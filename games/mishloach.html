@@ -14,7 +14,7 @@
       color: #1e1b4b;
       min-height: 100vh;
       display: flex; flex-direction: column; align-items: center;
-      padding: 20px;
+      padding: 20px; overflow-x: hidden;
     }
     .back-link {
       position: fixed; top: 12px; right: 12px;
@@ -23,37 +23,53 @@
       background: #fff; padding: 5px 12px;
       border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
     h1 {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: clamp(1.8rem, 5vw, 2.5rem);
-      color: #7c3aed;
-      text-align: center;
-      margin: 10px 0 5px;
+      color: #7c3aed; text-align: center; margin: 10px 0 5px;
     }
-    .subtitle {
-      color: #6b7280;
-      text-align: center;
-      margin-bottom: 20px;
+    .subtitle { color: #6b7280; text-align: center; margin-bottom: 15px; }
+    .sound-toggle {
+      position: fixed; top: 12px; left: 12px;
+      background: #fff; border: 2px solid #e9d5ff;
+      border-radius: 10px; padding: 4px 10px;
+      font-size: 1.2rem; cursor: pointer; z-index: 100;
+      transition: all 0.2s;
     }
+    .sound-toggle:hover { border-color: #7c3aed; }
 
-    .builder { max-width: 600px; width: 100%; }
-
+    .builder { max-width: 620px; width: 100%; }
     .section-label {
-      font-size: 1rem;
-      color: #4c1d95;
-      margin: 15px 0 8px;
-      font-weight: 700;
+      font-size: 1rem; color: #4c1d95;
+      margin: 18px 0 8px; font-weight: 700;
     }
 
+    /* Templates */
+    .templates {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .tpl-btn {
+      font-family: 'Heebo', sans-serif;
+      padding: 8px 16px;
+      border: 2px solid #e9d5ff;
+      background: #faf5ff; color: #4c1d95;
+      border-radius: 12px; cursor: pointer;
+      font-size: 0.85rem; font-weight: 600;
+      transition: all 0.3s;
+    }
+    .tpl-btn:hover { border-color: #7c3aed; background: #ede9fe; }
+    .tpl-btn.active {
+      border-color: #7c3aed; background: #7c3aed; color: #fff;
+    }
+
+    /* Names */
     .name-inputs {
       display: grid; grid-template-columns: 1fr 1fr;
       gap: 10px; margin-bottom: 10px;
     }
     .name-input {
       font-family: 'Heebo', sans-serif;
-      padding: 10px 15px;
-      border: 2px solid #e9d5ff;
+      padding: 10px 15px; border: 2px solid #e9d5ff;
       background: #fff; color: #1e1b4b;
       border-radius: 12px; font-size: 1rem;
       outline: none; direction: rtl;
@@ -61,41 +77,93 @@
     .name-input:focus { border-color: #7c3aed; }
     .name-input::placeholder { color: #a78bfa; }
 
-    /* Items grid — expanded! */
+    /* Photo upload */
+    .photo-upload {
+      display: flex; gap: 10px; align-items: center;
+      flex-wrap: wrap;
+    }
+    .photo-upload-btn {
+      font-family: 'Heebo', sans-serif;
+      padding: 10px 20px;
+      border: 2px dashed #c084fc;
+      background: #faf5ff; color: #7c3aed;
+      border-radius: 12px; cursor: pointer;
+      font-size: 0.9rem; font-weight: 600;
+      transition: all 0.3s;
+    }
+    .photo-upload-btn:hover { border-color: #7c3aed; background: #ede9fe; }
+    .photo-preview {
+      width: 60px; height: 60px;
+      border-radius: 50%; object-fit: cover;
+      border: 3px solid #c084fc;
+      display: none;
+    }
+    .photo-preview.active { display: block; }
+    .photo-remove {
+      font-family: 'Heebo', sans-serif;
+      padding: 4px 10px; border: none;
+      background: #fef2f2; color: #ef4444;
+      border-radius: 8px; cursor: pointer;
+      font-size: 0.8rem; display: none;
+    }
+    .photo-remove.active { display: inline-block; }
+
+    /* Items grid */
     .items-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      gap: 7px;
     }
     .item-btn {
       aspect-ratio: 1;
       border: 2px solid #e9d5ff;
       background: #faf5ff;
-      border-radius: 14px;
-      font-size: 1.8rem;
-      cursor: pointer;
-      transition: all 0.3s;
+      border-radius: 14px; font-size: 1.7rem;
+      cursor: pointer; transition: all 0.25s;
       display: flex; align-items: center; justify-content: center;
     }
-    .item-btn:hover { border-color: #7c3aed; background: #ede9fe; }
+    .item-btn:hover { border-color: #7c3aed; background: #ede9fe; transform: scale(1.05); }
     .item-btn.selected {
-      border-color: #22c55e;
-      background: #dcfce7;
-      transform: scale(1.1);
+      border-color: #22c55e; background: #dcfce7;
+      transform: scale(1.12);
       box-shadow: 0 3px 10px rgba(34,197,94,0.2);
+      animation: itemPop 0.3s ease-out;
+    }
+    @keyframes itemPop {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1.12); }
     }
 
+    /* Stickers */
+    .stickers-row {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .sticker-btn {
+      width: 44px; height: 44px;
+      border: 2px solid #fde68a;
+      background: #fffbeb;
+      border-radius: 12px; font-size: 1.5rem;
+      cursor: pointer; transition: all 0.25s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sticker-btn:hover { border-color: #fbbf24; transform: scale(1.1); }
+    .sticker-btn.selected {
+      border-color: #f97316; background: #fff7ed;
+      transform: scale(1.15);
+    }
+
+    /* Colors */
     .colors { display: flex; gap: 8px; flex-wrap: wrap; }
     .color-btn {
-      width: 40px; height: 40px;
-      border-radius: 50%;
+      width: 38px; height: 38px; border-radius: 50%;
       border: 3px solid #e9d5ff;
-      cursor: pointer;
-      transition: all 0.3s;
+      cursor: pointer; transition: all 0.3s;
     }
     .color-btn:hover { transform: scale(1.15); }
     .color-btn.selected { border-color: #7c3aed; box-shadow: 0 0 15px rgba(124,58,237,0.3); }
 
+    /* Blessing */
     .blessing-input {
       font-family: 'Heebo', sans-serif;
       width: 100%; padding: 10px 15px;
@@ -103,15 +171,12 @@
       background: #fff; color: #1e1b4b;
       border-radius: 12px; font-size: 1rem;
       outline: none; direction: rtl;
-      resize: vertical; min-height: 60px;
+      resize: vertical; min-height: 55px;
     }
     .blessing-input:focus { border-color: #7c3aed; }
     .blessing-input::placeholder { color: #a78bfa; }
-
-    /* Blessing presets */
     .blessings-presets {
-      display: flex; gap: 6px; flex-wrap: wrap;
-      margin-top: 8px;
+      display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;
     }
     .blessing-preset {
       font-family: 'Heebo', sans-serif;
@@ -126,45 +191,55 @@
     /* Preview */
     .preview-section { margin-top: 25px; text-align: center; }
     .preview-card {
-      background: var(--card-bg, linear-gradient(135deg, #fbbf24, #f97316));
       border-radius: 24px;
-      padding: 30px 25px;
-      max-width: 400px;
-      margin: 0 auto;
+      padding: 28px 22px;
+      max-width: 400px; margin: 0 auto;
       box-shadow: 0 15px 40px rgba(0,0,0,0.15);
       position: relative; overflow: hidden;
+      animation: cardIn 0.5s ease-out;
     }
-    .preview-card::before {
-      content: '✨'; position: absolute;
-      top: 10px; left: 15px;
-      font-size: 1.5rem; opacity: 0.5;
+    @keyframes cardIn {
+      0% { opacity: 0; transform: scale(0.9) rotate(-2deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
     }
-    .preview-card::after {
-      content: '✨'; position: absolute;
-      bottom: 10px; right: 15px;
-      font-size: 1.5rem; opacity: 0.5;
+    .preview-deco {
+      position: absolute; pointer-events: none;
+      font-size: 1.3rem; opacity: 0.6;
     }
+    .preview-photo {
+      width: 70px; height: 70px;
+      border-radius: 50%; object-fit: cover;
+      border: 3px solid rgba(255,255,255,0.6);
+      margin: 0 auto 10px;
+      display: none;
+    }
+    .preview-photo.active { display: block; }
     .preview-header {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: 1rem; color: rgba(0,0,0,0.5); margin-bottom: 5px;
     }
     .preview-to {
       font-family: 'Frank Ruhl Libre', serif;
-      font-size: 1.8rem; color: #1a0a3c; margin-bottom: 15px;
+      font-size: 1.7rem; color: #1a0a3c; margin-bottom: 10px;
     }
-    .preview-items { font-size: 3rem; margin: 15px 0; letter-spacing: 5px; }
+    .preview-items { font-size: 2.8rem; margin: 12px 0; letter-spacing: 4px; }
+    .preview-stickers {
+      font-size: 2rem; letter-spacing: 6px;
+      margin: 5px 0; min-height: 2rem;
+    }
     .preview-blessing {
-      font-size: 1.1rem; color: rgba(0,0,0,0.7);
-      line-height: 1.6; margin: 15px 0; font-style: italic;
+      font-size: 1.05rem; color: rgba(0,0,0,0.7);
+      line-height: 1.6; margin: 12px 0; font-style: italic;
     }
     .preview-from {
-      font-size: 0.9rem; color: rgba(0,0,0,0.4); margin-top: 10px;
+      font-size: 0.85rem; color: rgba(0,0,0,0.4); margin-top: 8px;
     }
     .preview-purim {
       font-family: 'Frank Ruhl Libre', serif;
-      font-size: 1.3rem; color: #1a0a3c; margin-top: 10px;
+      font-size: 1.2rem; color: #1a0a3c; margin-top: 8px;
     }
 
+    /* Actions */
     .actions {
       display: flex; gap: 10px;
       justify-content: center;
@@ -181,23 +256,58 @@
     .btn-share { background: #25d366; color: #fff; box-shadow: 0 4px 12px rgba(37,211,102,0.3); }
     .btn-download { background: #3b82f6; color: #fff; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
     .btn-reset { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+
+    /* Confetti effect */
+    .mini-confetti {
+      position: fixed; pointer-events: none; z-index: 200;
+    }
+    .mc-p {
+      position: absolute; border-radius: 50%;
+      animation: mcBurst 0.8s ease-out forwards;
+    }
+    @keyframes mcBurst {
+      0% { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+
+    @media (max-width: 500px) {
+      .name-inputs { grid-template-columns: 1fr; }
+      .items-grid { grid-template-columns: repeat(6, 1fr); }
+      .preview-card { padding: 20px 15px; }
+    }
   </style>
 </head>
 <body>
 
 <a href="../index.html" class="back-link">→ חזרה</a>
+<button class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="הפעלת/כיבוי צלילים">🔊</button>
 <h1>🎁 משלוח מנות דיגיטלי</h1>
-<p class="subtitle">בחרו פריטים, כתבו ברכה, ושלחו לחברים!</p>
+<p class="subtitle">בחרו פריטים, הוסיפו תמונה, כתבו ברכה ושלחו!</p>
 
 <div class="builder">
+
+  <div class="section-label">🎨 תבנית</div>
+  <div class="templates" id="templates"></div>
+
   <div class="section-label">👤 מאת / אל</div>
   <div class="name-inputs">
     <input type="text" class="name-input" id="fromName" placeholder="השם שלך" oninput="updatePreview()">
     <input type="text" class="name-input" id="toName" placeholder="שם החבר/ה" oninput="updatePreview()">
   </div>
 
+  <div class="section-label">📸 הוסיפו תמונה שלכם (אופציונלי)</div>
+  <div class="photo-upload">
+    <button class="photo-upload-btn" onclick="document.getElementById('photoInput').click()">📷 בחרו תמונה</button>
+    <img class="photo-preview" id="photoPreview">
+    <button class="photo-remove" id="photoRemove" onclick="removePhoto()">✕ הסירו</button>
+    <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+  </div>
+
   <div class="section-label">🍬 בחרו פריטים למשלוח (עד 8)</div>
   <div class="items-grid" id="itemsGrid"></div>
+
+  <div class="section-label">🎭 קישוטי פורים</div>
+  <div class="stickers-row" id="stickersRow"></div>
 
   <div class="section-label">🎨 צבע עיטוף</div>
   <div class="colors" id="colorsRow"></div>
@@ -211,14 +321,18 @@
     <button class="blessing-preset" onclick="setBlessing('משנכנס אדר מרבין בשמחה! פורים שמח!')">אדר שמח</button>
     <button class="blessing-preset" onclick="setBlessing('ונהפוך הוא — שכל הרע יתהפך לטובה!')">ונהפוך הוא</button>
     <button class="blessing-preset" onclick="setBlessing('לחבר/ה הכי טוב/ה בעולם — פורים שמח!')">לחבר הכי טוב</button>
+    <button class="blessing-preset" onclick="setBlessing('שתמיד תהיה לך סיבה לחייך! פורים שמח!')">סיבה לחייך</button>
+    <button class="blessing-preset" onclick="setBlessing('עם ישראל חי! פורים שמח ובטוח!')">עם ישראל חי</button>
   </div>
 
   <div class="preview-section">
     <div class="section-label" style="text-align: center;">👁️ תצוגה מקדימה</div>
-    <div class="preview-card" id="previewCard">
+    <div class="preview-card" id="previewCard" style="background: linear-gradient(135deg, #fbbf24, #f97316);">
+      <img class="preview-photo" id="prevPhoto">
       <div class="preview-header">משלוח מנות</div>
       <div class="preview-to" id="prevTo">לחבר/ה שלי ❤️</div>
       <div class="preview-items" id="prevItems">🍪 🍫 🍬</div>
+      <div class="preview-stickers" id="prevStickers"></div>
       <div class="preview-blessing" id="prevBlessing">פורים שמח!</div>
       <div class="preview-purim">🎭 פורים שמח תשפ״ו 🎭</div>
       <div class="preview-from" id="prevFrom">מאת: ___</div>
@@ -233,7 +347,85 @@
 </div>
 
 <script>
-// Expanded items list!
+// ══ Sound Engine ══
+let soundEnabled = true;
+let audioCtx = null;
+function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+}
+
+function playPop() {
+  if (!soundEnabled) return;
+  const ctx = getAudio(), now = ctx.currentTime;
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.type = 'sine'; osc.frequency.setValueAtTime(800, now);
+  osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+  gain.gain.setValueAtTime(0.1, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(now); osc.stop(now + 0.1);
+}
+
+function playDing() {
+  if (!soundEnabled) return;
+  const ctx = getAudio(), now = ctx.currentTime;
+  [880, 1108, 1320].forEach((freq, i) => {
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.08, now + i * 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.3);
+  });
+}
+
+// ══ Mini confetti ══
+function miniConfetti(x, y) {
+  const colors = ['#fbbf24','#ec4899','#7c3aed','#22c55e','#ef4444'];
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'mc-p';
+    const angle = (i / 12) * Math.PI * 2;
+    const dist = 30 + Math.random() * 50;
+    p.style.cssText = `
+      left:${x}px; top:${y}px; position:fixed; z-index:200; pointer-events:none;
+      width:${Math.random()*6+3}px; height:${Math.random()*6+3}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      --tx:${Math.cos(angle)*dist}px; --ty:${Math.sin(angle)*dist}px;
+    `;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 900);
+  }
+}
+
+// ══ Templates ══
+const TEMPLATES = [
+  { name: 'קלאסי', header: 'משלוח מנות', footer: '🎭 פורים שמח תשפ״ו 🎭', decos: ['✨','✨','🎀','🎀'] },
+  { name: 'חגיגי', header: '🎉 משלוח מנות חגיגי!', footer: '🎊 פורים שמח! 🎊', decos: ['🎊','🎉','🥳','🎈'] },
+  { name: 'מלכותי', header: '👑 משלוח מנות מלכותי', footer: '👑 ונהפוך הוא 👑', decos: ['👑','💎','✨','🏰'] },
+  { name: 'שמחה', header: '💖 משלוח מנות באהבה', footer: '💕 בשמחה ובאהבה 💕', decos: ['💖','💝','💕','🌸'] },
+];
+let selectedTemplate = 0;
+
+const tplContainer = document.getElementById('templates');
+TEMPLATES.forEach((t, i) => {
+  const btn = document.createElement('button');
+  btn.className = `tpl-btn ${i === 0 ? 'active' : ''}`;
+  btn.textContent = t.name;
+  btn.onclick = () => {
+    selectedTemplate = i;
+    document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    playPop();
+    updatePreview();
+  };
+  tplContainer.appendChild(btn);
+});
+
+// ══ Items ══
 const ITEMS = [
   '🍪', '🍫', '🍬', '🍩', '🧁', '🍰',
   '🍷', '🧃', '🥤', '🍎', '🍊', '🍇',
@@ -242,7 +434,53 @@ const ITEMS = [
   '🍓', '🍌', '🥧', '🧀', '🥨', '🫕',
   '☕', '🍵', '🧋', '🎂', '🍡', '🥮'
 ];
+let selectedItems = new Set();
 
+const itemsGrid = document.getElementById('itemsGrid');
+ITEMS.forEach(item => {
+  const btn = document.createElement('button');
+  btn.className = 'item-btn';
+  btn.textContent = item;
+  btn.onclick = (e) => {
+    if (selectedItems.has(item)) {
+      selectedItems.delete(item);
+      btn.classList.remove('selected');
+    } else if (selectedItems.size < 8) {
+      selectedItems.add(item);
+      btn.classList.add('selected');
+      miniConfetti(e.clientX, e.clientY);
+    }
+    playPop();
+    updatePreview();
+  };
+  itemsGrid.appendChild(btn);
+});
+
+// ══ Stickers ══
+const STICKERS = ['🎭','🎪','🎊','🎉','👑','💎','🌟','⭐','💐','🎶','🕺','💃','🦁','🎵','🏆','🎈'];
+let selectedStickers = new Set();
+
+const stickersRow = document.getElementById('stickersRow');
+STICKERS.forEach(s => {
+  const btn = document.createElement('button');
+  btn.className = 'sticker-btn';
+  btn.textContent = s;
+  btn.onclick = (e) => {
+    if (selectedStickers.has(s)) {
+      selectedStickers.delete(s);
+      btn.classList.remove('selected');
+    } else if (selectedStickers.size < 5) {
+      selectedStickers.add(s);
+      btn.classList.add('selected');
+      miniConfetti(e.clientX, e.clientY);
+    }
+    playPop();
+    updatePreview();
+  };
+  stickersRow.appendChild(btn);
+});
+
+// ══ Colors ══
 const COLORS = [
   { bg: 'linear-gradient(135deg, #fbbf24, #f97316)', name: 'זהב' },
   { bg: 'linear-gradient(135deg, #ec4899, #f43f5e)', name: 'ורוד' },
@@ -255,30 +493,8 @@ const COLORS = [
   { bg: 'linear-gradient(135deg, #fca5a5, #fde68a)', name: 'אפרסק' },
   { bg: 'linear-gradient(135deg, #06b6d4, #3b82f6)', name: 'תכלת' },
 ];
-
-let selectedItems = new Set();
 let selectedColor = 0;
 
-// Render items
-const itemsGrid = document.getElementById('itemsGrid');
-ITEMS.forEach(item => {
-  const btn = document.createElement('button');
-  btn.className = 'item-btn';
-  btn.textContent = item;
-  btn.onclick = () => {
-    if (selectedItems.has(item)) {
-      selectedItems.delete(item);
-      btn.classList.remove('selected');
-    } else if (selectedItems.size < 8) {
-      selectedItems.add(item);
-      btn.classList.add('selected');
-    }
-    updatePreview();
-  };
-  itemsGrid.appendChild(btn);
-});
-
-// Render colors
 const colorsRow = document.getElementById('colorsRow');
 COLORS.forEach((c, i) => {
   const btn = document.createElement('button');
@@ -289,104 +505,260 @@ COLORS.forEach((c, i) => {
     selectedColor = i;
     document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
+    playPop();
     updatePreview();
   };
   colorsRow.appendChild(btn);
 });
 
-function setBlessing(text) {
-  document.getElementById('blessing').value = text;
+// ══ Photo ══
+let uploadedPhoto = null;
+
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    uploadedPhoto = ev.target.result;
+    document.getElementById('photoPreview').src = uploadedPhoto;
+    document.getElementById('photoPreview').classList.add('active');
+    document.getElementById('photoRemove').classList.add('active');
+    playDing();
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePhoto() {
+  uploadedPhoto = null;
+  document.getElementById('photoPreview').classList.remove('active');
+  document.getElementById('photoRemove').classList.remove('active');
+  document.getElementById('photoInput').value = '';
   updatePreview();
 }
 
+// ══ Blessing presets ══
+function setBlessing(text) {
+  document.getElementById('blessing').value = text;
+  playPop();
+  updatePreview();
+}
+
+// ══ Preview ══
 function updatePreview() {
+  const tpl = TEMPLATES[selectedTemplate];
   const to = document.getElementById('toName').value || 'לחבר/ה שלי ❤️';
   const from = document.getElementById('fromName').value || '___';
   const blessing = document.getElementById('blessing').value || 'פורים שמח!';
   const items = selectedItems.size > 0 ? [...selectedItems].join(' ') : '🍪 🍫 🍬';
+  const stickers = [...selectedStickers].join(' ');
 
   document.getElementById('prevTo').textContent = to;
   document.getElementById('prevFrom').textContent = `מאת: ${from}`;
   document.getElementById('prevBlessing').textContent = blessing;
   document.getElementById('prevItems').textContent = items;
-  document.getElementById('previewCard').style.background = COLORS[selectedColor].bg;
+  document.getElementById('prevStickers').textContent = stickers;
+
+  // Photo
+  const prevPhoto = document.getElementById('prevPhoto');
+  if (uploadedPhoto) {
+    prevPhoto.src = uploadedPhoto;
+    prevPhoto.classList.add('active');
+  } else {
+    prevPhoto.classList.remove('active');
+  }
+
+  // Template
+  document.querySelector('.preview-header').textContent = tpl.header;
+  document.querySelector('.preview-purim').textContent = tpl.footer;
+
+  // Decorations
+  const card = document.getElementById('previewCard');
+  card.style.background = COLORS[selectedColor].bg;
+  card.querySelectorAll('.preview-deco').forEach(d => d.remove());
+  const positions = [
+    { top: '8px', left: '12px' },
+    { top: '8px', right: '12px' },
+    { bottom: '8px', left: '12px' },
+    { bottom: '8px', right: '12px' },
+  ];
+  tpl.decos.forEach((d, i) => {
+    const el = document.createElement('div');
+    el.className = 'preview-deco';
+    el.textContent = d;
+    Object.assign(el.style, positions[i]);
+    card.appendChild(el);
+  });
 }
 
+// ══ Share ══
 function shareWhatsApp() {
   const to = document.getElementById('toName').value || 'חבר/ה';
   const from = document.getElementById('fromName').value || 'חבר/ה';
   const blessing = document.getElementById('blessing').value || 'פורים שמח!';
   const items = selectedItems.size > 0 ? [...selectedItems].join(' ') : '🍪 🍫 🍬';
+  const stickers = selectedStickers.size > 0 ? '\n' + [...selectedStickers].join(' ') : '';
 
-  const text = `🎁 *משלוח מנות דיגיטלי!*\n\nל${to} היקר/ה,\n\n${items}\n\n${blessing}\n\n🎭 פורים שמח תשפ״ו!\nמאת: ${from}\n\n---\nשלחו גם אתם! 👇\n${window.location.href.split('/games/')[0]}`;
+  playDing();
+  const text = `🎁 *משלוח מנות דיגיטלי!*\n\nל${to} היקר/ה,\n\n${items}${stickers}\n\n${blessing}\n\n🎭 פורים שמח תשפ״ו!\nמאת: ${from}\n\n---\nשלחו גם אתם! 👇\n${window.location.href.split('/games/')[0]}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 }
 
+// ══ Download as PNG ══
 function downloadCard() {
+  playDing();
   const canvas = document.createElement('canvas');
-  canvas.width = 600; canvas.height = 500;
+  canvas.width = 600; canvas.height = 550;
   const ctx = canvas.getContext('2d');
+  const tpl = TEMPLATES[selectedTemplate];
 
-  const colors = COLORS[selectedColor].bg.match(/#[a-fA-F0-9]{6}/g);
+  // Background
+  const bgColors = COLORS[selectedColor].bg.match(/#[a-fA-F0-9]{6}/g);
   const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-  grad.addColorStop(0, colors[0]);
-  grad.addColorStop(1, colors[1]);
+  grad.addColorStop(0, bgColors[0]);
+  grad.addColorStop(1, bgColors[1]);
   ctx.fillStyle = grad;
-
   const r = 30;
   ctx.beginPath();
-  ctx.moveTo(r, 0);
-  ctx.lineTo(canvas.width - r, 0);
+  ctx.moveTo(r, 0); ctx.lineTo(canvas.width-r, 0);
   ctx.quadraticCurveTo(canvas.width, 0, canvas.width, r);
-  ctx.lineTo(canvas.width, canvas.height - r);
-  ctx.quadraticCurveTo(canvas.width, canvas.height, canvas.width - r, canvas.height);
+  ctx.lineTo(canvas.width, canvas.height-r);
+  ctx.quadraticCurveTo(canvas.width, canvas.height, canvas.width-r, canvas.height);
   ctx.lineTo(r, canvas.height);
-  ctx.quadraticCurveTo(0, canvas.height, 0, canvas.height - r);
+  ctx.quadraticCurveTo(0, canvas.height, 0, canvas.height-r);
   ctx.lineTo(0, r);
   ctx.quadraticCurveTo(0, 0, r, 0);
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.font = '18px Heebo, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('משלוח מנות', canvas.width / 2, 50);
+  // Decorations
+  ctx.font = '24px serif';
+  ctx.globalAlpha = 0.5;
+  ctx.fillText(tpl.decos[0], 15, 30);
+  ctx.fillText(tpl.decos[1], canvas.width - 35, 30);
+  ctx.fillText(tpl.decos[2], 15, canvas.height - 12);
+  ctx.fillText(tpl.decos[3], canvas.width - 35, canvas.height - 12);
+  ctx.globalAlpha = 1;
 
-  ctx.fillStyle = '#1a0a3c';
-  ctx.font = 'bold 36px Frank Ruhl Libre, serif';
-  ctx.fillText(document.getElementById('prevTo').textContent, canvas.width / 2, 100);
+  let yPos = 50;
 
-  ctx.font = '48px serif';
-  ctx.fillText(document.getElementById('prevItems').textContent, canvas.width / 2, 200);
+  // Photo (if exists)
+  function drawText() {
+    ctx.textAlign = 'center';
 
-  ctx.fillStyle = 'rgba(0,0,0,0.7)';
-  ctx.font = '20px Heebo, sans-serif';
-  ctx.fillText(document.getElementById('prevBlessing').textContent, canvas.width / 2, 280);
+    // Header
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.font = '18px Heebo, sans-serif';
+    ctx.fillText(tpl.header, canvas.width/2, yPos);
+    yPos += 40;
 
-  ctx.fillStyle = '#1a0a3c';
-  ctx.font = 'bold 26px Frank Ruhl Libre, serif';
-  ctx.fillText('🎭 פורים שמח תשפ״ו 🎭', canvas.width / 2, 370);
+    // To
+    ctx.fillStyle = '#1a0a3c';
+    ctx.font = 'bold 34px Frank Ruhl Libre, serif';
+    ctx.fillText(document.getElementById('prevTo').textContent, canvas.width/2, yPos);
+    yPos += 50;
 
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.font = '16px Heebo, sans-serif';
-  ctx.fillText(document.getElementById('prevFrom').textContent, canvas.width / 2, 430);
+    // Items
+    ctx.font = '44px serif';
+    ctx.fillText(document.getElementById('prevItems').textContent, canvas.width/2, yPos);
+    yPos += 35;
 
-  const link = document.createElement('a');
-  link.download = 'mishloach-manot.png';
-  link.href = canvas.toDataURL();
-  link.click();
+    // Stickers
+    if (selectedStickers.size > 0) {
+      ctx.font = '36px serif';
+      ctx.fillText([...selectedStickers].join(' '), canvas.width/2, yPos);
+      yPos += 35;
+    }
+
+    // Blessing
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.font = '19px Heebo, sans-serif';
+    const blessingText = document.getElementById('prevBlessing').textContent;
+    // Word wrap
+    const words = blessingText.split(' ');
+    let line = '';
+    const maxW = canvas.width - 80;
+    yPos += 15;
+    words.forEach(word => {
+      const test = line + word + ' ';
+      if (ctx.measureText(test).width > maxW && line !== '') {
+        ctx.fillText(line.trim(), canvas.width/2, yPos);
+        line = word + ' ';
+        yPos += 26;
+      } else {
+        line = test;
+      }
+    });
+    if (line.trim()) { ctx.fillText(line.trim(), canvas.width/2, yPos); yPos += 35; }
+
+    // Footer
+    ctx.fillStyle = '#1a0a3c';
+    ctx.font = 'bold 24px Frank Ruhl Libre, serif';
+    ctx.fillText(tpl.footer, canvas.width/2, yPos);
+    yPos += 30;
+
+    // From
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.font = '15px Heebo, sans-serif';
+    ctx.fillText(document.getElementById('prevFrom').textContent, canvas.width/2, yPos);
+
+    // Download
+    const link = document.createElement('a');
+    link.download = 'mishloach-manot.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  }
+
+  // Draw photo if exists
+  if (uploadedPhoto) {
+    const img = new Image();
+    img.onload = () => {
+      // Circular clip
+      const cx = canvas.width / 2, cy = 75, radius = 40;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(img, cx - radius, cy - radius, radius * 2, radius * 2);
+      ctx.restore();
+      // Border
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      yPos = 130;
+      drawText();
+    };
+    img.src = uploadedPhoto;
+  } else {
+    drawText();
+  }
 }
 
+// ══ Reset ══
 function resetAll() {
   selectedItems.clear();
+  selectedStickers.clear();
   selectedColor = 0;
+  selectedTemplate = 0;
+  uploadedPhoto = null;
   document.getElementById('fromName').value = '';
   document.getElementById('toName').value = '';
   document.getElementById('blessing').value = '';
+  document.getElementById('photoPreview').classList.remove('active');
+  document.getElementById('photoRemove').classList.remove('active');
+  document.getElementById('photoInput').value = '';
   document.querySelectorAll('.item-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.sticker-btn').forEach(b => b.classList.remove('selected'));
   document.querySelectorAll('.color-btn').forEach((b, i) => b.classList.toggle('selected', i === 0));
+  document.querySelectorAll('.tpl-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
   updatePreview();
 }
+
+// Initial
+updatePreview();
 </script>
 
 </body>
