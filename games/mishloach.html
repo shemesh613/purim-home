@@ -591,22 +591,62 @@ function updatePreview() {
   });
 }
 
-// ══ Share ══
+// ══ Share via WhatsApp as IMAGE ══
 function shareWhatsApp() {
+  playDing();
   const to = document.getElementById('toName').value || 'חבר/ה';
   const from = document.getElementById('fromName').value || 'חבר/ה';
   const blessing = document.getElementById('blessing').value || 'פורים שמח!';
-  const items = selectedItems.size > 0 ? [...selectedItems].join(' ') : '🍪 🍫 🍬';
-  const stickers = selectedStickers.size > 0 ? '\n' + [...selectedStickers].join(' ') : '';
+  const caption = `🎁 משלוח מנות ל${to}!\n${blessing}\nמאת: ${from}\n🎭 פורים שמח תשפ״ו!`;
 
-  playDing();
-  const text = `🎁 *משלוח מנות דיגיטלי!*\n\nל${to} היקר/ה,\n\n${items}${stickers}\n\n${blessing}\n\n🎭 פורים שמח תשפ״ו!\nמאת: ${from}\n\n---\nשלחו גם אתם! 👇\n${window.location.href.split('/games/')[0]}`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  // Generate canvas image first
+  generateCardCanvas(function(canvas) {
+    canvas.toBlob(function(blob) {
+      const file = new File([blob], 'mishloach-manot.png', { type: 'image/png' });
+
+      // Try Web Share API (works on mobile + modern browsers)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: 'משלוח מנות דיגיטלי',
+          text: caption
+        }).catch(() => {
+          // Fallback: download + text link
+          fallbackShare(canvas, caption);
+        });
+      } else {
+        // Fallback: download image + open WhatsApp with text
+        fallbackShare(canvas, caption);
+      }
+    }, 'image/png');
+  });
+}
+
+function fallbackShare(canvas, caption) {
+  // Auto-download the image
+  const link = document.createElement('a');
+  link.download = 'mishloach-manot.png';
+  link.href = canvas.toDataURL();
+  link.click();
+  // Then open WhatsApp with text
+  setTimeout(() => {
+    window.open(`https://wa.me/?text=${encodeURIComponent(caption + '\n\n👆 שלחו את התמונה שירדה!')}`, '_blank');
+  }, 500);
 }
 
 // ══ Download as PNG ══
 function downloadCard() {
   playDing();
+  generateCardCanvas(function(canvas) {
+    const link = document.createElement('a');
+    link.download = 'mishloach-manot.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+}
+
+// ══ Generate Card Canvas (shared by download + share) ══
+function generateCardCanvas(callback) {
   const canvas = document.createElement('canvas');
   canvas.width = 600; canvas.height = 550;
   const ctx = canvas.getContext('2d');
@@ -702,11 +742,8 @@ function downloadCard() {
     ctx.font = '15px Heebo, sans-serif';
     ctx.fillText(document.getElementById('prevFrom').textContent, canvas.width/2, yPos);
 
-    // Download
-    const link = document.createElement('a');
-    link.download = 'mishloach-manot.png';
-    link.href = canvas.toDataURL();
-    link.click();
+    // Callback with finished canvas
+    callback(canvas);
   }
 
   // Draw photo if exists
