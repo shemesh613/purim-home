@@ -861,9 +861,15 @@ renderGallery();
 // ══ WhatsApp Share ══
 function shareWA(e) {
   e.preventDefault();
+  const btn = e.currentTarget;
   const url = window.location.href;
   const text = `🎭 *פורים בבית!* 🇮🇱\n\nמשחקים, אתגרים ופעילויות פורים לכל המשפחה — חינם!\nחידון מגילה, זיכרון, רעשן דיגיטלי, חדרי אתגר ועוד!\n\n👇 היכנסו ושחקו:\n${url}\n\nפורים שמח! 🎉🎭`;
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  // Visual feedback
+  const orig = btn.innerHTML;
+  btn.innerHTML = '✅ נפתח בוואטסאפ — שלחו שם!';
+  btn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
+  setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 4000);
 }
 </script>
 

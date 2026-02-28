@@ -182,7 +182,10 @@
 <p class="subtitle">חדרי אתגר מהמגילה — לשחק בבית!</p>
 
 <!-- ══ Teacher Setup ══ -->
-<div class="setup-bar">
+<div style="max-width:700px; margin:0 auto 10px; text-align:center;">
+  <button onclick="teacherLogin()" style="font-family:'Heebo',sans-serif; font-size:0.85rem; padding:6px 18px; background:rgba(124,58,237,0.08); border:1px solid rgba(124,58,237,0.25); color:#7c3aed; border-radius:10px; cursor:pointer;">🔐 כניסת מורה</button>
+</div>
+<div class="setup-bar" id="setupBar" style="display:none;">
   <label>⚙️ הגדרת מורה:</label>
   <label>קבוצות <input type="number" id="numGroups" min="1" max="20" value="10"></label>
   <label>משתתפים בקבוצה <input type="number" id="groupSize" min="1" max="15" value="4"></label>
@@ -287,6 +290,21 @@
     { id: 2, emoji: '📸', name: 'צילום' },
   ];
   const STATION_ORDER = [3, 5, 4, 1, 6, 2]; // unlock order (easy → hard)
+
+  // ══ Teacher Auth ══
+  const TEACHER_PASS = '1234';
+  function teacherLogin() {
+    const pass = prompt('🔐 הכניסו קוד מורה:');
+    if (pass === TEACHER_PASS) {
+      sessionStorage.setItem('purim_teacher', '1');
+      document.getElementById('setupBar').style.display = '';
+    } else if (pass !== null) {
+      alert('❌ סיסמה שגויה');
+    }
+  }
+  if (sessionStorage.getItem('purim_teacher') === '1') {
+    document.getElementById('setupBar').style.display = '';
+  }
 
   // ══ Settings ══
   function getSettings() {
