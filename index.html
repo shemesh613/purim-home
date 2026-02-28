@@ -22,7 +22,7 @@
     .corner-logo {
       position: fixed;
       top: 14px; left: 14px;
-      width: 60px; height: 60px;
+      width: 90px; height: 90px;
       border-radius: 50%;
       object-fit: cover;
       border: 3px solid #fbbf24;
@@ -324,9 +324,43 @@
       border-radius: 18px;
       overflow: hidden;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+      text-decoration: none; color: inherit;
+      display: block;
     }
-    .video-card iframe {
-      width: 100%; aspect-ratio: 16/9; border: none;
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+    .video-thumb {
+      position: relative;
+      width: 100%; aspect-ratio: 16/9;
+      overflow: hidden;
+    }
+    .video-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .play-btn {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 68px; height: 48px;
+      background: rgba(255,0,0,0.85);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s;
+    }
+    .play-btn::after {
+      content: '';
+      border-style: solid;
+      border-width: 10px 0 10px 18px;
+      border-color: transparent transparent transparent #fff;
+      margin-left: 3px;
+    }
+    .video-card:hover .play-btn {
+      background: rgba(255,0,0,1);
+      transform: translate(-50%, -50%) scale(1.1);
     }
     .video-card .video-title {
       padding: 12px 15px;
@@ -390,7 +424,7 @@
       .videos-grid { grid-template-columns: 1fr; }
       .tabs { gap: 3px; }
       .tab-btn { font-size: 0.8rem; padding: 6px 12px; }
-      .corner-logo { width: 45px; height: 45px; top: 10px; left: 10px; }
+      .corner-logo { width: 65px; height: 65px; top: 10px; left: 10px; }
     }
   </style>
 </head>
@@ -405,7 +439,7 @@
   <h1>פורים בבית!</h1>
   <div class="flag-row">🇮🇱 ✡️ 🇮🇱</div>
   <p class="subtitle">לכיתה ולבית — משחקים ופעילויות לכל המשפחה!</p>
-  <p class="brand">נבנה באהבה ע״י <strong>שמשון ג'קוב</strong> | AI בדקה 1</p>
+  <p class="brand">נבנה ע״י <strong>שמשון ג'יקוב</strong> | AI בדקה 1</p>
 </header>
 
 <!-- ══ Tabs ══ -->
@@ -524,8 +558,10 @@
         <p class="card-desc">עצבו ושלחו לחברים!</p>
         <span class="card-badge badge-new">✨ חדש</span>
       </a>
-      <!-- Stations — ONE card for all rooms -->
-      <a href="games/stations/index.html" class="game-card" style="--card-shadow: rgba(251,191,36,0.2); --card-border: #fde68a; grid-column: span 2;">
+    </div>
+    <!-- Stations — Featured card, centered -->
+    <div style="display:flex; justify-content:center; margin-top:16px;">
+      <a href="games/stations/index.html" class="game-card" style="--card-shadow: rgba(251,191,36,0.25); --card-border: #fde68a; max-width:500px; width:100%; background:linear-gradient(135deg, #fffbeb, #fef3c7);">
         <span class="card-emoji">🏰</span>
         <h3 class="card-title">חדרי אתגר — משימת פורים!</h3>
         <p class="card-desc">5 חדרים מהמגילה! צבעו דף, הרימו למצלמה, ופתרו חידות מטורפות!</p>
@@ -543,31 +579,46 @@
       <span class="line"></span>🎭 סרטוני פורים 🎭<span class="line"></span>
     </h2>
     <div class="videos-grid">
-      <div class="video-card">
-        <iframe src="https://www.youtube.com/embed/RmQJaYvWzck?si=whR1mvVKTargXqO1" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+      <a href="https://www.youtube.com/watch?v=RmQJaYvWzck" target="_blank" rel="noopener" class="video-card">
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/RmQJaYvWzck/hqdefault.jpg" alt="מגילת אסתר בלגו" loading="lazy">
+          <div class="play-btn"></div>
+        </div>
         <div class="video-title">🎭 מגילת אסתר בלגו!</div>
-      </div>
-      <div class="video-card">
-        <iframe src="https://www.youtube.com/embed/FdmomtifXkw?si=VcWmFDaiuC4LpOjn" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+      </a>
+      <a href="https://www.youtube.com/watch?v=FdmomtifXkw" target="_blank" rel="noopener" class="video-card">
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/FdmomtifXkw/hqdefault.jpg" alt="סרטון פורים" loading="lazy">
+          <div class="play-btn"></div>
+        </div>
         <div class="video-title">🎭 סרטון פורים</div>
-      </div>
+      </a>
     </div>
 
     <!-- More Videos -->
     <h3 class="video-subtitle">🎬 עוד סרטונים</h3>
     <div class="videos-grid">
-      <div class="video-card">
-        <iframe src="https://www.youtube.com/embed/tpXIt-t0q8E?si=How2CdlE7d4TUK5G" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+      <a href="https://www.youtube.com/watch?v=tpXIt-t0q8E" target="_blank" rel="noopener" class="video-card">
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/tpXIt-t0q8E/hqdefault.jpg" alt="סרטון" loading="lazy">
+          <div class="play-btn"></div>
+        </div>
         <div class="video-title">🎬 סרטון</div>
-      </div>
-      <div class="video-card">
-        <iframe src="https://www.youtube.com/embed/CoTVoRbpePo?si=yQuIdebEyUs_wDbl" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+      </a>
+      <a href="https://www.youtube.com/watch?v=CoTVoRbpePo" target="_blank" rel="noopener" class="video-card">
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/CoTVoRbpePo/hqdefault.jpg" alt="סרטון" loading="lazy">
+          <div class="play-btn"></div>
+        </div>
         <div class="video-title">🎬 סרטון</div>
-      </div>
-      <div class="video-card">
-        <iframe src="https://www.youtube.com/embed/EOCS9eue5q0?si=s4hopW6pVrpsxRYc" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+      </a>
+      <a href="https://www.youtube.com/watch?v=EOCS9eue5q0" target="_blank" rel="noopener" class="video-card">
+        <div class="video-thumb">
+          <img src="https://img.youtube.com/vi/EOCS9eue5q0/hqdefault.jpg" alt="סרטון" loading="lazy">
+          <div class="play-btn"></div>
+        </div>
         <div class="video-title">🎬 סרטון</div>
-      </div>
+      </a>
     </div>
   </div>
 </div>
@@ -578,7 +629,7 @@
     📱 שתפו בוואטסאפ לכל הכיתה!
   </a>
   <p class="footer-text">
-    🇮🇱 פורים שמח תשפ״ו | נבנה באהבה ע״י <strong>שמשון ג'קוב</strong> | AI בדקה 1
+    🇮🇱 פורים שמח תשפ״ו | נבנה ע״י <strong>שמשון ג'יקוב</strong> | AI בדקה 1
   </p>
 </footer>
 
