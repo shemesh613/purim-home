@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌡️ חדר הטמפרטורה — משימת פורים</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Heebo', sans-serif; background: #0a0015; color: #fff; overflow: hidden; height: 100vh; width: 100vw; transition: background 0.5s; }
+
+    /* ══ Particles ══ */
+    .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--dur) ease-in-out infinite alternate; }
+    @keyframes twinkle { from { opacity: 0.2; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+
+    /* ══ Common Layout ══ */
+    .phase { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.8s, transform 0.8s; }
+    .phase.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
+
+    .station-badge { font-size: 1rem; color: #ffd700; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); padding: 6px 20px; border-radius: 20px; margin-bottom: 15px; letter-spacing: 2px; }
+    .title { font-family: 'Frank Ruhl Libre', serif; font-size: clamp(2rem, 6vw, 3.5rem); color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.4); margin-bottom: 10px; }
+    .subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
+    .btn { font-family: 'Heebo', sans-serif; font-size: 1.2rem; padding: 14px 40px; border: 2px solid #ffd700; background: rgba(255,215,0,0.15); color: #ffd700; border-radius: 12px; cursor: pointer; transition: all 0.3s; letter-spacing: 1px; }
+    .btn:hover { background: rgba(255,215,0,0.3); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,215,0,0.3); }
+
+    /* ══ Phase 1: Color Detection ══ */
+    #phase-color { z-index: 20; }
+    .camera-container { position: relative; width: 320px; height: 240px; border-radius: 16px; overflow: hidden; border: 3px solid rgba(255,215,0,0.4); box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+    .camera-container video { width: 100%; height: 100%; object-fit: cover; }
+    .color-indicator { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin: 20px auto; transition: all 0.5s; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+    .color-status { font-size: 1.3rem; color: rgba(255,255,255,0.7); margin-top: 10px; min-height: 2em; }
+    .color-matched { animation: colorPulse 0.5s ease-out; }
+    @keyframes colorPulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+    .accept-color-label { font-size: 0.9rem; color: rgba(255,215,0,0.5); margin-top: 8px; }
+
+    /* ══ Phase 2: Temperature Puzzle ══ */
+    #phase-puzzle {
+      background: radial-gradient(ellipse at center, #1a0030 0%, #0a0015 100%);
+      flex-direction: column;
+      padding: 20px;
+      gap: 0;
+    }
+
+    /* Distorted text area */
+    .text-stage {
+      position: relative;
+      width: 100%;
+      max-width: 700px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .hidden-verse {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(1.6rem, 4vw, 2.8rem);
+      color: #ffd700;
+      line-height: 1.6;
+      padding: 20px 30px;
+      border: 2px solid rgba(255,215,0,0.2);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.3);
+      transition: filter 0.15s, box-shadow 0.5s;
+      user-select: none;
+    }
+    .verse-source {
+      font-size: 0.85rem;
+      color: rgba(255,215,0,0.4);
+      margin-top: 8px;
+    }
+    .verse-glow {
+      box-shadow: 0 0 40px rgba(255,215,0,0.6), 0 0 80px rgba(255,215,0,0.3) !important;
+      border-color: rgba(255,215,0,0.8) !important;
+    }
+
+    /* Temperature gauge */
+    .temp-gauge-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+    .temp-label-cold { font-size: 1.4rem; }
+    .temp-label-hot  { font-size: 1.4rem; }
+    .temp-gauge-bar {
+      width: 200px;
+      height: 18px;
+      border-radius: 9px;
+      background: linear-gradient(to right, #3399ff, #33ffcc, #ffff00, #ff8800, #ff2200);
+      border: 2px solid rgba(255,255,255,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .temp-gauge-fill {
+      position: absolute;
+      top: 0; right: 0;
+      height: 100%;
+      background: rgba(0,0,0,0.55);
+      border-radius: 0 9px 9px 0;
+      transition: width 0.3s;
+    }
+    .temp-feedback {
+      font-size: 1.5rem;
+      font-weight: 700;
+      min-width: 90px;
+      text-align: center;
+      text-shadow: 0 0 10px currentColor;
+      transition: color 0.3s;
+    }
+
+    /* Sliders */
+    .sliders-panel {
+      width: 100%;
+      max-width: 560px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 16px;
+      padding: 18px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .slider-emoji { font-size: 1.3rem; flex-shrink: 0; }
+    .slider-label { font-size: 0.95rem; color: rgba(255,255,255,0.75); width: 100px; flex-shrink: 0; text-align: right; }
+    .slider-input {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #ffd700;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(255,215,0,0.6);
+      border: 2px solid #fff;
+    }
+    .slider-input::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #ffd700;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(255,215,0,0.6);
+      border: 2px solid #fff;
+    }
+    #slider-blur  { background: linear-gradient(to right, #aaddff 0%, #335577 100%); }
+    #slider-contrast { background: linear-gradient(to right, #333 0%, #fff 100%); }
+    #slider-hue   { background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); }
+
+    .slider-value { font-size: 1rem; color: #ffd700; min-width: 50px; text-align: left; font-weight: 700; }
+
+    /* puzzle-timer top bar */
+    .puzzle-timer { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); font-size: 1.3rem; color: rgba(255,215,0,0.6); z-index: 16; pointer-events: none; }
+
+    /* ══ Phase 3: Success ══ */
+    #phase-success { background: radial-gradient(ellipse at center, #1a0a3e 0%, #0a0015 100%); z-index: 30; }
+    .success-icon { font-size: 5rem; animation: bounce 1s ease-in-out infinite; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    .success-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.5rem; color: #ffd700; margin: 15px 0; }
+    .clue-box { background: rgba(255,215,0,0.1); border: 2px solid rgba(255,215,0,0.4); border-radius: 16px; padding: 25px 35px; max-width: 500px; margin: 20px auto; }
+    .clue-label { font-size: 0.9rem; color: rgba(255,215,0,0.6); margin-bottom: 10px; }
+    .clue-text { font-family: 'Frank Ruhl Libre', serif; font-size: 1.5rem; color: #ffd700; line-height: 1.6; }
+    .clue-arrow { font-size: 2rem; margin-top: 15px; animation: arrowPulse 1.5s ease-in-out infinite; }
+    @keyframes arrowPulse { 0%,100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(10px); opacity: 1; } }
+
+    /* ══ Confetti ══ */
+    .confetti { position: fixed; top: -10px; width: 10px; height: 10px; z-index: 31; animation: confettiFall var(--fall-dur) linear forwards; }
+    @keyframes confettiFall { to { top: 110vh; transform: rotate(var(--rot)) translateX(var(--drift)); } }
+
+    /* ══ Reset Button ══ */
+    .reset-btn { position: fixed; bottom: 15px; left: 15px; font-size: 0.75rem; color: rgba(255,255,255,0.15); background: none; border: 1px solid rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 6px; cursor: pointer; z-index: 50; }
+    .reset-btn:hover { color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.3); }
+
+    /* Solved overlay flash */
+    @keyframes solvedFlash { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
+    .solved-flash { position: fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(ellipse at center, rgba(255,215,0,0.35) 0%, transparent 70%); pointer-events: none; z-index: 25; animation: solvedFlash 1.2s ease-out forwards; }
+  
+    /* ══ Phase: Group Selection ══ */
+    #phase-group { z-index: 21; background: radial-gradient(ellipse at center, #1a0a3e 0%, #0a0015 100%); }
+    .group-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.5rem; color: #ffd700; margin-bottom: 10px; }
+    .group-subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
+    .group-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; max-width: 500px; }
+    .group-btn {
+      font-family: 'Heebo', sans-serif; font-size: 1.8rem; font-weight: 900;
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 3px solid rgba(255,215,0,0.4); background: rgba(255,215,0,0.1);
+      color: #ffd700; cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .group-btn:hover { background: rgba(255,215,0,0.3); transform: scale(1.15); box-shadow: 0 0 25px rgba(255,215,0,0.4); }
+  </style>
+</head>
+<body>
+  <!-- Stars Background -->
+  <div class="stars" id="stars"></div>
+
+  <!-- ═══ Phase 1: Color Detection ═══ -->
+  <div class="phase" id="phase-color">
+    <div class="station-badge">🌡️ תחנה 6</div>
+    <div class="title">חדר הטמפרטורה</div>
+    <div class="subtitle">הרימו את הכרטיס הצבעוני מול המצלמה</div>
+    <div class="camera-container">
+      <video id="camera" autoplay playsinline muted></video>
+      <canvas id="color-canvas" style="display:none"></canvas>
+    </div>
+    <div class="color-indicator" id="color-indicator"></div>
+    <div class="color-status" id="color-status">ממתין למצלמה...</div>
+    <div class="accept-color-label" id="accept-label"></div>
+  </div>
+
+  <!-- ═══ Phase 2: Temperature Puzzle ═══ -->
+  
+  <!-- ═══ Phase: Group Selection ═══ -->
+  <div class="phase hidden" id="phase-group">
+    <div class="group-title">👥 מי אתם?</div>
+    <div class="group-subtitle">בחרו את מספר הקבוצה שלכם</div>
+    <div class="group-grid" id="group-grid"></div>
+  </div>
+
+  <div class="phase hidden" id="phase-puzzle">
+    <div class="puzzle-timer" id="puzzle-timer">⏱️ 00:00</div>
+
+    <!-- Distorted text -->
+    <div class="text-stage">
+      <div class="hidden-verse" id="hidden-verse"></div>
+      <div class="verse-source" id="verse-source"></div>
+    </div>
+
+    <!-- Temperature gauge -->
+    <div class="temp-gauge-wrap">
+      <span class="temp-label-cold">❄️</span>
+      <div class="temp-gauge-bar">
+        <div class="temp-gauge-fill" id="temp-gauge-fill"></div>
+      </div>
+      <span class="temp-label-hot">🔥</span>
+      <span class="temp-feedback" id="temp-feedback">...</span>
+    </div>
+
+    <!-- Sliders -->
+    <div class="sliders-panel">
+      <div class="slider-row">
+        <span class="slider-emoji">🌫️</span>
+        <label class="slider-label" for="slider-blur">טשטוש</label>
+        <input class="slider-input" type="range" id="slider-blur" min="0" max="20" value="15">
+        <span class="slider-value" id="val-blur">15px</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-emoji">⚡</span>
+        <label class="slider-label" for="slider-contrast">ניגודיות</label>
+        <input class="slider-input" type="range" id="slider-contrast" min="0" max="200" value="30">
+        <span class="slider-value" id="val-contrast">30%</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-emoji">🎨</span>
+        <label class="slider-label" for="slider-hue">גוון</label>
+        <input class="slider-input" type="range" id="slider-hue" min="0" max="360" value="180">
+        <span class="slider-value" id="val-hue">180°</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Phase 3: Success ═══ -->
+  <div class="phase hidden" id="phase-success">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">פיצחתם את הצופן!</div>
+    <div class="clue-box">
+      <div class="clue-label">📍 הרמז:</div>
+      <div class="clue-text" id="clue-display"></div>
+    </div>
+    <div class="clue-arrow">⬇️</div>
+    <button class="btn" onclick="resetStation()" style="margin-top:20px; font-size:1rem; padding:10px 30px;">🔄 קבוצה הבאה</button>
+  </div>
+
+  <button class="reset-btn" onclick="resetStation()">איפוס</button>
+
+  <script>
+    // ══════════════════════════════════════════════════════════
+    // CONFIG
+    // ══════════════════════════════════════════════════════════
+    const CONFIG = {
+      stationNumber: 6,
+      stationName: 'חדר הטמפרטורה',
+      acceptColor: 'purple',
+      hiddenText: 'ליהודים היתה אורה ושמחה וששון ויקר',
+      textSource: 'אסתר ח:טז',
+      clueText: '״ונהפוך הוא״ — מה שהיה אחרית נהיה ראשית! חזרו למקום שממנו יצאתם, כי שם הניצחון ממתין לכם 🏆',
+    };
+
+    // ══ Color definitions (shared with station-1) ══
+    const COLORS = {
+      red:    { he: 'אדום 🔴',   min: [150,  0,  0], max: [255, 100, 100], bg: '#ff3333' },
+      blue:   { he: 'תכלת 🔵',   min: [  0,  0,140], max: [100, 100, 255], bg: '#3366ff' },
+      green:  { he: 'ירוק 🟢',   min: [  0,120,  0], max: [100, 255, 100], bg: '#33cc33' },
+      yellow: { he: 'צהוב 🟡',   min: [180,180,  0], max: [255, 255, 100], bg: '#ffcc00' },
+      orange: { he: 'כתום 🟠',   min: [200,100,  0], max: [255, 180,  80], bg: '#ff8800' },
+      purple: { he: 'סגול 🟣',   min: [100,  0,120], max: [200,  80, 255], bg: '#9933ff' },
+    };
+
+    // ══ Stars ══
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 80; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 3 + 1;
+      s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${1+Math.random()*3}s;animation-delay:${Math.random()*3}s;`;
+      starsEl.appendChild(s);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 1: Color Detection (identical to station-1)
+    // ══════════════════════════════════════════════════════════
+    const video        = document.getElementById('camera');
+    const colorCanvas  = document.getElementById('color-canvas');
+    const colorCtx     = colorCanvas.getContext('2d', { willReadFrequently: true });
+    const indicator    = document.getElementById('color-indicator');
+    const statusEl     = document.getElementById('color-status');
+    const acceptLabel  = document.getElementById('accept-label');
+
+    acceptLabel.textContent = `תחנה ${CONFIG.stationNumber}`;
+    let colorDetected = false;
+    let matchCount = 0;
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: 320, height: 240 } });
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+          colorCanvas.width = 320;
+          colorCanvas.height = 240;
+          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          detectColor();
+        };
+      } catch (e) {
+        statusEl.textContent = '⚠️ אין גישה למצלמה — לחצו על "אפשר"';
+      }
+    }
+
+    function detectColor() {
+      if (colorDetected) return;
+      colorCtx.drawImage(video, 0, 0, 320, 240);
+      const cx = 110, cy = 70, cw = 100, ch = 100;
+      const imageData = colorCtx.getImageData(cx, cy, cw, ch);
+      const data = imageData.data;
+      let rSum = 0, gSum = 0, bSum = 0, count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        rSum += data[i]; gSum += data[i+1]; bSum += data[i+2]; count++;
+      }
+      const r = Math.round(rSum / count);
+      const g = Math.round(gSum / count);
+      const b = Math.round(bSum / count);
+      indicator.style.background = `rgb(${r},${g},${b})`;
+
+      let detected = null;
+      for (const [name, col] of Object.entries(COLORS)) {
+        if (r >= col.min[0] && r <= col.max[0] && g >= col.min[1] && g <= col.max[1] && b >= col.min[2] && b <= col.max[2]) {
+          detected = name; break;
+        }
+      }
+
+      if (detected === CONFIG.acceptColor) {
+        matchCount++;
+        statusEl.textContent = `🎯 מזהה ${COLORS[detected].he}... (${matchCount}/10)`;
+        statusEl.style.color = '#4ade80';
+        if (matchCount >= 10) {
+          colorDetected = true;
+          indicator.classList.add('color-matched');
+          statusEl.textContent = `✅ ${COLORS[detected].he} — זוהה! נכנסים...`;
+          setTimeout(showGroupSelect, 1200);
+          return;
+        }
+      } else if (detected) {
+        matchCount = Math.max(0, matchCount - 1);
+        statusEl.textContent = `❌ זה ${COLORS[detected].he} — לא הצבע הנכון — נסו תחנה אחרת`;
+        statusEl.style.color = '#f87171';
+      } else {
+        matchCount = Math.max(0, matchCount - 1);
+        // Check if something colorful is visible (not just gray/dark)
+        const maxC = Math.max(r, g, b);
+        const minC = Math.min(r, g, b);
+        const saturation = maxC > 30 ? (maxC - minC) / maxC : 0;
+        if (saturation > 0.25 && maxC > 60) {
+          statusEl.textContent = '🔍 מזהה צבע... קרבו את הכרטיס למצלמה';
+          statusEl.style.color = '#fbbf24';
+        } else {
+          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          statusEl.style.color = 'rgba(255,255,255,0.7)';
+        }
+      }
+      requestAnimationFrame(detectColor);
+    }
+
+    startCamera();
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 2: Temperature / Filter Puzzle
+    // ══════════════════════════════════════════════════════════
+    let puzzleSolved    = false;
+    let puzzleStartTime = 0;
+    let timerInterval;
+
+    const sliderBlur     = document.getElementById('slider-blur');
+    const sliderContrast = document.getElementById('slider-contrast');
+    const sliderHue      = document.getElementById('slider-hue');
+    const valBlur        = document.getElementById('val-blur');
+    const valContrast    = document.getElementById('val-contrast');
+    const valHue         = document.getElementById('val-hue');
+    const verseEl        = document.getElementById('hidden-verse');
+    const tempFill       = document.getElementById('temp-gauge-fill');
+    const tempFeedback   = document.getElementById('temp-feedback');
+    // ══ Group Selection ══
+    let selectedGroup = null;
+    const groupGrid = document.getElementById('group-grid');
+    for (let i = 1; i <= 10; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'group-btn';
+      btn.textContent = i;
+      btn.onclick = () => selectGroup(i);
+      groupGrid.appendChild(btn);
+    }
+
+    function showGroupSelect() {
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      document.getElementById('phase-color').classList.add('hidden');
+      document.getElementById('phase-group').classList.remove('hidden');
+    }
+
+    function selectGroup(num) {
+      selectedGroup = num;
+      document.getElementById('phase-group').classList.add('hidden');
+      startPuzzle();
+    }
+
+    function saveCompletion() {
+      if (!selectedGroup) return;
+      const key = 'purim_progress';
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      if (!data[selectedGroup]) data[selectedGroup] = [];
+      if (!data[selectedGroup].includes(CONFIG.stationNumber)) {
+        data[selectedGroup].push(CONFIG.stationNumber);
+      }
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+
+
+    function startPuzzle() {
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      document.getElementById('phase-color').classList.add('hidden');
+      document.getElementById('phase-puzzle').classList.remove('hidden');
+
+      verseEl.textContent = CONFIG.hiddenText;
+      document.getElementById('verse-source').textContent = `📜 ${CONFIG.textSource}`;
+
+      puzzleStartTime = Date.now();
+      timerInterval = setInterval(updateTimer, 100);
+
+      // Apply initial distortion
+      applyFilter();
+    }
+
+    function updateTimer() {
+      const elapsed = Math.floor((Date.now() - puzzleStartTime) / 1000);
+      const min = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const sec = String(elapsed % 60).padStart(2, '0');
+      document.getElementById('puzzle-timer').textContent = `⏱️ ${min}:${sec}`;
+    }
+
+    // ── Compute closeness score 0–1 for each slider ──
+    function blurScore(v)     { return 1 - Math.min(v, 20) / 20; }           // want ≤ 2, best=0
+    function contrastScore(v) { return Math.min(Math.max(v - 0, 200), 200) / 200; }  // want ≥ 80, best=200
+    function hueScore(v) {
+      // want ≤ 30 OR ≥ 330, i.e. close to 0/360
+      const dist = Math.min(v, 360 - v);   // 0..180
+      return 1 - dist / 180;
+    }
+
+    function checkSolved(blur, contrast, hue) {
+      return blur <= 2 && contrast >= 80 && (hue <= 30 || hue >= 330);
+    }
+
+    function applyFilter() {
+      if (puzzleSolved) return;
+      const blur     = parseFloat(sliderBlur.value);
+      const contrast = parseFloat(sliderContrast.value);
+      const hue      = parseFloat(sliderHue.value);
+
+      // Update labels
+      valBlur.textContent     = `${blur}px`;
+      valContrast.textContent = `${contrast}%`;
+      valHue.textContent      = `${hue}°`;
+
+      // Apply CSS filter to text
+      verseEl.style.filter = `blur(${blur}px) contrast(${contrast}%) hue-rotate(${hue}deg)`;
+
+      // Background tint based on hue slider
+      const bgHue = hue;
+      document.body.style.background = `hsl(${bgHue}, 30%, 4%)`;
+
+      // Overall temperature score
+      const bs = blurScore(blur);
+      const cs = contrastScore(contrast);
+      const hs = hueScore(hue);
+      const score = (bs * 0.4 + cs * 0.35 + hs * 0.25); // weighted average 0–1
+
+      // Temperature gauge: fill covers the "cold" side
+      // score=0 → full dark (very cold), score=1 → no dark (very hot)
+      const coldPercent = Math.round((1 - score) * 100);
+      tempFill.style.width = coldPercent + '%';
+
+      // Feedback text
+      let feedback, color;
+      if (score >= 0.90) {
+        feedback = '🔥🔥 רותח!';   color = '#ff4400';
+      } else if (score >= 0.70) {
+        feedback = '🔥 חם!';        color = '#ff8800';
+      } else if (score >= 0.50) {
+        feedback = '🌡️ פושר';      color = '#ffcc00';
+      } else if (score >= 0.30) {
+        feedback = '❄️ קר';        color = '#66ccff';
+      } else {
+        feedback = '❄️❄️ קפוא!';   color = '#99eeff';
+      }
+      tempFeedback.textContent = feedback;
+      tempFeedback.style.color  = color;
+
+      // Check win condition
+      if (checkSolved(blur, contrast, hue)) {
+        puzzleSolved = true;
+        clearInterval(timerInterval);
+        verseEl.style.filter = 'none';
+        verseEl.classList.add('verse-glow');
+        tempFeedback.textContent = '✨ בוהק!';
+        tempFeedback.style.color = '#ffd700';
+        tempFill.style.width = '0%';
+
+        // Flash overlay
+        const flash = document.createElement('div');
+        flash.className = 'solved-flash';
+        document.body.appendChild(flash);
+        setTimeout(() => flash.remove(), 1300);
+
+        setTimeout(showSuccess, 1500);
+      }
+    }
+
+    // Attach slider listeners
+    [sliderBlur, sliderContrast, sliderHue].forEach(s => {
+      s.addEventListener('input', applyFilter);
+    });
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 3: Success
+    // ══════════════════════════════════════════════════════════
+    function showSuccess() {
+      document.getElementById('phase-puzzle').classList.add('hidden');
+      document.getElementById('phase-success').classList.remove('hidden');
+      document.getElementById('clue-display').textContent = CONFIG.clueText;
+      spawnConfetti();
+    }
+
+    function spawnConfetti() {
+      const colors = ['#ffd700', '#ff3366', '#33ccff', '#33ff66', '#ff8800', '#cc33ff'];
+      for (let i = 0; i < 60; i++) {
+        setTimeout(() => {
+          const c = document.createElement('div');
+          c.className = 'confetti';
+          c.style.cssText = `left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;border-radius:${Math.random()>0.5?'50%':'2px'};--fall-dur:${2+Math.random()*3}s;--rot:${Math.random()*720}deg;--drift:${-50+Math.random()*100}px;`;
+          document.body.appendChild(c);
+          setTimeout(() => c.remove(), 5000);
+        }, i * 50);
+      }
+    }
+
+    // ══ Reset ══
+    function resetStation() {
+      colorDetected = false;
+      matchCount    = 0;
+      puzzleSolved  = false;
+      clearInterval(timerInterval);
+
+      // Reset sliders
+      sliderBlur.value     = 15;
+      sliderContrast.value = 30;
+      sliderHue.value      = 180;
+      valBlur.textContent     = '15px';
+      valContrast.textContent = '30%';
+      valHue.textContent      = '180°';
+
+      // Reset visual
+      if (verseEl) {
+        verseEl.style.filter = '';
+        verseEl.classList.remove('verse-glow');
+      }
+      tempFill.style.width      = '100%';
+      tempFeedback.textContent  = '...';
+      tempFeedback.style.color  = '#fff';
+      document.body.style.background = '#0a0015';
+
+      document.getElementById('phase-success').classList.add('hidden');
+      document.getElementById('phase-puzzle').classList.add('hidden');
+      document.getElementById('phase-color').classList.remove('hidden');
+      statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+      statusEl.style.color = 'rgba(255,255,255,0.7)';
+      indicator.classList.remove('color-matched');
+      indicator.style.background = '';
+      startCamera();
+    }
+  </script>
+</body>
+</html>

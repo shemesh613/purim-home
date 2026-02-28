@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✨ גשם האותיות — משימת פורים</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Heebo', sans-serif; background: #0a0015; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
+
+    /* ══ Particles ══ */
+    .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--dur) ease-in-out infinite alternate; }
+    @keyframes twinkle { from { opacity: 0.2; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+
+    /* ══ Common Layout ══ */
+    .phase { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.8s, transform 0.8s; }
+    .phase.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
+
+    .station-badge { font-size: 1rem; color: #ffd700; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); padding: 6px 20px; border-radius: 20px; margin-bottom: 15px; letter-spacing: 2px; }
+    .title { font-family: 'Frank Ruhl Libre', serif; font-size: clamp(2rem, 6vw, 3.5rem); color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.4); margin-bottom: 10px; }
+    .subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
+    .btn { font-family: 'Heebo', sans-serif; font-size: 1.2rem; padding: 14px 40px; border: 2px solid #ffd700; background: rgba(255,215,0,0.15); color: #ffd700; border-radius: 12px; cursor: pointer; transition: all 0.3s; letter-spacing: 1px; }
+    .btn:hover { background: rgba(255,215,0,0.3); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,215,0,0.3); }
+
+    /* ══ Phase 1: Color Detection ══ */
+    #phase-color { z-index: 20; }
+    .camera-container { position: relative; width: 320px; height: 240px; border-radius: 16px; overflow: hidden; border: 3px solid rgba(255,215,0,0.4); box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+    .camera-container video { width: 100%; height: 100%; object-fit: cover; }
+    .color-indicator { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin: 20px auto; transition: all 0.5s; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+    .color-status { font-size: 1.3rem; color: rgba(255,255,255,0.7); margin-top: 10px; min-height: 2em; }
+    .color-matched { animation: colorPulse 0.5s ease-out; }
+    @keyframes colorPulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+    .accept-color-label { font-size: 0.9rem; color: rgba(255,215,0,0.5); margin-top: 8px; }
+
+    /* ══ Phase 2: Matrix Letters ══ */
+    #phase-puzzle { background: #000; flex-direction: column; justify-content: flex-end; padding-bottom: 0; }
+    #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 11; }
+
+    .puzzle-ui {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 20;
+      background: linear-gradient(to top, rgba(0,0,0,0.97) 60%, transparent);
+      padding: 20px 20px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .puzzle-question {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.4rem;
+      color: #ffd700;
+      text-shadow: 0 0 20px rgba(255,215,0,0.6);
+      text-align: center;
+    }
+    .answer-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      direction: rtl;
+    }
+    #answer-input {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.6rem;
+      background: rgba(139,92,246,0.15);
+      border: 2px solid rgba(139,92,246,0.5);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 18px;
+      width: 200px;
+      text-align: center;
+      direction: rtl;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    #answer-input:focus {
+      border-color: rgba(255,215,0,0.7);
+      box-shadow: 0 0 20px rgba(255,215,0,0.3);
+    }
+    #answer-input.error {
+      border-color: #f87171;
+      animation: shake 0.4s ease-out;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+    }
+    .submit-btn {
+      font-family: 'Heebo', sans-serif;
+      font-size: 1.1rem;
+      padding: 10px 28px;
+      border: 2px solid #8b5cf6;
+      background: rgba(139,92,246,0.2);
+      color: #c4b5fd;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+    .submit-btn:hover { background: rgba(139,92,246,0.4); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139,92,246,0.4); }
+
+    #feedback-msg {
+      font-size: 1.1rem;
+      min-height: 1.5em;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    #hint-box {
+      background: rgba(255,215,0,0.08);
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      color: rgba(255,215,0,0.85);
+      text-align: center;
+      max-width: 460px;
+      display: none;
+    }
+    .red-flash {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(248,65,65,0.18);
+      z-index: 19;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    .red-flash.active { opacity: 1; }
+
+    /* ══ Phase 3: Success ══ */
+    #phase-success { background: radial-gradient(ellipse at center, #1a0a3e 0%, #0a0015 100%); z-index: 30; }
+    .success-icon { font-size: 5rem; animation: bounce 1s ease-in-out infinite; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    .success-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.5rem; color: #ffd700; margin: 15px 0; }
+    .clue-box { background: rgba(255,215,0,0.1); border: 2px solid rgba(255,215,0,0.4); border-radius: 16px; padding: 25px 35px; max-width: 500px; margin: 20px auto; }
+    .clue-label { font-size: 0.9rem; color: rgba(255,215,0,0.6); margin-bottom: 10px; }
+    .clue-text { font-family: 'Frank Ruhl Libre', serif; font-size: 1.5rem; color: #ffd700; line-height: 1.6; }
+    .clue-arrow { font-size: 2rem; margin-top: 15px; animation: arrowPulse 1.5s ease-in-out infinite; }
+    @keyframes arrowPulse { 0%,100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(10px); opacity: 1; } }
+
+    /* ══ Confetti ══ */
+    .confetti { position: fixed; top: -10px; width: 10px; height: 10px; z-index: 31; animation: confettiFall var(--fall-dur) linear forwards; }
+    @keyframes confettiFall { to { top: 110vh; transform: rotate(var(--rot)) translateX(var(--drift)); } }
+
+    /* ══ Reset Button ══ */
+    .reset-btn { position: fixed; bottom: 15px; left: 15px; font-size: 0.75rem; color: rgba(255,255,255,0.15); background: none; border: 1px solid rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 6px; cursor: pointer; z-index: 50; }
+    .reset-btn:hover { color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.3); }
+  
+    /* ══ Phase: Group Selection ══ */
+    #phase-group { z-index: 21; background: radial-gradient(ellipse at center, #1a0a3e 0%, #0a0015 100%); }
+    .group-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.5rem; color: #ffd700; margin-bottom: 10px; }
+    .group-subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
+    .group-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; max-width: 500px; }
+    .group-btn {
+      font-family: 'Heebo', sans-serif; font-size: 1.8rem; font-weight: 900;
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 3px solid rgba(255,215,0,0.4); background: rgba(255,215,0,0.1);
+      color: #ffd700; cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .group-btn:hover { background: rgba(255,215,0,0.3); transform: scale(1.15); box-shadow: 0 0 25px rgba(255,215,0,0.4); }
+  </style>
+</head>
+<body>
+  <!-- Stars Background -->
+  <div class="stars" id="stars"></div>
+
+  <!-- ═══ Phase 1: Color Detection ═══ -->
+  <div class="phase" id="phase-color">
+    <div class="station-badge">✨ תחנה 4</div>
+    <div class="title">גשם האותיות</div>
+    <div class="subtitle">הרימו את הכרטיס הצבעוני מול המצלמה</div>
+    <div class="camera-container">
+      <video id="camera" autoplay playsinline muted></video>
+      <canvas id="color-canvas" style="display:none"></canvas>
+    </div>
+    <div class="color-indicator" id="color-indicator"></div>
+    <div class="color-status" id="color-status">ממתין למצלמה...</div>
+    <div class="accept-color-label" id="accept-label"></div>
+  </div>
+
+  <!-- ═══ Phase 2: Matrix Letters Puzzle ═══ -->
+  
+  <!-- ═══ Phase: Group Selection ═══ -->
+  <div class="phase hidden" id="phase-group">
+    <div class="group-title">👥 מי אתם?</div>
+    <div class="group-subtitle">בחרו את מספר הקבוצה שלכם</div>
+    <div class="group-grid" id="group-grid"></div>
+  </div>
+
+  <div class="phase hidden" id="phase-puzzle">
+    <canvas id="matrix-canvas"></canvas>
+    <div class="red-flash" id="red-flash"></div>
+
+    <div class="puzzle-ui">
+      <div class="puzzle-question" id="puzzle-question"></div>
+      <div class="answer-row">
+        <button class="submit-btn" onclick="checkAnswer()">🔓 פתח</button>
+        <input type="text" id="answer-input" placeholder="הקלידו כאן..." maxlength="10" autocomplete="off" autocorrect="off" spellcheck="false" />
+      </div>
+      <div id="feedback-msg"></div>
+      <div id="hint-box"></div>
+    </div>
+  </div>
+
+  <!-- ═══ Phase 3: Success ═══ -->
+  <div class="phase hidden" id="phase-success">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">פיצחתם את הצופן!</div>
+    <div class="clue-box">
+      <div class="clue-label">📍 הרמז למיקום הכרטיס הבא:</div>
+      <div class="clue-text" id="clue-display"></div>
+    </div>
+    <div class="clue-arrow">⬇️</div>
+    <button class="btn" onclick="resetStation()" style="margin-top:20px; font-size:1rem; padding:10px 30px;">🔄 קבוצה הבאה</button>
+  </div>
+
+  <button class="reset-btn" onclick="resetStation()">איפוס</button>
+
+  <script>
+    // ══════════════════════════════════════════════════════════
+    // ✏️ הגדרות — ערכו כאן את הטקסטים!
+    // ══════════════════════════════════════════════════════════
+    const CONFIG = {
+      stationNumber: 4,
+      stationName: 'גשם האותיות',
+      acceptColor: 'yellow',
+      answerWord: 'מרדכי',
+      question: 'מי מסתתר בין האותיות?',
+      hint: 'גיבור המגילה, עמד בשער המלך, לא כרע ולא השתחווה',
+      clueText: '״מה נעשה יקר וגדולה למרדכי על ככה״ — בחדר שבו יושבי השררה מלמדים ומורים, מאחורי הפתח הגדול, כתום ימתין',
+    };
+
+    // ══ Color definitions ══
+    const COLORS = {
+      red:    { he: 'אדום 🔴', min: [150, 0, 0], max: [255, 100, 100], bg: '#ff3333' },
+      blue:   { he: 'תכלת 🔵', min: [0, 0, 140], max: [100, 100, 255], bg: '#3366ff' },
+      green:  { he: 'ירוק 🟢', min: [0, 120, 0], max: [100, 255, 100], bg: '#33cc33' },
+      yellow: { he: 'צהוב 🟡', min: [180, 180, 0], max: [255, 255, 100], bg: '#ffcc00' },
+      orange: { he: 'כתום 🟠', min: [200, 100, 0], max: [255, 180, 80], bg: '#ff8800' },
+      purple: { he: 'סגול 🟣', min: [100, 0, 120], max: [200, 80, 255], bg: '#9933ff' },
+    };
+
+    // ══ Stars ══
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 80; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 3 + 1;
+      s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${1+Math.random()*3}s;animation-delay:${Math.random()*3}s;`;
+      starsEl.appendChild(s);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 1: Color Detection
+    // ══════════════════════════════════════════════════════════
+    const video = document.getElementById('camera');
+    const colorCanvas = document.getElementById('color-canvas');
+    const colorCtx = colorCanvas.getContext('2d', { willReadFrequently: true });
+    const indicator = document.getElementById('color-indicator');
+    const statusEl = document.getElementById('color-status');
+    const acceptLabel = document.getElementById('accept-label');
+
+    acceptLabel.textContent = `תחנה ${CONFIG.stationNumber}`;
+    let colorDetected = false;
+    let matchCount = 0;
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: 320, height: 240 } });
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+          colorCanvas.width = 320;
+          colorCanvas.height = 240;
+          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          detectColor();
+        };
+      } catch (e) {
+        statusEl.textContent = '⚠️ אין גישה למצלמה — לחצו על "אפשר"';
+      }
+    }
+
+    function detectColor() {
+      if (colorDetected) return;
+      colorCtx.drawImage(video, 0, 0, 320, 240);
+      const cx = 110, cy = 70, cw = 100, ch = 100;
+      const imageData = colorCtx.getImageData(cx, cy, cw, ch);
+      const data = imageData.data;
+      let rSum = 0, gSum = 0, bSum = 0, count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        rSum += data[i]; gSum += data[i+1]; bSum += data[i+2]; count++;
+      }
+      const r = Math.round(rSum / count);
+      const g = Math.round(gSum / count);
+      const b = Math.round(bSum / count);
+      indicator.style.background = `rgb(${r},${g},${b})`;
+
+      let detected = null;
+      for (const [name, col] of Object.entries(COLORS)) {
+        if (r >= col.min[0] && r <= col.max[0] && g >= col.min[1] && g <= col.max[1] && b >= col.min[2] && b <= col.max[2]) {
+          detected = name;
+          break;
+        }
+      }
+
+      if (detected === CONFIG.acceptColor) {
+        matchCount++;
+        statusEl.textContent = `🎯 מזהה ${COLORS[detected].he}... (${matchCount}/10)`;
+        statusEl.style.color = '#4ade80';
+        if (matchCount >= 10) {
+          colorDetected = true;
+          indicator.classList.add('color-matched');
+          statusEl.textContent = `✅ ${COLORS[detected].he} — זוהה! נכנסים...`;
+          setTimeout(showGroupSelect, 1200);
+          return;
+        }
+      } else if (detected) {
+        matchCount = Math.max(0, matchCount - 1);
+        statusEl.textContent = `❌ זה ${COLORS[detected].he} — לא הצבע הנכון — נסו תחנה אחרת`;
+        statusEl.style.color = '#f87171';
+      } else {
+        matchCount = Math.max(0, matchCount - 1);
+        // Check if something colorful is visible (not just gray/dark)
+        const maxC = Math.max(r, g, b);
+        const minC = Math.min(r, g, b);
+        const saturation = maxC > 30 ? (maxC - minC) / maxC : 0;
+        if (saturation > 0.25 && maxC > 60) {
+          statusEl.textContent = '🔍 מזהה צבע... קרבו את הכרטיס למצלמה';
+          statusEl.style.color = '#fbbf24';
+        } else {
+          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          statusEl.style.color = 'rgba(255,255,255,0.7)';
+        }
+      }
+      requestAnimationFrame(detectColor);
+    }
+
+    startCamera();
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 2: Matrix Hebrew Letters
+    // ══════════════════════════════════════════════════════════
+    const matrixCanvas = document.getElementById('matrix-canvas');
+    const mCtx = matrixCanvas.getContext('2d');
+
+    // Full Hebrew alphabet + extras for rain
+    const HEBREW_CHARS = 'אבגדהוזחטיכלמנסעפצקרשתםןףךץ';
+    const ANSWER = CONFIG.answerWord; // מרדכי
+
+    let columns = [];
+    let frameCount = 0;
+    let matrixAnimId = null;
+    let wrongAttempts = 0;
+    let puzzleSolved = false;
+
+    // Each column: { y, speed, chars[], goldenTimer, isAnswerCol, answerLetterIdx }
+    function initMatrix() {
+      matrixCanvas.width = window.innerWidth;
+      matrixCanvas.height = window.innerHeight;
+
+      const FONT_SIZE = 22;
+      const numCols = Math.floor(matrixCanvas.width / FONT_SIZE);
+
+      columns = [];
+      for (let i = 0; i < numCols; i++) {
+        columns.push({
+          x: i * FONT_SIZE,
+          y: Math.random() * -matrixCanvas.height, // start above screen at random heights
+          speed: 0.5 + Math.random() * 1.2,
+          chars: Array.from({ length: 30 }, () => randomHebChar()),
+          charTimer: 0,
+          charSwapInterval: 4 + Math.floor(Math.random() * 8),
+          // golden state: null | { letter, brightness, size }
+          goldenState: null,
+          goldenTimer: 0,
+        });
+      }
+    }
+
+    function randomHebChar() {
+      return HEBREW_CHARS[Math.floor(Math.random() * HEBREW_CHARS.length)];
+    }
+
+    // Schedule word flashes
+    // answerCols: which column indices are currently showing answer letters
+    let nextSingleFlash = 150;    // frame when next single golden letter appears
+    let nextWordFlash   = 300;    // frame when full word appears
+    const FONT_SIZE = 22;
+
+    function drawMatrix() {
+      if (puzzleSolved) return;
+      frameCount++;
+
+      const W = matrixCanvas.width;
+      const H = matrixCanvas.height;
+
+      // Dim previous frame (trail effect)
+      mCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      mCtx.fillRect(0, 0, W, H);
+
+      // ── Single golden letter flash ──
+      if (frameCount >= nextSingleFlash) {
+        const letter = ANSWER[Math.floor(Math.random() * ANSWER.length)];
+        const colIdx = Math.floor(Math.random() * columns.length);
+        columns[colIdx].goldenState = { letter, brightness: 1.0, size: 1.6 };
+        columns[colIdx].goldenTimer = 60; // frames to show it
+        nextSingleFlash = frameCount + 130 + Math.floor(Math.random() * 60);
+      }
+
+      // ── Full word flash across adjacent columns ──
+      if (frameCount >= nextWordFlash) {
+        // Pick a start column so the whole word fits
+        const startCol = Math.floor(Math.random() * Math.max(1, columns.length - ANSWER.length));
+        for (let i = 0; i < ANSWER.length; i++) {
+          const c = columns[startCol + i];
+          if (c) {
+            c.goldenState = { letter: ANSWER[i], brightness: 1.0, size: 1.9 };
+            c.goldenTimer = 90;
+          }
+        }
+        nextWordFlash = frameCount + 280 + Math.floor(Math.random() * 80);
+      }
+
+      // ── Draw each column ──
+      for (let ci = 0; ci < columns.length; ci++) {
+        const col = columns[ci];
+
+        // Advance column position
+        col.y += col.speed;
+        if (col.y > H + 200) {
+          col.y = -FONT_SIZE * (5 + Math.random() * 20);
+          col.speed = 0.5 + Math.random() * 1.2;
+        }
+
+        // Swap chars occasionally
+        col.charTimer++;
+        if (col.charTimer >= col.charSwapInterval) {
+          col.charTimer = 0;
+          const idx = Math.floor(Math.random() * col.chars.length);
+          col.chars[idx] = randomHebChar();
+          col.charSwapInterval = 4 + Math.floor(Math.random() * 8);
+        }
+
+        // Draw the falling stream
+        const streamLen = col.chars.length;
+        for (let row = 0; row < streamLen; row++) {
+          const posY = col.y - row * FONT_SIZE;
+          if (posY < -FONT_SIZE || posY > H) continue;
+
+          // Head of stream: bright purple
+          if (row === 0) {
+            mCtx.font = `bold ${FONT_SIZE}px monospace`;
+            mCtx.fillStyle = 'rgba(200,180,255,0.9)';
+          } else {
+            // Tail fades: from medium to very dim purple
+            const alpha = Math.max(0.03, 0.55 - row * 0.025);
+            mCtx.font = `${FONT_SIZE}px monospace`;
+            mCtx.fillStyle = `rgba(139,92,246,${alpha})`;
+          }
+          mCtx.fillText(col.chars[row], col.x, posY);
+        }
+
+        // Draw golden letter on top if active
+        if (col.goldenState && col.goldenTimer > 0) {
+          const gs = col.goldenState;
+          col.goldenTimer--;
+
+          // Pulsing brightness
+          const pulse = 0.7 + 0.3 * Math.sin(col.goldenTimer * 0.3);
+          const alpha = gs.brightness * pulse;
+          const fontSize = Math.round(FONT_SIZE * gs.size);
+
+          mCtx.save();
+          mCtx.font = `bold ${fontSize}px monospace`;
+
+          // Outer glow
+          mCtx.shadowColor = '#ffd700';
+          mCtx.shadowBlur = 18 + pulse * 10;
+          mCtx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+
+          // Center the larger glyph in the column
+          const offset = (fontSize - FONT_SIZE) / 2;
+          mCtx.fillText(gs.letter, col.x - offset * 0.3, col.y - offset * 0.5);
+          mCtx.shadowBlur = 0;
+          mCtx.restore();
+
+          if (col.goldenTimer <= 0) {
+            col.goldenState = null;
+          }
+        }
+      }
+
+      matrixAnimId = requestAnimationFrame(drawMatrix);
+    }
+    // ══ Group Selection ══
+    let selectedGroup = null;
+    const groupGrid = document.getElementById('group-grid');
+    for (let i = 1; i <= 10; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'group-btn';
+      btn.textContent = i;
+      btn.onclick = () => selectGroup(i);
+      groupGrid.appendChild(btn);
+    }
+
+    function showGroupSelect() {
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      document.getElementById('phase-color').classList.add('hidden');
+      document.getElementById('phase-group').classList.remove('hidden');
+    }
+
+    function selectGroup(num) {
+      selectedGroup = num;
+      document.getElementById('phase-group').classList.add('hidden');
+      startPuzzle();
+    }
+
+    function saveCompletion() {
+      if (!selectedGroup) return;
+      const key = 'purim_progress';
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      if (!data[selectedGroup]) data[selectedGroup] = [];
+      if (!data[selectedGroup].includes(CONFIG.stationNumber)) {
+        data[selectedGroup].push(CONFIG.stationNumber);
+      }
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+
+
+    function startPuzzle() {
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      document.getElementById('phase-color').classList.add('hidden');
+      document.getElementById('phase-puzzle').classList.remove('hidden');
+      document.getElementById('puzzle-question').textContent = CONFIG.question;
+
+      initMatrix();
+      frameCount = 0;
+      nextSingleFlash = 150;
+      nextWordFlash   = 300;
+      drawMatrix();
+
+      // Focus input
+      setTimeout(() => document.getElementById('answer-input').focus(), 400);
+    }
+
+    window.addEventListener('resize', () => {
+      if (!document.getElementById('phase-puzzle').classList.contains('hidden')) {
+        initMatrix();
+      }
+    });
+
+    // Allow Enter key to submit
+    document.getElementById('answer-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') checkAnswer();
+    });
+
+    // ── Answer checking ──
+    function checkAnswer() {
+      if (puzzleSolved) return;
+      const input = document.getElementById('answer-input');
+      const val = input.value.trim();
+      const feedbackEl = document.getElementById('feedback-msg');
+
+      if (val === CONFIG.answerWord) {
+        puzzleSolved = true;
+        if (matrixAnimId) cancelAnimationFrame(matrixAnimId);
+        feedbackEl.style.color = '#4ade80';
+        feedbackEl.textContent = '✅ נכון!';
+        setTimeout(showSuccess, 800);
+      } else {
+        wrongAttempts++;
+        // Red flash overlay
+        const flash = document.getElementById('red-flash');
+        flash.classList.add('active');
+        setTimeout(() => flash.classList.remove('active'), 300);
+
+        // Shake input
+        input.classList.add('error');
+        setTimeout(() => input.classList.remove('error'), 450);
+        input.value = '';
+
+        feedbackEl.style.color = '#f87171';
+        feedbackEl.textContent = '❌ נסו שוב!';
+        setTimeout(() => { if (!puzzleSolved) feedbackEl.textContent = ''; }, 2000);
+
+        // Show hint after 3 wrong attempts
+        if (wrongAttempts >= 3) {
+          const hintBox = document.getElementById('hint-box');
+          hintBox.textContent = `💡 ${CONFIG.hint}`;
+          hintBox.style.display = 'block';
+        }
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 3: Success
+    // ══════════════════════════════════════════════════════════
+    function showSuccess() {
+      document.getElementById('phase-puzzle').classList.add('hidden');
+      document.getElementById('phase-success').classList.remove('hidden');
+      document.getElementById('clue-display').textContent = CONFIG.clueText;
+      spawnConfetti();
+    }
+
+    function spawnConfetti() {
+      const colors = ['#ffd700', '#ff3366', '#33ccff', '#33ff66', '#ff8800', '#cc33ff'];
+      for (let i = 0; i < 60; i++) {
+        setTimeout(() => {
+          const c = document.createElement('div');
+          c.className = 'confetti';
+          c.style.cssText = `left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;border-radius:${Math.random()>0.5?'50%':'2px'};--fall-dur:${2+Math.random()*3}s;--rot:${Math.random()*720}deg;--drift:${-50+Math.random()*100}px;`;
+          document.body.appendChild(c);
+          setTimeout(() => c.remove(), 5000);
+        }, i * 50);
+      }
+    }
+
+    function resetStation() {
+      // Cancel animation
+      if (matrixAnimId) { cancelAnimationFrame(matrixAnimId); matrixAnimId = null; }
+
+      // Reset state
+      colorDetected = false;
+      matchCount = 0;
+      puzzleSolved = false;
+      wrongAttempts = 0;
+      frameCount = 0;
+
+      // Reset UI
+      document.getElementById('phase-success').classList.add('hidden');
+      document.getElementById('phase-puzzle').classList.add('hidden');
+      document.getElementById('phase-color').classList.remove('hidden');
+      document.getElementById('answer-input').value = '';
+      document.getElementById('feedback-msg').textContent = '';
+      document.getElementById('hint-box').style.display = 'none';
+      document.getElementById('hint-box').textContent = '';
+      document.getElementById('red-flash').classList.remove('active');
+
+      statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+      statusEl.style.color = 'rgba(255,255,255,0.7)';
+      indicator.classList.remove('color-matched');
+      indicator.style.background = '';
+
+      // Clear canvas
+      if (matrixCanvas.width) mCtx.clearRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+
+      startCamera();
+    }
+  </script>
+</body>
+</html>

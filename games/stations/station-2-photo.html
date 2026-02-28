@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📸 חדר הצילום המלכותי — משימת פורים</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Heebo', sans-serif; background: #0a0015; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
+
+    /* ══ Particles ══ */
+    .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--dur) ease-in-out infinite alternate; }
+    @keyframes twinkle { from { opacity: 0.2; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+
+    /* ══ Common Layout ══ */
+    .phase { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.8s, transform 0.8s; }
+    .phase.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
+
+    .station-badge { font-size: 1rem; color: #ffd700; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); padding: 6px 20px; border-radius: 20px; margin-bottom: 15px; letter-spacing: 2px; }
+    .title { font-family: 'Frank Ruhl Libre', serif; font-size: clamp(2rem, 6vw, 3.5rem); color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.4); margin-bottom: 10px; }
+    .subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
+    .btn { font-family: 'Heebo', sans-serif; font-size: 1.2rem; padding: 14px 40px; border: 2px solid #ffd700; background: rgba(255,215,0,0.15); color: #ffd700; border-radius: 12px; cursor: pointer; transition: all 0.3s; letter-spacing: 1px; }
+    .btn:hover { background: rgba(255,215,0,0.3); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,215,0,0.3); }
+
+    /* ══ Phase 1: Color Detection ══ */
+    #phase-color { z-index: 20; }
+    .camera-container { position: relative; width: 320px; height: 240px; border-radius: 16px; overflow: hidden; border: 3px solid rgba(255,215,0,0.4); box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+    .camera-container video { width: 100%; height: 100%; object-fit: cover; }
+    .color-indicator { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin: 20px auto; transition: all 0.5s; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+    .color-status { font-size: 1.3rem; color: rgba(255,255,255,0.7); margin-top: 10px; min-height: 2em; }
+    .color-matched { animation: colorPulse 0.5s ease-out; }
+    @keyframes colorPulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+    .accept-color-label { font-size: 0.9rem; color: rgba(255,215,0,0.5); margin-top: 8px; }
+
+    /* ══ Phase 2: Photo Booth ══ */
+    #phase-puzzle {
+      background: radial-gradient(ellipse at center, #1a0030 0%, #0a0015 100%);
+      z-index: 20;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .photo-booth-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .photo-live-container {
+      position: relative;
+      width: 320px;
+      height: 240px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px solid rgba(255,215,0,0.6);
+      box-shadow: 0 0 40px rgba(255,215,0,0.2), 0 0 80px rgba(139,92,246,0.2);
+    }
+    .photo-live-container video {
+      width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
+    }
+    /* Decorative frame overlay on live view */
+    .photo-live-container::before {
+      content: '';
+      position: absolute; inset: 0; z-index: 2;
+      background:
+        linear-gradient(135deg, rgba(255,215,0,0.18) 0%, transparent 35%),
+        linear-gradient(225deg, rgba(255,215,0,0.18) 0%, transparent 35%),
+        linear-gradient(315deg, rgba(255,215,0,0.18) 0%, transparent 35%),
+        linear-gradient(45deg,  rgba(255,215,0,0.18) 0%, transparent 35%);
+      pointer-events: none;
+    }
+    .photo-live-container::after {
+      content: '👑';
+      position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+      font-size: 1.6rem; z-index: 3; pointer-events: none;
+      filter: drop-shadow(0 0 6px rgba(255,215,0,0.8));
+      animation: crownFloat 2s ease-in-out infinite alternate;
+    }
+    @keyframes crownFloat { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(-5px); } }
+
+    .shoot-btn {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 2rem;
+      padding: 18px 50px;
+      background: radial-gradient(ellipse, rgba(255,215,0,0.25) 0%, rgba(255,150,0,0.1) 100%);
+      border: 3px solid #ffd700;
+      color: #ffd700;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 30px rgba(255,215,0,0.3);
+      letter-spacing: 2px;
+      animation: shootPulse 2s ease-in-out infinite;
+    }
+    .shoot-btn:hover { transform: scale(1.07); box-shadow: 0 0 50px rgba(255,215,0,0.6); }
+    .shoot-btn:active { transform: scale(0.95); }
+    @keyframes shootPulse {
+      0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+      50%      { box-shadow: 0 0 50px rgba(255,215,0,0.7), 0 0 80px rgba(255,150,0,0.3); }
+    }
+
+    /* countdown overlay */
+    .countdown-overlay {
+      position: absolute; inset: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.5);
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 6rem; color: #ffd700;
+      text-shadow: 0 0 40px rgba(255,215,0,0.9);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+      border-radius: 13px;
+    }
+    .countdown-overlay.active { opacity: 1; pointer-events: all; }
+    @keyframes countPop { 0% { transform: scale(2); opacity: 0; } 30% { transform: scale(1); opacity: 1; } 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.8); opacity: 0; } }
+    .count-num { animation: countPop 1s ease-in-out forwards; }
+
+    /* flash effect */
+    .flash-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: #fff; opacity: 0; pointer-events: none;
+      transition: opacity 0.05s;
+    }
+    .flash-overlay.flash { opacity: 1; transition: opacity 0.4s; }
+
+    /* result photo */
+    .result-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      max-width: 600px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    .result-container.show { display: flex; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    .result-photo-wrapper {
+      position: relative;
+      border-radius: 12px;
+      overflow: visible;
+    }
+    .result-photo-wrapper canvas#result-canvas {
+      border-radius: 10px;
+      display: block;
+      max-width: min(420px, 90vw);
+      height: auto;
+      box-shadow: 0 0 40px rgba(255,215,0,0.4), 0 0 80px rgba(139,92,246,0.2);
+    }
+
+    /* sparkle particles around photo */
+    .sparkle {
+      position: absolute;
+      pointer-events: none;
+      font-size: 1.2rem;
+      animation: sparkleFly var(--sp-dur) ease-out forwards;
+      z-index: 5;
+    }
+    @keyframes sparkleFly {
+      0%   { opacity: 1; transform: translate(0,0) scale(1) rotate(0deg); }
+      100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(0.3) rotate(360deg); }
+    }
+
+    .retake-btn {
+      font-family: 'Heebo', sans-serif;
+      font-size: 1.1rem;
+      padding: 12px 36px;
+      border: 2px solid rgba(255,215,0,0.5);
+      background: rgba(255,215,0,0.08);
+      color: rgba(255,215,0,0.8);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .retake-btn:hover { background: rgba(255,215,0,0.2); transform: translateY(-2px); }
+
+    .photo-instruction {
+      font-size: 1rem;
+      color: rgba(255,215,0,0.6);
+      text-align: center;
+      animation: fadeInOut 3s ease-in-out infinite;
+      padding: 0 20px;
+    }
+    @keyframes fadeInOut { 0%,100% { opacity: 0.3; } 50% { opacity: 0.9; } }
+
+    .success-countdown-bar {
+      width: 300px;
+      height: 6px;
+      background: rgba(255,215,0,0.15);
+      border-radius: 3px;
+      overflow: hidden;
+      display: none;
+    }
+    .success-countdown-bar.show { display: block; }
+    .success-countdown-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffd700, #ff8800);
+      border-radius: 3px;
+      width: 100%;
+      transition: width 5s linear;
+    }
+
+    /* ══ Phase 3: Success ══ */
+    #phase-success { background: radial-gradient(ellipse at center, #1a0a3e 0%, #0a0015 100%); z-index: 30; }
+    .success-icon { font-size: 5rem; animation: bounce 1s ease-in-out infinite; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    .success-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.5rem; color: #ffd700; margin: 15px 0; }
+    .clue-box { background: rgba(255,215,0,0.1); border: 2px solid rgba(255,215,0,0.4); border-radius: 16px; padding: 25px 35px; max-width: 500px; margin: 20px auto; }
+    .clue-label { font-size: 0.9rem; color: rgba(255,215,0,0.6); margin-bottom: 10px; }
+    .clue-text { font-family: 'Frank Ruhl Libre', serif; font-size: 1.5rem; color: #ffd700; line-height: 1.6; }
+    .clue-arrow { font-size: 2rem; margin-top: 15px; animation: arrowPulse 1.5s ease-in-out infinite; }
+    @keyframes arrowPulse { 0%,100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(10px); opacity: 1; } }
+
+    /* final photo thumbnail in success screen */
+    .success-thumbnail {
+      width: 160px;
+      height: 120px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 2px solid rgba(255,215,0,0.5);
+      box-shadow: 0 0 20px rgba(255,215,0,0.3);
+      margin-bottom: 10px;
+    }
+
+    /* ══ Confetti ══ */
+    .confetti { position: fixed; top: -10px; width: 10px; height: 10px; z-index: 31; animation: confettiFall var(--fall-dur) linear forwards; }
+    @keyframes confettiFall { to { top: 110vh; transform: rotate(var(--rot)) translateX(var(--drift)); } }
+
+    /* ══ Reset Button ══ */
+    .reset-btn { position: fixed; bottom: 15px; left: 15px; font-size: 0.75rem; color: rgba(255,255,255,0.15); background: none; border: 1px solid rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 6px; cursor: pointer; z-index: 50; }
+    .reset-btn:hover { color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.3); }
+
+    /* ══ Royal decorations ══ */
+    .royal-divider {
+      font-size: 1.2rem;
+      color: rgba(255,215,0,0.3);
+      letter-spacing: 8px;
+      margin: 4px 0;
+    }
+  
+    /* ══ Phase: Group Selection ══ */
+    #phase-group { z-index: 21; background: radial-gradient(ellipse at center, #1a0a3e 0%, #0a0015 100%); }
+    .group-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.5rem; color: #ffd700; margin-bottom: 10px; }
+    .group-subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
+    .group-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; max-width: 500px; }
+    .group-btn {
+      font-family: 'Heebo', sans-serif; font-size: 1.8rem; font-weight: 900;
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 3px solid rgba(255,215,0,0.4); background: rgba(255,215,0,0.1);
+      color: #ffd700; cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .group-btn:hover { background: rgba(255,215,0,0.3); transform: scale(1.15); box-shadow: 0 0 25px rgba(255,215,0,0.4); }
+  </style>
+</head>
+<body>
+  <!-- Stars Background -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Flash Effect -->
+  <div class="flash-overlay" id="flash-overlay"></div>
+
+  <!-- ═══ Phase 1: Color Detection ═══ -->
+  <div class="phase" id="phase-color">
+    <div class="station-badge">📸 תחנה 2</div>
+    <div class="title">חדר הצילום המלכותי</div>
+    <div class="subtitle">הרימו את הכרטיס הצבעוני מול המצלמה</div>
+    <div class="camera-container">
+      <video id="camera-color" autoplay playsinline muted></video>
+      <canvas id="color-canvas" style="display:none"></canvas>
+    </div>
+    <div class="color-indicator" id="color-indicator"></div>
+    <div class="color-status" id="color-status">ממתין למצלמה...</div>
+    <div class="accept-color-label" id="accept-label"></div>
+  </div>
+
+  <!-- ═══ Phase 2: Photo Booth ═══ -->
+  
+  <!-- ═══ Phase: Group Selection ═══ -->
+  <div class="phase hidden" id="phase-group">
+    <div class="group-title">👥 מי אתם?</div>
+    <div class="group-subtitle">בחרו את מספר הקבוצה שלכם</div>
+    <div class="group-grid" id="group-grid"></div>
+  </div>
+
+  <div class="phase hidden" id="phase-puzzle">
+    <!-- Live camera view (shown before capture) -->
+    <div class="photo-booth-wrapper" id="live-view">
+      <div class="station-badge">📸 תחנה 2</div>
+      <div class="title" style="font-size:clamp(1.5rem,4vw,2.5rem);">חדר הצילום המלכותי</div>
+      <div class="royal-divider">✦ ✦ ✦</div>
+
+      <div class="photo-live-container" id="live-container">
+        <video id="camera-photo" autoplay playsinline muted></video>
+        <div class="countdown-overlay" id="countdown-overlay"></div>
+      </div>
+
+      <div class="photo-instruction">👑 סדרו את הכתרים — ועמדו יחד לצילום המלכותי!</div>
+
+      <button class="shoot-btn" id="shoot-btn" onclick="startCountdown()">📸 צלמו!</button>
+    </div>
+
+    <!-- Result view (shown after capture) -->
+    <div class="result-container" id="result-view">
+      <div class="station-badge">📸 תחנה 2</div>
+      <div style="font-family:'Frank Ruhl Libre',serif; font-size:1.4rem; color:#ffd700; text-align:center;">הצילום המלכותי שלכם ✨</div>
+
+      <div class="result-photo-wrapper" id="photo-wrapper">
+        <canvas id="result-canvas"></canvas>
+      </div>
+
+      <div class="success-countdown-bar" id="progress-bar">
+        <div class="success-countdown-fill" id="progress-fill"></div>
+      </div>
+
+      <div class="photo-instruction" id="result-instruction">ממתין... הרמז יגיע בעוד רגע</div>
+
+      <button class="retake-btn" onclick="retakePhoto()">🎭 צלמו שוב</button>
+    </div>
+  </div>
+
+  <!-- ═══ Phase 3: Success ═══ -->
+  <div class="phase hidden" id="phase-success">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">צולמתם כמו מלכים!</div>
+    <img id="success-thumbnail" class="success-thumbnail" alt="הצילום שלכם" />
+    <div class="clue-box">
+      <div class="clue-label">📍 הרמז למיקום הכרטיס הבא:</div>
+      <div class="clue-text" id="clue-display"></div>
+    </div>
+    <div class="clue-arrow">⬇️</div>
+    <button class="btn" onclick="resetStation()" style="margin-top:20px; font-size:1rem; padding:10px 30px;">🔄 קבוצה הבאה</button>
+  </div>
+
+  <button class="reset-btn" onclick="resetStation()">איפוס</button>
+
+  <script>
+    // ══════════════════════════════════════════════════════════
+    // ✏️ הגדרות
+    // ══════════════════════════════════════════════════════════
+    const CONFIG = {
+      stationNumber: 2,
+      stationName: 'חדר הצילום המלכותי',
+      acceptColor: 'blue',
+      clueText: '״ויכתוב מרדכי את הדברים האלה״ — חפשו ליד המקום שבו כותבים הודעות לכל העם. ירוק כגן הביתן ימתין לכם שם',
+    };
+
+    // ══ Color definitions ══
+    const COLORS = {
+      red:    { he: 'אדום 🔴', min: [150, 0, 0],   max: [255, 100, 100], bg: '#ff3333' },
+      blue:   { he: 'תכלת 🔵', min: [0, 0, 140],   max: [100, 100, 255], bg: '#3366ff' },
+      green:  { he: 'ירוק 🟢', min: [0, 120, 0],   max: [100, 255, 100], bg: '#33cc33' },
+      yellow: { he: 'צהוב 🟡', min: [180, 180, 0], max: [255, 255, 100], bg: '#ffcc00' },
+      orange: { he: 'כתום 🟠', min: [200, 100, 0], max: [255, 180, 80],  bg: '#ff8800' },
+      purple: { he: 'סגול 🟣', min: [100, 0, 120], max: [200, 80, 255],  bg: '#9933ff' },
+    };
+
+    // ══ Stars ══
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 80; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 3 + 1;
+      s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${1+Math.random()*3}s;animation-delay:${Math.random()*3}s;`;
+      starsEl.appendChild(s);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 1: Color Detection
+    // ══════════════════════════════════════════════════════════
+    const videoColor   = document.getElementById('camera-color');
+    const colorCanvas  = document.getElementById('color-canvas');
+    const colorCtx     = colorCanvas.getContext('2d', { willReadFrequently: true });
+    const indicator    = document.getElementById('color-indicator');
+    const statusEl     = document.getElementById('color-status');
+    const acceptLabel  = document.getElementById('accept-label');
+
+    acceptLabel.textContent = `תחנה ${CONFIG.stationNumber}`;
+    let colorDetected = false;
+    let matchCount    = 0;
+
+    async function startCameraColor() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: 320, height: 240 } });
+        videoColor.srcObject = stream;
+        videoColor.onloadedmetadata = () => {
+          colorCanvas.width  = 320;
+          colorCanvas.height = 240;
+          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          detectColor();
+        };
+      } catch (e) {
+        statusEl.textContent = '⚠️ אין גישה למצלמה — לחצו על "אפשר"';
+      }
+    }
+
+    function detectColor() {
+      if (colorDetected) return;
+      colorCtx.drawImage(videoColor, 0, 0, 320, 240);
+      const cx = 110, cy = 70, cw = 100, ch = 100;
+      const imageData = colorCtx.getImageData(cx, cy, cw, ch);
+      const data = imageData.data;
+      let rSum = 0, gSum = 0, bSum = 0, count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        rSum += data[i]; gSum += data[i+1]; bSum += data[i+2]; count++;
+      }
+      const r = Math.round(rSum / count);
+      const g = Math.round(gSum / count);
+      const b = Math.round(bSum / count);
+      indicator.style.background = `rgb(${r},${g},${b})`;
+
+      let detected = null;
+      for (const [name, col] of Object.entries(COLORS)) {
+        if (r >= col.min[0] && r <= col.max[0] && g >= col.min[1] && g <= col.max[1] && b >= col.min[2] && b <= col.max[2]) {
+          detected = name; break;
+        }
+      }
+
+      if (detected === CONFIG.acceptColor) {
+        matchCount++;
+        statusEl.textContent = `🎯 מזהה ${COLORS[detected].he}... (${matchCount}/10)`;
+        statusEl.style.color = '#4ade80';
+        if (matchCount >= 10) {
+          colorDetected = true;
+          indicator.classList.add('color-matched');
+          statusEl.textContent = `✅ ${COLORS[detected].he} — זוהה! נכנסים לחדר הצילום...`;
+          // Stop color-detection camera
+          if (videoColor.srcObject) videoColor.srcObject.getTracks().forEach(t => t.stop());
+          setTimeout(showGroupSelect, 1200);
+          return;
+        }
+      } else if (detected) {
+        matchCount = Math.max(0, matchCount - 1);
+        statusEl.textContent = `❌ זה ${COLORS[detected].he} — לא הצבע הנכון — נסו תחנה אחרת`;
+        statusEl.style.color = '#f87171';
+      } else {
+        matchCount = Math.max(0, matchCount - 1);
+        // Check if something colorful is visible (not just gray/dark)
+        const maxC = Math.max(r, g, b);
+        const minC = Math.min(r, g, b);
+        const saturation = maxC > 30 ? (maxC - minC) / maxC : 0;
+        if (saturation > 0.25 && maxC > 60) {
+          statusEl.textContent = '🔍 מזהה צבע... קרבו את הכרטיס למצלמה';
+          statusEl.style.color = '#fbbf24';
+        } else {
+          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          statusEl.style.color = 'rgba(255,255,255,0.7)';
+        }
+      }
+      requestAnimationFrame(detectColor);
+    }
+
+    startCameraColor();
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 2: Photo Booth
+    // ══════════════════════════════════════════════════════════
+    const videoPhoto     = document.getElementById('camera-photo');
+    const countdownEl    = document.getElementById('countdown-overlay');
+    const shootBtn       = document.getElementById('shoot-btn');
+    const liveView       = document.getElementById('live-view');
+    const resultView     = document.getElementById('result-view');
+    const resultCanvas   = document.getElementById('result-canvas');
+    const flashEl        = document.getElementById('flash-overlay');
+    const photoWrapper   = document.getElementById('photo-wrapper');
+    const progressBar    = document.getElementById('progress-bar');
+    const progressFill   = document.getElementById('progress-fill');
+    const resultInstr    = document.getElementById('result-instruction');
+
+    let photoCaptured = false;
+    let photoStream   = null;
+    let successTimer  = null;
+    // ══ Group Selection ══
+    let selectedGroup = null;
+    const groupGrid = document.getElementById('group-grid');
+    for (let i = 1; i <= 10; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'group-btn';
+      btn.textContent = i;
+      btn.onclick = () => selectGroup(i);
+      groupGrid.appendChild(btn);
+    }
+
+    function showGroupSelect() {
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      document.getElementById('phase-color').classList.add('hidden');
+      document.getElementById('phase-group').classList.remove('hidden');
+    }
+
+    function selectGroup(num) {
+      selectedGroup = num;
+      document.getElementById('phase-group').classList.add('hidden');
+      startPhotoBooth();
+    }
+
+    function saveCompletion() {
+      if (!selectedGroup) return;
+      const key = 'purim_progress';
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      if (!data[selectedGroup]) data[selectedGroup] = [];
+      if (!data[selectedGroup].includes(CONFIG.stationNumber)) {
+        data[selectedGroup].push(CONFIG.stationNumber);
+      }
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+
+
+    async function startPhotoBooth() {
+      document.getElementById('phase-color').classList.add('hidden');
+      document.getElementById('phase-puzzle').classList.remove('hidden');
+
+      try {
+        // Prefer front camera for group selfie
+        photoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
+        videoPhoto.srcObject = photoStream;
+      } catch (e) {
+        // Fallback: any camera
+        try {
+          photoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+          videoPhoto.srcObject = photoStream;
+        } catch (e2) {
+          resultInstr.textContent = '⚠️ לא נמצאה מצלמה — רעננו את הדף';
+        }
+      }
+    }
+
+    function startCountdown() {
+      if (photoCaptured) return;
+      shootBtn.disabled = true;
+      shootBtn.style.opacity = '0.4';
+      countdownEl.classList.add('active');
+
+      let count = 3;
+      showCountNum(count);
+      const interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          showCountNum(count);
+        } else {
+          clearInterval(interval);
+          countdownEl.classList.remove('active');
+          countdownEl.innerHTML = '';
+          capturePhoto();
+        }
+      }, 1000);
+    }
+
+    function showCountNum(n) {
+      countdownEl.innerHTML = `<span class="count-num" style="animation:countPop 1s ease-in-out forwards;">${n}</span>`;
+      // Restart animation
+      const span = countdownEl.querySelector('span');
+      span.style.animation = 'none';
+      void span.offsetWidth;
+      span.style.animation = 'countPop 1s ease-in-out forwards';
+    }
+
+    function capturePhoto() {
+      // Flash
+      flashEl.classList.remove('flash');
+      void flashEl.offsetWidth;
+      flashEl.classList.add('flash');
+      setTimeout(() => flashEl.classList.remove('flash'), 400);
+
+      // Draw video to offscreen canvas
+      const W = videoPhoto.videoWidth  || 640;
+      const H = videoPhoto.videoHeight || 480;
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width  = W;
+      tempCanvas.height = H;
+      const tCtx = tempCanvas.getContext('2d');
+
+      // Mirror the image back (video was mirrored for preview)
+      tCtx.save();
+      tCtx.scale(-1, 1);
+      tCtx.drawImage(videoPhoto, -W, 0, W, H);
+      tCtx.restore();
+
+      // Apply Purim overlays
+      applyPurimEffect(tempCanvas, W, H);
+    }
+
+    function applyPurimEffect(sourceCanvas, W, H) {
+      // Set result canvas size
+      resultCanvas.width  = W;
+      resultCanvas.height = H;
+      const ctx = resultCanvas.getContext('2d');
+
+      // 1. Draw original photo
+      ctx.drawImage(sourceCanvas, 0, 0, W, H);
+
+      // 2. Sepia-like filter via pixel manipulation
+      const imgData = ctx.getImageData(0, 0, W, H);
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i+1], b = d[i+2];
+        // Sepia formula
+        d[i]   = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189);
+        d[i+1] = Math.min(255, r * 0.349 + g * 0.686 + b * 0.168);
+        d[i+2] = Math.min(255, r * 0.272 + g * 0.534 + b * 0.131);
+        // Boost warmth slightly for regal tone
+        d[i]   = Math.min(255, d[i]   * 1.08);
+        d[i+1] = Math.min(255, d[i+1] * 0.97);
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      // 3. Parchment/scroll frame border
+      drawParchmentFrame(ctx, W, H);
+
+      // 4. Golden crown at top center
+      drawCrown(ctx, W, H);
+
+      // 5. "שושן הבירה" text at bottom
+      drawBottomText(ctx, W, H);
+
+      // 6. Clue text overlaid subtly
+      drawClueOverlay(ctx, W, H);
+
+      // Show result view
+      photoCaptured = true;
+      liveView.style.display = 'none';
+      resultView.classList.add('show');
+
+      // Spawn sparkles around the canvas
+      setTimeout(spawnSparkles, 300);
+
+      // Start 5-second countdown to success
+      progressBar.classList.add('show');
+      progressFill.style.width = '100%';
+      setTimeout(() => { progressFill.style.width = '0%'; }, 50);
+      resultInstr.textContent = '✨ תסתכלו על הצילום המלכותי — הרמז מגיע בעוד 5 שניות!';
+      successTimer = setTimeout(showSuccess, 5000);
+    }
+
+    function drawParchmentFrame(ctx, W, H) {
+      const bw = Math.max(18, W * 0.045); // border width proportional
+
+      // Outer dark border
+      ctx.strokeStyle = 'rgba(101, 67, 33, 0.9)';
+      ctx.lineWidth = bw;
+      ctx.strokeRect(bw / 2, bw / 2, W - bw, H - bw);
+
+      // Inner golden line
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.85)';
+      ctx.lineWidth = Math.max(2, bw * 0.18);
+      const inset = bw + 4;
+      ctx.strokeRect(inset, inset, W - inset * 2, H - inset * 2);
+
+      // Corner ornaments — small golden diamonds
+      const corners = [[0, 0], [W, 0], [0, H], [W, H]];
+      const cornerOffset = bw * 0.9;
+      const ornamentSize = bw * 0.7;
+      ctx.fillStyle = 'rgba(255, 215, 0, 0.9)';
+      corners.forEach(([cx, cy]) => {
+        const ox = cx === 0 ? cornerOffset : W - cornerOffset;
+        const oy = cy === 0 ? cornerOffset : H - cornerOffset;
+        ctx.save();
+        ctx.translate(ox, oy);
+        ctx.rotate(Math.PI / 4);
+        ctx.fillRect(-ornamentSize / 2, -ornamentSize / 2, ornamentSize, ornamentSize);
+        ctx.restore();
+      });
+
+      // Side ornaments — small circles mid-edge
+      ctx.beginPath();
+      const midOrnament = bw * 0.4;
+      [[W/2, bw/2], [W/2, H - bw/2], [bw/2, H/2], [W - bw/2, H/2]].forEach(([mx, my]) => {
+        ctx.moveTo(mx + midOrnament, my);
+        ctx.arc(mx, my, midOrnament, 0, Math.PI * 2);
+      });
+      ctx.fill();
+    }
+
+    function drawCrown(ctx, W, H) {
+      const crownSize = Math.min(W, H) * 0.16;
+      ctx.font = `${crownSize}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+
+      // Glow effect
+      ctx.shadowColor = 'rgba(255, 215, 0, 0.9)';
+      ctx.shadowBlur  = crownSize * 0.5;
+      ctx.fillStyle = '#ffd700';
+      ctx.fillText('👑', W / 2, crownSize * 0.1);
+
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+    }
+
+    function drawBottomText(ctx, W, H) {
+      const bw      = Math.max(18, W * 0.045);
+      const fontSize = Math.min(W * 0.065, 36);
+
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.font         = `bold ${fontSize}px 'Frank Ruhl Libre', serif`;
+
+      // Text glow
+      ctx.shadowColor = 'rgba(255, 180, 0, 0.8)';
+      ctx.shadowBlur  = fontSize * 0.6;
+
+      // Decorative background strip
+      const stripH = fontSize * 1.9;
+      const stripY = H - bw - stripH;
+      ctx.fillStyle = 'rgba(60, 30, 0, 0.65)';
+      ctx.fillRect(bw + 2, stripY, W - (bw + 2) * 2, stripH);
+
+      // Main text
+      ctx.fillStyle = '#ffd700';
+      ctx.fillText('✦ שושן הבירה ✦', W / 2, H - bw - 8);
+
+      // Subtitle
+      const subSize = fontSize * 0.52;
+      ctx.font      = `${subSize}px 'Heebo', sans-serif`;
+      ctx.shadowBlur = subSize * 0.4;
+      ctx.fillStyle = 'rgba(255, 235, 150, 0.85)';
+      ctx.fillText('פורים שמח! 🎭', W / 2, H - bw - fontSize * 1.15);
+
+      ctx.shadowBlur = 0;
+    }
+
+    function drawClueOverlay(ctx, W, H) {
+      // Small, subtle clue text near top (will be more visible in success phase)
+      const fontSize = Math.min(W * 0.038, 20);
+      ctx.font         = `${fontSize}px 'Heebo', sans-serif`;
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle    = 'rgba(255, 255, 200, 0.0)'; // fully hidden here — revealed in success
+      ctx.fillText(CONFIG.clueText, W / 2, 30);
+    }
+
+    function spawnSparkles() {
+      const wrapper   = photoWrapper;
+      const rect      = wrapper.getBoundingClientRect();
+      const emojis    = ['✨', '⭐', '🌟', '💫', '👑', '✦', '🎭'];
+      const count     = 20;
+
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          const sp = document.createElement('span');
+          sp.className = 'sparkle';
+          const emoji  = emojis[Math.floor(Math.random() * emojis.length)];
+          sp.textContent = emoji;
+
+          // Random position along the border of the photo
+          const side = Math.floor(Math.random() * 4);
+          let startX, startY;
+          const cRect = resultCanvas.getBoundingClientRect();
+          const wRect = wrapper.getBoundingClientRect();
+          if (side === 0) { startX = Math.random() * cRect.width; startY = -20; }
+          else if (side === 1) { startX = cRect.width + 10; startY = Math.random() * cRect.height; }
+          else if (side === 2) { startX = Math.random() * cRect.width; startY = cRect.height + 10; }
+          else { startX = -20; startY = Math.random() * cRect.height; }
+
+          const angle   = Math.random() * Math.PI * 2;
+          const dist    = 40 + Math.random() * 60;
+          const sx      = Math.cos(angle) * dist;
+          const sy      = Math.sin(angle) * dist;
+          const dur     = 0.8 + Math.random() * 1.2;
+
+          sp.style.cssText = `left:${startX}px;top:${startY}px;--sx:${sx}px;--sy:${sy}px;--sp-dur:${dur}s;font-size:${0.9 + Math.random() * 0.8}rem;`;
+          wrapper.appendChild(sp);
+          setTimeout(() => sp.remove(), dur * 1000 + 100);
+        }, i * 100);
+      }
+    }
+
+    function retakePhoto() {
+      // Cancel pending success
+      if (successTimer) { clearTimeout(successTimer); successTimer = null; }
+      photoCaptured = false;
+      resultView.classList.remove('show');
+      progressBar.classList.remove('show');
+      progressFill.style.width = '100%';
+      liveView.style.display = 'flex';
+      shootBtn.disabled = false;
+      shootBtn.style.opacity = '1';
+      // Clear old sparkles
+      photoWrapper.querySelectorAll('.sparkle').forEach(s => s.remove());
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 3: Success
+    // ══════════════════════════════════════════════════════════
+    function showSuccess() {
+      // Stop photo camera
+      if (photoStream) photoStream.getTracks().forEach(t => t.stop());
+
+      // Thumbnail: convert result canvas to image
+      const thumb = document.getElementById('success-thumbnail');
+      thumb.src = resultCanvas.toDataURL('image/jpeg', 0.7);
+
+      document.getElementById('phase-puzzle').classList.add('hidden');
+      document.getElementById('phase-success').classList.remove('hidden');
+      document.getElementById('clue-display').textContent = CONFIG.clueText;
+
+      spawnConfetti();
+    }
+
+    function spawnConfetti() {
+      const colors = ['#ffd700', '#ff3366', '#33ccff', '#33ff66', '#ff8800', '#cc33ff'];
+      for (let i = 0; i < 60; i++) {
+        setTimeout(() => {
+          const c = document.createElement('div');
+          c.className = 'confetti';
+          c.style.cssText = `left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;border-radius:${Math.random()>0.5?'50%':'2px'};--fall-dur:${2+Math.random()*3}s;--rot:${Math.random()*720}deg;--drift:${-50+Math.random()*100}px;`;
+          document.body.appendChild(c);
+          setTimeout(() => c.remove(), 5000);
+        }, i * 50);
+      }
+    }
+
+    function resetStation() {
+      // Cancel any running timers
+      if (successTimer) { clearTimeout(successTimer); successTimer = null; }
+
+      // Stop any streams
+      if (videoPhoto.srcObject) videoPhoto.srcObject.getTracks().forEach(t => t.stop());
+      if (videoColor.srcObject) videoColor.srcObject.getTracks().forEach(t => t.stop());
+      photoStream = null;
+
+      // Reset state
+      colorDetected = false;
+      matchCount    = 0;
+      photoCaptured = false;
+
+      // Reset UI
+      resultView.classList.remove('show');
+      liveView.style.display = 'flex';
+      progressBar.classList.remove('show');
+      progressFill.style.width = '100%';
+      shootBtn.disabled = false;
+      shootBtn.style.opacity = '1';
+      countdownEl.classList.remove('active');
+      countdownEl.innerHTML = '';
+      indicator.classList.remove('color-matched');
+      indicator.style.background = '';
+      statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+      statusEl.style.color  = 'rgba(255,255,255,0.7)';
+
+      // Show phase 1
+      document.getElementById('phase-success').classList.add('hidden');
+      document.getElementById('phase-puzzle').classList.add('hidden');
+      document.getElementById('phase-color').classList.remove('hidden');
+
+      // Clear sparkles
+      photoWrapper.querySelectorAll('.sparkle').forEach(s => s.remove());
+
+      startCameraColor();
+    }
+  </script>
+</body>
+</html>

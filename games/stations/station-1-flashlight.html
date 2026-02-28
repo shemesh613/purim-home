@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔦 חדר הסנפיר — משימת פורים</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Heebo', sans-serif; background: #0a0015; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
+
+    .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--dur) ease-in-out infinite alternate; }
+    @keyframes twinkle { from { opacity: 0.2; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+
+    .phase { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.8s, transform 0.8s; }
+    .phase.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
+
+    .station-badge { font-size: 1rem; color: #ffd700; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); padding: 6px 20px; border-radius: 20px; margin-bottom: 15px; letter-spacing: 2px; }
+    .title { font-family: 'Frank Ruhl Libre', serif; font-size: clamp(2rem, 6vw, 3.5rem); color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.4); margin-bottom: 10px; }
+    .subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; text-align: center; max-width: 500px; }
+    .btn { font-family: 'Heebo', sans-serif; font-size: 1.2rem; padding: 14px 40px; border: 2px solid #ffd700; background: rgba(255,215,0,0.15); color: #ffd700; border-radius: 12px; cursor: pointer; transition: all 0.3s; letter-spacing: 1px; }
+    .btn:hover { background: rgba(255,215,0,0.3); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,215,0,0.3); }
+
+    /* ══ Phase 1: Color Detection ══ */
+    #phase-color { z-index: 20; }
+    .camera-container { position: relative; width: 320px; height: 240px; border-radius: 16px; overflow: hidden; border: 3px solid rgba(255,215,0,0.4); box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+    .camera-container video { width: 100%; height: 100%; object-fit: cover; }
+    .color-indicator { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin: 20px auto; transition: all 0.5s; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+    .color-status { font-size: 1.3rem; color: rgba(255,255,255,0.7); margin-top: 10px; min-height: 2em; text-align: center; }
+    .color-matched { animation: colorPulse 0.5s ease-out; }
+    @keyframes colorPulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+    .accept-color-label { font-size: 0.9rem; color: rgba(255,215,0,0.5); margin-top: 8px; }
+
+    /* ══ Phase 2: Flashlight Puzzle ══ */
+    #phase-puzzle { cursor: none; background: #000; }
+    .flashlight-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 15; }
+    .scattered-words { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 14; }
+    .scattered-word { position: absolute; font-family: 'Frank Ruhl Libre', serif; color: #ffd700; text-shadow: 0 0 15px rgba(255,215,0,0.5); white-space: nowrap; user-select: none; pointer-events: none; }
+    .hidden-instruction { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); font-size: 1rem; color: rgba(255,255,255,0.15); z-index: 16; text-align: center; pointer-events: none; animation: fadeInOut 3s ease-in-out infinite; }
+    @keyframes fadeInOut { 0%,100% { opacity: 0.1; } 50% { opacity: 0.4; } }
+    .puzzle-timer { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); font-size: 1.5rem; color: rgba(255,215,0,0.6); z-index: 16; pointer-events: none; }
+
+    /* ══ Answer Panel ══ */
+    .answer-panel { position: fixed; bottom: 0; left: 0; width: 100%; background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 70%, transparent 100%); padding: 20px 30px 25px; z-index: 20; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: auto; }
+    .answer-input { font-family: 'Frank Ruhl Libre', serif; font-size: 1.3rem; padding: 12px 20px; border: 2px solid rgba(255,215,0,0.4); background: rgba(255,215,0,0.08); color: #ffd700; border-radius: 12px; outline: none; direction: rtl; width: 400px; max-width: 60vw; text-align: center; }
+    .answer-input:focus { border-color: #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.3); }
+    .answer-input::placeholder { color: rgba(255,215,0,0.3); }
+    .answer-btn { font-family: 'Heebo', sans-serif; font-size: 1.1rem; padding: 12px 25px; border: 2px solid #ffd700; background: rgba(255,215,0,0.2); color: #ffd700; border-radius: 12px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+    .answer-btn:hover { background: rgba(255,215,0,0.4); }
+    .answer-feedback { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); font-size: 1.2rem; z-index: 21; text-align: center; transition: opacity 0.5s; pointer-events: none; }
+    .answer-hint { position: fixed; bottom: 90px; right: 30px; font-size: 0.85rem; color: rgba(255,215,0,0.3); z-index: 21; pointer-events: none; max-width: 250px; text-align: right; }
+
+    /* ══ Screen shake ══ */
+    .screen-shake { animation: shake 0.5s ease-in-out; }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(10px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
+    .red-flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.3); z-index: 25; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+    .red-flash.active { opacity: 1; }
+
+    /* ══ Phase 3: Success ══ */
+    #phase-success { background: radial-gradient(ellipse at center, #1a0a3e 0%, #0a0015 100%); z-index: 30; }
+    .success-icon { font-size: 5rem; animation: bounce 1s ease-in-out infinite; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    .success-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.5rem; color: #ffd700; margin: 15px 0; }
+    .clue-box { background: rgba(255,215,0,0.1); border: 2px solid rgba(255,215,0,0.4); border-radius: 16px; padding: 25px 35px; max-width: 600px; margin: 20px auto; }
+    .clue-label { font-size: 0.9rem; color: rgba(255,215,0,0.6); margin-bottom: 10px; }
+    .clue-text { font-family: 'Frank Ruhl Libre', serif; font-size: 1.4rem; color: #ffd700; line-height: 1.8; }
+    .clue-arrow { font-size: 2rem; margin-top: 15px; animation: arrowPulse 1.5s ease-in-out infinite; }
+    @keyframes arrowPulse { 0%,100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(10px); opacity: 1; } }
+
+    .confetti { position: fixed; top: -10px; width: 10px; height: 10px; z-index: 31; animation: confettiFall var(--fall-dur) linear forwards; }
+    @keyframes confettiFall { to { top: 110vh; transform: rotate(var(--rot)) translateX(var(--drift)); } }
+
+    .reset-btn { position: fixed; bottom: 15px; left: 15px; font-size: 0.75rem; color: rgba(255,255,255,0.15); background: none; border: 1px solid rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 6px; cursor: pointer; z-index: 50; }
+    .reset-btn:hover { color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.3); }
+  
+    /* ══ Phase: Group Selection ══ */
+    #phase-group { z-index: 21; background: radial-gradient(ellipse at center, #1a0a3e 0%, #0a0015 100%); }
+    .group-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.5rem; color: #ffd700; margin-bottom: 10px; }
+    .group-subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
+    .group-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; max-width: 500px; }
+    .group-btn {
+      font-family: 'Heebo', sans-serif; font-size: 1.8rem; font-weight: 900;
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 3px solid rgba(255,215,0,0.4); background: rgba(255,215,0,0.1);
+      color: #ffd700; cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .group-btn:hover { background: rgba(255,215,0,0.3); transform: scale(1.15); box-shadow: 0 0 25px rgba(255,215,0,0.4); }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+
+  <!-- ═══ Phase 1: Color Detection ═══ -->
+  <div class="phase" id="phase-color">
+    <div class="station-badge">🔦 תחנה 1</div>
+    <div class="title">חדר הסנפיר</div>
+    <div class="subtitle">הרימו את הכרטיס הצבעוני מול המצלמה</div>
+    <div class="camera-container">
+      <video id="camera" autoplay playsinline muted></video>
+      <canvas id="color-canvas" style="display:none"></canvas>
+    </div>
+    <div class="color-indicator" id="color-indicator"></div>
+    <div class="color-status" id="color-status">ממתין למצלמה...</div>
+    <div class="accept-color-label" id="accept-label"></div>
+  </div>
+
+  <!-- ═══ Phase 2: Flashlight Puzzle ═══ -->
+  
+  <!-- ═══ Phase: Group Selection ═══ -->
+  <div class="phase hidden" id="phase-group">
+    <div class="group-title">👥 מי אתם?</div>
+    <div class="group-subtitle">בחרו את מספר הקבוצה שלכם</div>
+    <div class="group-grid" id="group-grid"></div>
+  </div>
+
+  <div class="phase hidden" id="phase-puzzle">
+    <div class="scattered-words" id="scattered-words"></div>
+    <canvas class="flashlight-canvas" id="flashlight-canvas"></canvas>
+    <div class="puzzle-timer" id="puzzle-timer">⏱️ 00:00</div>
+    <div class="hidden-instruction">🔦 חפשו את המילים המפוזרות על המסך — גלו וכתבו את הפסוק!</div>
+    <div class="answer-panel">
+      <input type="text" class="answer-input" id="answer-input" placeholder="...כתבו כאן את הפסוק שמצאתם" autocomplete="off">
+      <button class="answer-btn" id="answer-btn">🔓 בדקו</button>
+    </div>
+    <div class="answer-feedback" id="answer-feedback"></div>
+    <div class="answer-hint" id="answer-hint"></div>
+  </div>
+
+  <div class="red-flash" id="red-flash"></div>
+
+  <!-- ═══ Phase 3: Success ═══ -->
+  <div class="phase hidden" id="phase-success">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">מצאתם את הסוד!</div>
+    <div class="clue-box">
+      <div class="clue-label">📜 הרמז למיקום הכרטיס הבא:</div>
+      <div class="clue-text" id="clue-display"></div>
+    </div>
+    <div class="clue-arrow">⬇️</div>
+    <button class="btn" onclick="resetStation()" style="margin-top:20px; font-size:1rem; padding:10px 30px;">🔄 קבוצה הבאה</button>
+  </div>
+
+  <button class="reset-btn" onclick="resetStation()">איפוס</button>
+
+  <script>
+    // ══════════════════════════════════════════════════════════
+    // ✏️ הגדרות — ערכו כאן!
+    // ══════════════════════════════════════════════════════════
+    const CONFIG = {
+      stationNumber: 1,
+      stationName: 'חדר הסנפיר',
+      acceptColor: 'red',
+
+      // הפסוק שמפוזר על המסך — צריך למצוא ולכתוב
+      hiddenVerse: 'בלילה ההוא נדדה שנת המלך',
+      verseSource: 'אסתר ו:א',
+
+      // הרמז — בסגנון מגילה! ערכו לפי המיקום שלכם
+      clueText: 'בשבתו על כסא מלכותו אשר בכיתה אשר היא האות הראשונה של שומר הסף — שם תמצאו את הצבע הבא',
+
+      // רדיוס הפנס — קטן יותר = קשה יותר
+      flashlightRadius: 70,
+
+      // גודל פונט מילים מפוזרות (קטן = קשה)
+      wordFontMin: 1.2,  // rem
+      wordFontMax: 2.0,  // rem
+
+      // סיבוב מילים — מילים מסובבות = קשה יותר
+      wordRotation: true,
+      maxRotation: 25,  // מעלות
+
+      // מילות הסחה — מילים מזויפות שמבלבלות!
+      decoyWords: ['ויהי', 'אחשורוש', 'בימים', 'ההם', 'ושתי', 'הגן', 'ביתן', 'המלכה', 'זרש', 'תרשיש'],
+      decoyColor: '#8b5cf6',  // סגול — שונה מהזהב של המילים האמיתיות
+
+      // רמזים אחרי טעויות
+      hints: [
+        '💡 חפשו רק את המילים בצבע זהב — התעלמו מהסגולות!',
+        '💡 הפסוק מתחיל ב"בלילה" ומסתיים ב"המלך"',
+        '💡 הפסוק: "בלילה ה___ נ___ ש___ ה___"',
+      ],
+    };
+
+    // ══ Color definitions ══
+    const COLORS = {
+      red:    { he: 'אדום 🔴', min: [150, 0, 0], max: [255, 100, 100], bg: '#ff3333' },
+      blue:   { he: 'תכלת 🔵', min: [0, 0, 140], max: [100, 100, 255], bg: '#3366ff' },
+      green:  { he: 'ירוק 🟢', min: [0, 120, 0], max: [100, 255, 100], bg: '#33cc33' },
+      yellow: { he: 'צהוב 🟡', min: [180, 180, 0], max: [255, 255, 100], bg: '#ffcc00' },
+      orange: { he: 'כתום 🟠', min: [200, 100, 0], max: [255, 180, 80], bg: '#ff8800' },
+      purple: { he: 'סגול 🟣', min: [100, 0, 120], max: [200, 80, 255], bg: '#9933ff' },
+    };
+
+    // ══ Stars ══
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 80; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 3 + 1;
+      s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${1+Math.random()*3}s;animation-delay:${Math.random()*3}s;`;
+      starsEl.appendChild(s);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 1: Color Detection
+    // ══════════════════════════════════════════════════════════
+    const video = document.getElementById('camera');
+    const colorCanvas = document.getElementById('color-canvas');
+    const colorCtx = colorCanvas.getContext('2d', { willReadFrequently: true });
+    const indicator = document.getElementById('color-indicator');
+    const statusEl = document.getElementById('color-status');
+    const acceptLabel = document.getElementById('accept-label');
+
+    acceptLabel.textContent = `תחנה ${CONFIG.stationNumber}`;
+    let colorDetected = false;
+    let matchCount = 0;
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: 320, height: 240 } });
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+          colorCanvas.width = 320;
+          colorCanvas.height = 240;
+          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          detectColor();
+        };
+      } catch (e) {
+        statusEl.textContent = '⚠️ אין גישה למצלמה — לחצו על "אפשר"';
+      }
+    }
+
+    function detectColor() {
+      if (colorDetected) return;
+      colorCtx.drawImage(video, 0, 0, 320, 240);
+      const cx = 110, cy = 70, cw = 100, ch = 100;
+      const imageData = colorCtx.getImageData(cx, cy, cw, ch);
+      const data = imageData.data;
+      let rSum = 0, gSum = 0, bSum = 0, count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        rSum += data[i]; gSum += data[i+1]; bSum += data[i+2]; count++;
+      }
+      const r = Math.round(rSum / count);
+      const g = Math.round(gSum / count);
+      const b = Math.round(bSum / count);
+      indicator.style.background = `rgb(${r},${g},${b})`;
+
+      let detected = null;
+      for (const [name, col] of Object.entries(COLORS)) {
+        if (r >= col.min[0] && r <= col.max[0] && g >= col.min[1] && g <= col.max[1] && b >= col.min[2] && b <= col.max[2]) {
+          detected = name;
+          break;
+        }
+      }
+
+      if (detected === CONFIG.acceptColor) {
+        matchCount++;
+        statusEl.textContent = `🎯 מזהה ${COLORS[detected].he}... (${matchCount}/10)`;
+        statusEl.style.color = '#4ade80';
+        if (matchCount >= 10) {
+          colorDetected = true;
+          indicator.classList.add('color-matched');
+          statusEl.textContent = `✅ ${COLORS[detected].he} — זוהה! נכנסים...`;
+          setTimeout(showGroupSelect, 1200);
+          return;
+        }
+      } else if (detected) {
+        matchCount = Math.max(0, matchCount - 1);
+        statusEl.textContent = `❌ זה ${COLORS[detected].he} — לא הצבע הנכון — נסו תחנה אחרת`;
+        statusEl.style.color = '#f87171';
+      } else {
+        matchCount = Math.max(0, matchCount - 1);
+        // Check if something colorful is visible (not just gray/dark)
+        const maxC = Math.max(r, g, b);
+        const minC = Math.min(r, g, b);
+        const saturation = maxC > 30 ? (maxC - minC) / maxC : 0;
+        if (saturation > 0.25 && maxC > 60) {
+          statusEl.textContent = '🔍 מזהה צבע... קרבו את הכרטיס למצלמה';
+          statusEl.style.color = '#fbbf24';
+        } else {
+          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          statusEl.style.color = 'rgba(255,255,255,0.7)';
+        }
+      }
+      requestAnimationFrame(detectColor);
+    }
+
+    startCamera();
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 2: Scattered Flashlight Puzzle
+    // ══════════════════════════════════════════════════════════
+    const flCanvas = document.getElementById('flashlight-canvas');
+    const flCtx = flCanvas.getContext('2d');
+    let mouseX = -200, mouseY = -200;
+    let puzzleSolved = false;
+    let puzzleStartTime = 0;
+    let timerInterval;
+    let wrongAttempts = 0;
+
+    function randomBetween(min, max) { return min + Math.random() * (max - min); }
+
+    function placeWords() {
+      const container = document.getElementById('scattered-words');
+      container.innerHTML = '';
+      const placed = [];
+      const margin = 80; // margin from edges
+      const bottomMargin = 140; // space for answer panel
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      // Real words from the verse
+      const realWords = CONFIG.hiddenVerse.split(' ');
+
+      // All words: real + decoys, shuffled
+      const allWords = [
+        ...realWords.map(w => ({ text: w, real: true })),
+        ...CONFIG.decoyWords.map(w => ({ text: w, real: false })),
+      ];
+      // Shuffle
+      for (let i = allWords.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allWords[i], allWords[j]] = [allWords[j], allWords[i]];
+      }
+
+      allWords.forEach(word => {
+        const el = document.createElement('div');
+        el.className = 'scattered-word';
+        el.textContent = word.text;
+
+        const fontSize = randomBetween(CONFIG.wordFontMin, CONFIG.wordFontMax);
+        el.style.fontSize = fontSize + 'rem';
+        el.style.color = word.real ? '#ffd700' : CONFIG.decoyColor;
+        el.style.textShadow = word.real
+          ? '0 0 15px rgba(255,215,0,0.5)'
+          : '0 0 10px rgba(139,92,246,0.4)';
+
+        if (CONFIG.wordRotation) {
+          const rotation = randomBetween(-CONFIG.maxRotation, CONFIG.maxRotation);
+          el.style.transform = `rotate(${rotation}deg)`;
+        }
+
+        // Find non-overlapping position (try up to 50 times)
+        let x, y, attempts = 0;
+        const estWidth = word.text.length * fontSize * 16;
+        const estHeight = fontSize * 24;
+        do {
+          x = randomBetween(margin, W - margin - estWidth);
+          y = randomBetween(margin + 60, H - bottomMargin - estHeight);
+          attempts++;
+        } while (attempts < 50 && placed.some(p =>
+          Math.abs(p.x - x) < Math.max(p.w, estWidth) * 0.7 &&
+          Math.abs(p.y - y) < Math.max(p.h, estHeight) * 0.9
+        ));
+
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        placed.push({ x, y, w: estWidth, h: estHeight });
+        container.appendChild(el);
+      });
+    }
+    // ══ Group Selection ══
+    let selectedGroup = null;
+    const groupGrid = document.getElementById('group-grid');
+    for (let i = 1; i <= 10; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'group-btn';
+      btn.textContent = i;
+      btn.onclick = () => selectGroup(i);
+      groupGrid.appendChild(btn);
+    }
+
+    function showGroupSelect() {
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      document.getElementById('phase-color').classList.add('hidden');
+      document.getElementById('phase-group').classList.remove('hidden');
+    }
+
+    function selectGroup(num) {
+      selectedGroup = num;
+      document.getElementById('phase-group').classList.add('hidden');
+      startPuzzle();
+    }
+
+    function saveCompletion() {
+      if (!selectedGroup) return;
+      const key = 'purim_progress';
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      if (!data[selectedGroup]) data[selectedGroup] = [];
+      if (!data[selectedGroup].includes(CONFIG.stationNumber)) {
+        data[selectedGroup].push(CONFIG.stationNumber);
+      }
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+
+
+    function startPuzzle() {
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      document.getElementById('phase-color').classList.add('hidden');
+      document.getElementById('phase-puzzle').classList.remove('hidden');
+
+      placeWords();
+
+      flCanvas.width = window.innerWidth;
+      flCanvas.height = window.innerHeight;
+
+      puzzleStartTime = Date.now();
+      timerInterval = setInterval(updateTimer, 100);
+
+      // Focus input
+      setTimeout(() => document.getElementById('answer-input').focus(), 500);
+      drawFlashlight();
+    }
+
+    function updateTimer() {
+      const elapsed = Math.floor((Date.now() - puzzleStartTime) / 1000);
+      const min = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const sec = String(elapsed % 60).padStart(2, '0');
+      document.getElementById('puzzle-timer').textContent = `⏱️ ${min}:${sec}`;
+    }
+
+    function drawFlashlight() {
+      if (puzzleSolved) return;
+      flCtx.clearRect(0, 0, flCanvas.width, flCanvas.height);
+
+      // Full darkness
+      flCtx.fillStyle = '#000';
+      flCtx.fillRect(0, 0, flCanvas.width, flCanvas.height);
+
+      const radius = CONFIG.flashlightRadius;
+
+      // Cut flashlight hole — smaller and tighter for difficulty
+      flCtx.globalCompositeOperation = 'destination-out';
+
+      // Inner bright circle
+      const innerGrad = flCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, radius * 0.5);
+      innerGrad.addColorStop(0, 'rgba(0,0,0,1)');
+      innerGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      flCtx.fillStyle = innerGrad;
+      flCtx.fillRect(mouseX - radius, mouseY - radius, radius * 2, radius * 2);
+
+      // Outer soft glow
+      const outerGrad = flCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, radius);
+      outerGrad.addColorStop(0, 'rgba(0,0,0,0.8)');
+      outerGrad.addColorStop(0.6, 'rgba(0,0,0,0.3)');
+      outerGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      flCtx.fillStyle = outerGrad;
+      flCtx.fillRect(mouseX - radius, mouseY - radius, radius * 2, radius * 2);
+
+      flCtx.globalCompositeOperation = 'source-over';
+
+      // Keep answer panel area visible
+      flCtx.clearRect(0, flCanvas.height - 80, flCanvas.width, 80);
+
+      requestAnimationFrame(drawFlashlight);
+    }
+
+    // Mouse/touch tracking
+    document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+    document.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY;
+    }, { passive: false });
+
+    window.addEventListener('resize', () => {
+      flCanvas.width = window.innerWidth;
+      flCanvas.height = window.innerHeight;
+    });
+
+    // ══ Answer checking ══
+    function normalizeHebrew(str) {
+      return str.replace(/[^א-ת ]/g, '').replace(/\s+/g, ' ').trim();
+    }
+
+    function checkAnswer() {
+      const input = document.getElementById('answer-input');
+      const userAnswer = normalizeHebrew(input.value);
+      const correctAnswer = normalizeHebrew(CONFIG.hiddenVerse);
+
+      if (userAnswer === correctAnswer) {
+        puzzleSolved = true;
+        clearInterval(timerInterval);
+        showFeedback('✅ נכון! מצאתם את הפסוק!', '#4ade80');
+        setTimeout(showSuccess, 1200);
+      } else {
+        wrongAttempts++;
+        showFeedback('❌ לא מדויק — נסו שוב!', '#f87171');
+        document.body.classList.add('screen-shake');
+        document.getElementById('red-flash').classList.add('active');
+        setTimeout(() => {
+          document.body.classList.remove('screen-shake');
+          document.getElementById('red-flash').classList.remove('active');
+        }, 500);
+
+        // Show hints based on attempts
+        if (wrongAttempts <= CONFIG.hints.length) {
+          document.getElementById('answer-hint').textContent = CONFIG.hints[wrongAttempts - 1];
+        }
+
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    function showFeedback(text, color) {
+      const fb = document.getElementById('answer-feedback');
+      fb.textContent = text;
+      fb.style.color = color;
+      fb.style.opacity = '1';
+      setTimeout(() => { fb.style.opacity = '0'; }, 2500);
+    }
+
+    document.getElementById('answer-btn').addEventListener('click', checkAnswer);
+    document.getElementById('answer-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') checkAnswer();
+    });
+
+    // Prevent cursor hiding on answer panel
+    document.querySelector('.answer-panel').addEventListener('mouseenter', () => {
+      document.getElementById('phase-puzzle').style.cursor = 'auto';
+    });
+    document.querySelector('.answer-panel').addEventListener('mouseleave', () => {
+      document.getElementById('phase-puzzle').style.cursor = 'none';
+    });
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 3: Success
+    // ══════════════════════════════════════════════════════════
+    function showSuccess() {
+      document.getElementById('phase-puzzle').classList.add('hidden');
+      document.getElementById('phase-success').classList.remove('hidden');
+      document.getElementById('clue-display').textContent = CONFIG.clueText;
+      spawnConfetti();
+    }
+
+    function spawnConfetti() {
+      const colors = ['#ffd700', '#ff3366', '#33ccff', '#33ff66', '#ff8800', '#cc33ff'];
+      for (let i = 0; i < 60; i++) {
+        setTimeout(() => {
+          const c = document.createElement('div');
+          c.className = 'confetti';
+          c.style.cssText = `left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;border-radius:${Math.random()>0.5?'50%':'2px'};--fall-dur:${2+Math.random()*3}s;--rot:${Math.random()*720}deg;--drift:${-50+Math.random()*100}px;`;
+          document.body.appendChild(c);
+          setTimeout(() => c.remove(), 5000);
+        }, i * 50);
+      }
+    }
+
+    function resetStation() {
+      colorDetected = false;
+      matchCount = 0;
+      puzzleSolved = false;
+      wrongAttempts = 0;
+      clearInterval(timerInterval);
+      mouseX = -200; mouseY = -200;
+      document.getElementById('answer-input').value = '';
+      document.getElementById('answer-hint').textContent = '';
+      document.getElementById('answer-feedback').style.opacity = '0';
+      document.getElementById('phase-success').classList.add('hidden');
+      document.getElementById('phase-puzzle').classList.add('hidden');
+      document.getElementById('phase-color').classList.remove('hidden');
+      statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+      statusEl.style.color = 'rgba(255,255,255,0.7)';
+      indicator.classList.remove('color-matched');
+      indicator.style.background = '';
+      startCamera();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎭 פורים בבית — משחקים ופעילויות לכל המשפחה!</title>
+  <meta name="description" content="משחקים, אתגרים ופעילויות פורים לילדים — חינם! זיכרון, חידון מגילה, רעשן דיגיטלי, חדרי בריחה ועוד">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --purple: #7c3aed;
+      --pink: #ec4899;
+      --gold: #fbbf24;
+      --turquoise: #2dd4bf;
+      --blue: #3b82f6;
+      --orange: #f97316;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: linear-gradient(135deg, #1e0a3c 0%, #2d1066 30%, #4c1d95 60%, #5b21b6 100%);
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ══ Animated Background ══ */
+    .bg-shapes {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .bg-shape {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.08;
+      animation: floatShape var(--dur, 20s) ease-in-out infinite;
+    }
+    @keyframes floatShape {
+      0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      25% { transform: translate(30px, -50px) rotate(90deg) scale(1.1); }
+      50% { transform: translate(-20px, 30px) rotate(180deg) scale(0.9); }
+      75% { transform: translate(40px, 20px) rotate(270deg) scale(1.05); }
+    }
+
+    /* ══ Confetti ══ */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 50;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      top: -20px;
+      width: var(--size, 10px);
+      height: var(--size, 10px);
+      background: var(--color);
+      opacity: 0.9;
+      animation: confettiFall var(--fall, 4s) linear forwards;
+      animation-delay: var(--delay, 0s);
+    }
+    .confetti-piece.circle { border-radius: 50%; }
+    .confetti-piece.star { clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+    .confetti-piece.triangle { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
+    @keyframes confettiFall {
+      0% { top: -20px; transform: rotate(0deg) translateX(0); opacity: 1; }
+      100% { top: 110vh; transform: rotate(var(--rot, 720deg)) translateX(var(--drift, 100px)); opacity: 0; }
+    }
+
+    /* ══ Stars ══ */
+    .stars {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .star {
+      position: absolute;
+      background: #ffd700;
+      border-radius: 50%;
+      animation: twinkle var(--dur) ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.2; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* ══ Header ══ */
+    .header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 40px 20px 30px;
+    }
+    .header-masks {
+      font-size: clamp(3rem, 10vw, 6rem);
+      line-height: 1;
+      margin-bottom: 10px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0) rotate(-3deg); }
+      50% { transform: translateY(-15px) rotate(3deg); }
+    }
+    .header h1 {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      background: linear-gradient(135deg, #fbbf24, #f97316, #ec4899, #fbbf24);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientShift 4s ease-in-out infinite;
+      margin-bottom: 8px;
+    }
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .header .subtitle {
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      color: rgba(255,255,255,0.8);
+      font-weight: 300;
+    }
+    .header .subtitle span {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+
+    /* ══ War Banner ══ */
+    .war-banner {
+      position: relative;
+      z-index: 10;
+      max-width: 700px;
+      margin: 0 auto 30px;
+      padding: 15px 25px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(255,255,255,0.1));
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 16px;
+      text-align: center;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.6;
+    }
+    .war-banner strong { color: #93c5fd; }
+    .war-banner .flag { font-size: 1.3rem; }
+
+    /* ══ Categories ══ */
+    .category {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 20px;
+    }
+    .category-title {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .category-title .emoji { font-size: 2rem; }
+    .category-title .line {
+      flex: 1;
+      max-width: 100px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(251,191,36,0.5), transparent);
+    }
+
+    /* ══ Games Grid ══ */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .game-card {
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 25px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, var(--card-color1, rgba(124,58,237,0.2)), var(--card-color2, rgba(236,72,153,0.2)));
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .game-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: var(--card-accent, #fbbf24);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3), 0 0 30px var(--card-glow, rgba(251,191,36,0.2));
+    }
+    .game-card:hover::before { opacity: 1; }
+    .game-card:active { transform: translateY(-4px) scale(0.98); }
+
+    .card-emoji {
+      font-size: 3.5rem;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+      display: inline-block;
+      animation: cardFloat 3s ease-in-out infinite;
+      animation-delay: var(--float-delay, 0s);
+    }
+    @keyframes cardFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .card-title {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.4rem;
+      color: #fff;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+    .card-desc {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.4;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 15px;
+    }
+    .card-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+    }
+    .badge-new { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .badge-popular { background: rgba(251,191,36,0.2); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+    .badge-fun { background: rgba(236,72,153,0.2); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
+    .badge-challenge { background: rgba(139,92,246,0.2); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+
+    .play-btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 25px;
+      background: linear-gradient(135deg, var(--card-accent, #fbbf24), var(--card-accent2, #f97316));
+      color: #1a0a3c;
+      font-family: 'Heebo', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      z-index: 1;
+      text-decoration: none;
+    }
+    .play-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    /* ══ Footer ══ */
+    .footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin-top: 40px;
+    }
+    .footer .brand {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 5px;
+    }
+    .footer .brand strong {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+    .footer .tagline {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.3);
+    }
+    .footer .share-section {
+      margin-top: 20px;
+    }
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 30px;
+      background: linear-gradient(135deg, #25d366, #128c7e);
+      color: #fff;
+      font-family: 'Heebo', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+    .share-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(37,211,102,0.3);
+    }
+
+    /* ══ Responsive ══ */
+    @media (max-width: 600px) {
+      .games-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      .game-card {
+        padding: 20px 15px;
+      }
+      .header {
+        padding: 25px 15px 20px;
+      }
+    }
+
+    /* ══ Coming Soon Overlay ══ */
+    .coming-soon {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .coming-soon .card-badge-cs {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.6);
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ Background Shapes ══ -->
+<div class="bg-shapes" id="bgShapes"></div>
+
+<!-- ══ Stars ══ -->
+<div class="stars" id="stars"></div>
+
+<!-- ══ Confetti ══ -->
+<div class="confetti-container" id="confetti"></div>
+
+<!-- ══ Header ══ -->
+<header class="header">
+  <div class="header-masks">🎭</div>
+  <h1>פורים בבית!</h1>
+  <p class="subtitle">משחקים, אתגרים ופעילויות <span>לכל המשפחה</span> — חינם!</p>
+</header>
+
+<!-- ══ Banner ══ -->
+<div class="war-banner">
+  <span class="flag">🇮🇱</span>
+  <strong>פורים תשפ״ו</strong> — גם כשנשארים בבית, חוגגים ביחד!
+  <br>שלחו לחברים, לכיתה, למשפחה — ותחגגו פורים שמח! 🎉
+</div>
+
+<!-- ══ Category: משחקים חדשים ══ -->
+<section class="category">
+  <h2 class="category-title">
+    <span class="line"></span>
+    <span class="emoji">🎮</span>
+    משחקים ואתגרים
+    <span class="emoji">🎲</span>
+    <span class="line"></span>
+  </h2>
+
+  <div class="games-grid">
+
+    <!-- Memory Game -->
+    <div class="game-card" onclick="location.href='games/memory.html'"
+         style="--card-color1: rgba(236,72,153,0.3); --card-color2: rgba(251,191,36,0.3); --card-accent: #ec4899; --card-accent2: #f472b6; --card-glow: rgba(236,72,153,0.3); --float-delay: 0s;">
+      <div class="card-emoji">🧩</div>
+      <h3 class="card-title">זיכרון פורים</h3>
+      <p class="card-desc">מצאו את הזוגות! דמויות המגילה מחכות לכם</p>
+      <span class="card-badge badge-popular">⭐ הכי פופולרי</span>
+      <br><span class="play-btn">שחקו עכשיו!</span>
+    </div>
+
+    <!-- Trivia Quiz -->
+    <div class="game-card" onclick="location.href='games/trivia.html'"
+         style="--card-color1: rgba(59,130,246,0.3); --card-color2: rgba(139,92,246,0.3); --card-accent: #3b82f6; --card-accent2: #6366f1; --card-glow: rgba(59,130,246,0.3); --float-delay: 0.3s;">
+      <div class="card-emoji">❓</div>
+      <h3 class="card-title">חידון מגילה</h3>
+      <p class="card-desc">כמה אתם באמת מכירים את מגילת אסתר? 20 שאלות!</p>
+      <span class="card-badge badge-challenge">🧠 אתגר</span>
+      <br><span class="play-btn">התחילו חידון!</span>
+    </div>
+
+    <!-- Grogger -->
+    <div class="game-card" onclick="location.href='games/grogger.html'"
+         style="--card-color1: rgba(249,115,22,0.3); --card-color2: rgba(239,68,68,0.3); --card-accent: #f97316; --card-accent2: #ef4444; --card-glow: rgba(249,115,22,0.3); --float-delay: 0.6s;">
+      <div class="card-emoji">📢</div>
+      <h3 class="card-title">רעשן דיגיטלי</h3>
+      <p class="card-desc">נערו את הטלפון או לחצו — רעשן פורים אמיתי!</p>
+      <span class="card-badge badge-fun">🎉 כיפי</span>
+      <br><span class="play-btn">רעשו!</span>
+    </div>
+
+    <!-- Mishloach Manot -->
+    <div class="game-card" onclick="location.href='games/mishloach.html'"
+         style="--card-color1: rgba(34,197,94,0.3); --card-color2: rgba(45,212,191,0.3); --card-accent: #22c55e; --card-accent2: #2dd4bf; --card-glow: rgba(34,197,94,0.3); --float-delay: 0.9s;">
+      <div class="card-emoji">🎁</div>
+      <h3 class="card-title">משלוח מנות דיגיטלי</h3>
+      <p class="card-desc">עצבו משלוח מנות ושלחו לחברים בוואטסאפ!</p>
+      <span class="card-badge badge-new">✨ חדש</span>
+      <br><span class="play-btn">צרו משלוח!</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ Category: משימת פורים ══ -->
+<section class="category">
+  <h2 class="category-title">
+    <span class="line"></span>
+    <span class="emoji">🏰</span>
+    משימת פורים — חדרי אתגר
+    <span class="emoji">🗝️</span>
+    <span class="line"></span>
+  </h2>
+
+  <div class="games-grid">
+
+    <!-- Station 1: Flashlight -->
+    <div class="game-card" onclick="location.href='games/stations/station-1-flashlight.html'"
+         style="--card-color1: rgba(251,191,36,0.3); --card-color2: rgba(249,115,22,0.3); --card-accent: #fbbf24; --card-accent2: #f97316; --card-glow: rgba(251,191,36,0.3); --float-delay: 0s;">
+      <div class="card-emoji">🔦</div>
+      <h3 class="card-title">חדר הסנפיר</h3>
+      <p class="card-desc">מצאו את המילים הנסתרות בחושך עם הפנס!</p>
+      <span class="card-badge badge-challenge">🗝️ אתגר</span>
+      <br><span class="play-btn">היכנסו לחדר!</span>
+    </div>
+
+    <!-- Station 3: Scratch -->
+    <div class="game-card" onclick="location.href='games/stations/station-3-scratch.html'"
+         style="--card-color1: rgba(139,92,246,0.3); --card-color2: rgba(236,72,153,0.3); --card-accent: #a78bfa; --card-accent2: #ec4899; --card-glow: rgba(139,92,246,0.3); --float-delay: 0.3s;">
+      <div class="card-emoji">🎫</div>
+      <h3 class="card-title">חדר הגירוד</h3>
+      <p class="card-desc">גרדו את הכרטיסים וגלו את הסוד הנסתר!</p>
+      <span class="card-badge badge-fun">🎉 כיפי</span>
+      <br><span class="play-btn">התחילו לגרד!</span>
+    </div>
+
+    <!-- Station 4: Letters -->
+    <div class="game-card" onclick="location.href='games/stations/station-4-letters.html'"
+         style="--card-color1: rgba(45,212,191,0.3); --card-color2: rgba(59,130,246,0.3); --card-accent: #2dd4bf; --card-accent2: #3b82f6; --card-glow: rgba(45,212,191,0.3); --float-delay: 0.6s;">
+      <div class="card-emoji">🔤</div>
+      <h3 class="card-title">חדר האותיות</h3>
+      <p class="card-desc">פענחו את הצופן הסודי מתוך המגילה!</p>
+      <span class="card-badge badge-challenge">🧠 אתגר</span>
+      <br><span class="play-btn">פענחו!</span>
+    </div>
+
+    <!-- Station 5: Hit Haman -->
+    <div class="game-card" onclick="location.href='games/stations/station-5-haman.html'"
+         style="--card-color1: rgba(239,68,68,0.3); --card-color2: rgba(249,115,22,0.3); --card-accent: #ef4444; --card-accent2: #f97316; --card-glow: rgba(239,68,68,0.3); --float-delay: 0.9s;">
+      <div class="card-emoji">🔨</div>
+      <h3 class="card-title">הכו בהמן!</h3>
+      <p class="card-desc">צעקו חזק והכו בהמן! משחק קול מטורף</p>
+      <span class="card-badge badge-popular">🔥 להיט</span>
+      <br><span class="play-btn">הכו!</span>
+    </div>
+
+    <!-- Station 6: Temperature -->
+    <div class="game-card" onclick="location.href='games/stations/station-6-temperature.html'"
+         style="--card-color1: rgba(59,130,246,0.3); --card-color2: rgba(239,68,68,0.3); --card-accent: #3b82f6; --card-accent2: #ef4444; --card-glow: rgba(59,130,246,0.3); --float-delay: 1.2s;">
+      <div class="card-emoji">🌡️</div>
+      <h3 class="card-title">חדר הטמפרטורה</h3>
+      <p class="card-desc">חם או קר? גלו את הפסוק הנסתר!</p>
+      <span class="card-badge badge-challenge">🗝️ אתגר</span>
+      <br><span class="play-btn">היכנסו!</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ Footer ══ -->
+<footer class="footer">
+  <div class="share-section">
+    <a class="share-btn" id="shareBtn" href="#" onclick="shareWhatsApp(event)">
+      📱 שתפו בוואטסאפ לכל הכיתה!
+    </a>
+  </div>
+  <br>
+  <p class="brand">נבנה באהבה ❤️ ע״י <strong>שמשון ג'קוב</strong></p>
+  <p class="tagline">AI בדקה 1 — כלים חכמים לכל מורה</p>
+</footer>
+
+<script>
+// ══ Stars ══
+(function() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 3 + 1;
+    star.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      top: ${Math.random() * 100}%; left: ${Math.random() * 100}%;
+      --dur: ${Math.random() * 3 + 2}s;
+      animation-delay: ${Math.random() * 3}s;
+    `;
+    container.appendChild(star);
+  }
+})();
+
+// ══ Background Shapes ══
+(function() {
+  const container = document.getElementById('bgShapes');
+  const colors = ['#7c3aed', '#ec4899', '#fbbf24', '#3b82f6', '#2dd4bf', '#f97316'];
+  for (let i = 0; i < 8; i++) {
+    const shape = document.createElement('div');
+    shape.className = 'bg-shape';
+    const size = Math.random() * 300 + 100;
+    shape.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      top: ${Math.random() * 100}%; left: ${Math.random() * 100}%;
+      background: ${colors[i % colors.length]};
+      --dur: ${Math.random() * 15 + 15}s;
+      animation-delay: ${Math.random() * 5}s;
+    `;
+    container.appendChild(shape);
+  }
+})();
+
+// ══ Initial Confetti Burst ══
+(function() {
+  const container = document.getElementById('confetti');
+  const colors = ['#fbbf24', '#ec4899', '#7c3aed', '#3b82f6', '#22c55e', '#ef4444', '#f97316', '#2dd4bf'];
+  const shapes = ['circle', 'star', 'triangle', ''];
+
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+    piece.className = `confetti-piece ${shape}`;
+    piece.style.cssText = `
+      --color: ${colors[Math.floor(Math.random() * colors.length)]};
+      --size: ${Math.random() * 12 + 5}px;
+      --fall: ${Math.random() * 3 + 3}s;
+      --delay: ${Math.random() * 2}s;
+      --rot: ${Math.random() * 1440 - 720}deg;
+      --drift: ${Math.random() * 200 - 100}px;
+      left: ${Math.random() * 100}%;
+    `;
+    container.appendChild(piece);
+  }
+
+  // Clean up confetti after animation
+  setTimeout(() => container.innerHTML = '', 7000);
+})();
+
+// ══ WhatsApp Share ══
+function shareWhatsApp(e) {
+  e.preventDefault();
+  const url = window.location.href;
+  const text = `🎭 *פורים בבית!*\n\nמשחקים, אתגרים ופעילויות פורים לכל המשפחה — חינם!\nזיכרון, חידון מגילה, רעשן דיגיטלי, חדרי אתגר ועוד!\n\n👇 היכנסו ושחקו:\n${url}\n\nפורים שמח! 🎉`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📜 מגילת הסודות — משימת פורים</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Heebo', sans-serif; background: #0a0015; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
+
+    /* ══ Stars Background ══ */
+    .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--dur) ease-in-out infinite alternate; }
+    @keyframes twinkle { from { opacity: 0.2; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+
+    /* ══ Common Layout ══ */
+    .phase { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.8s, transform 0.8s; }
+    .phase.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
+
+    .station-badge { font-size: 1rem; color: #ffd700; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); padding: 6px 20px; border-radius: 20px; margin-bottom: 15px; letter-spacing: 2px; }
+    .title { font-family: 'Frank Ruhl Libre', serif; font-size: clamp(2rem, 6vw, 3.5rem); color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.4); margin-bottom: 10px; }
+    .subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
+    .btn { font-family: 'Heebo', sans-serif; font-size: 1.2rem; padding: 14px 40px; border: 2px solid #ffd700; background: rgba(255,215,0,0.15); color: #ffd700; border-radius: 12px; cursor: pointer; transition: all 0.3s; letter-spacing: 1px; }
+    .btn:hover { background: rgba(255,215,0,0.3); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,215,0,0.3); }
+
+    /* ══ Phase 1: Color Detection ══ */
+    #phase-color { z-index: 20; }
+    .camera-container { position: relative; width: 320px; height: 240px; border-radius: 16px; overflow: hidden; border: 3px solid rgba(255,215,0,0.4); box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+    .camera-container video { width: 100%; height: 100%; object-fit: cover; }
+    .color-indicator { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin: 20px auto; transition: all 0.5s; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+    .color-status { font-size: 1.3rem; color: rgba(255,255,255,0.7); margin-top: 10px; min-height: 2em; }
+    .color-matched { animation: colorPulse 0.5s ease-out; }
+    @keyframes colorPulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+    .accept-color-label { font-size: 0.9rem; color: rgba(255,215,0,0.5); margin-top: 8px; }
+
+    /* ══ Phase 2: Scratch Puzzle ══ */
+    #phase-puzzle {
+      background: radial-gradient(ellipse at center, #1a0a00 0%, #0a0015 100%);
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .puzzle-header {
+      text-align: center;
+      margin-bottom: 18px;
+      z-index: 12;
+    }
+    .puzzle-title {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      color: #ffd700;
+      text-shadow: 0 0 20px rgba(255,215,0,0.5);
+    }
+    .puzzle-subtitle {
+      font-size: 0.95rem;
+      color: rgba(255,215,0,0.5);
+      margin-top: 5px;
+    }
+
+    .scratch-wrapper {
+      position: relative;
+      width: 80vw;
+      max-width: 720px;
+      height: 300px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(139,69,19,0.5), 0 0 80px rgba(255,215,0,0.1);
+      border: 3px solid rgba(180,140,60,0.5);
+      z-index: 12;
+    }
+
+    /* ── Revealed text underneath ── */
+    .scroll-text-layer {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #2a1a00 0%, #3d2500 40%, #2a1800 100%);
+      padding: 20px 30px;
+      text-align: center;
+    }
+    .scroll-hidden-source {
+      font-size: 0.85rem;
+      color: rgba(255,215,0,0.45);
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+    .scroll-hidden-text {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(1.3rem, 3.5vw, 2rem);
+      color: #ffd700;
+      line-height: 1.7;
+      text-shadow: 0 0 25px rgba(255,180,0,0.6), 0 2px 8px rgba(0,0,0,0.8);
+    }
+    /* Decorative lines */
+    .scroll-text-layer::before,
+    .scroll-text-layer::after {
+      content: '✦ ✦ ✦';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,215,0,0.2);
+      font-size: 1rem;
+      letter-spacing: 8px;
+    }
+    .scroll-text-layer::before { top: 12px; }
+    .scroll-text-layer::after  { bottom: 12px; }
+
+    /* ── Scratch canvas on top ── */
+    #scratch-canvas {
+      position: absolute;
+      inset: 0;
+      cursor: crosshair;
+      border-radius: 14px;
+    }
+
+    /* ── Revealed state ── */
+    .scratch-wrapper.revealed #scratch-canvas {
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      pointer-events: none;
+    }
+
+    /* ── Progress bar ── */
+    .scratch-progress-container {
+      width: 80vw;
+      max-width: 720px;
+      margin-top: 16px;
+      z-index: 12;
+    }
+    .scratch-progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,215,0,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(255,215,0,0.2);
+    }
+    .scratch-progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #8B4513, #ffd700, #DAA520);
+      border-radius: 4px;
+      transition: width 0.2s ease;
+      box-shadow: 0 0 8px rgba(255,215,0,0.4);
+    }
+    .scratch-pct-label {
+      font-size: 0.9rem;
+      color: rgba(255,215,0,0.5);
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    /* ── Hint text ── */
+    .scratch-hint {
+      margin-top: 18px;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.35);
+      animation: fadeInOut 3s ease-in-out infinite;
+      z-index: 12;
+    }
+    @keyframes fadeInOut { 0%,100% { opacity: 0.15; } 50% { opacity: 0.55; } }
+
+    /* ══ Phase 3: Success ══ */
+    #phase-success { background: radial-gradient(ellipse at center, #1a0a3e 0%, #0a0015 100%); z-index: 30; }
+    .success-icon { font-size: 5rem; animation: bounce 1s ease-in-out infinite; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    .success-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.5rem; color: #ffd700; margin: 15px 0; }
+    .clue-box { background: rgba(255,215,0,0.1); border: 2px solid rgba(255,215,0,0.4); border-radius: 16px; padding: 25px 35px; max-width: 500px; margin: 20px auto; }
+    .clue-label { font-size: 0.9rem; color: rgba(255,215,0,0.6); margin-bottom: 10px; }
+    .clue-text { font-family: 'Frank Ruhl Libre', serif; font-size: 1.5rem; color: #ffd700; line-height: 1.6; }
+    .clue-arrow { font-size: 2rem; margin-top: 15px; animation: arrowPulse 1.5s ease-in-out infinite; }
+    @keyframes arrowPulse { 0%,100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(10px); opacity: 1; } }
+
+    /* ══ Confetti ══ */
+    .confetti { position: fixed; top: -10px; width: 10px; height: 10px; z-index: 31; animation: confettiFall var(--fall-dur) linear forwards; }
+    @keyframes confettiFall { to { top: 110vh; transform: rotate(var(--rot)) translateX(var(--drift)); } }
+
+    /* ══ Reset Button ══ */
+    .reset-btn { position: fixed; bottom: 15px; left: 15px; font-size: 0.75rem; color: rgba(255,255,255,0.15); background: none; border: 1px solid rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 6px; cursor: pointer; z-index: 50; }
+    .reset-btn:hover { color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.3); }
+
+    /* ══ Glow pulse on reveal ══ */
+    @keyframes glowReveal {
+      0%   { box-shadow: 0 0 40px rgba(139,69,19,0.5), 0 0 80px rgba(255,215,0,0.1); }
+      50%  { box-shadow: 0 0 80px rgba(255,215,0,0.9), 0 0 120px rgba(255,180,0,0.5); }
+      100% { box-shadow: 0 0 60px rgba(255,215,0,0.6), 0 0 100px rgba(255,180,0,0.3); }
+    }
+    .scratch-wrapper.revealed {
+      animation: glowReveal 1s ease forwards;
+    }
+  
+    /* ══ Phase: Group Selection ══ */
+    #phase-group { z-index: 21; background: radial-gradient(ellipse at center, #1a0a3e 0%, #0a0015 100%); }
+    .group-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.5rem; color: #ffd700; margin-bottom: 10px; }
+    .group-subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
+    .group-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; max-width: 500px; }
+    .group-btn {
+      font-family: 'Heebo', sans-serif; font-size: 1.8rem; font-weight: 900;
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 3px solid rgba(255,215,0,0.4); background: rgba(255,215,0,0.1);
+      color: #ffd700; cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .group-btn:hover { background: rgba(255,215,0,0.3); transform: scale(1.15); box-shadow: 0 0 25px rgba(255,215,0,0.4); }
+  </style>
+</head>
+<body>
+  <!-- Stars Background -->
+  <div class="stars" id="stars"></div>
+
+  <!-- ═══ Phase 1: Color Detection ═══ -->
+  <div class="phase" id="phase-color">
+    <div class="station-badge">📜 תחנה 3</div>
+    <div class="title">מגילת הסודות</div>
+    <div class="subtitle">הרימו את הכרטיס הצבעוני מול המצלמה</div>
+    <div class="camera-container">
+      <video id="camera" autoplay playsinline muted></video>
+      <canvas id="color-canvas" style="display:none"></canvas>
+    </div>
+    <div class="color-indicator" id="color-indicator"></div>
+    <div class="color-status" id="color-status">ממתין למצלמה...</div>
+    <div class="accept-color-label" id="accept-label"></div>
+  </div>
+
+  <!-- ═══ Phase 2: Scratch Puzzle ═══ -->
+  
+  <!-- ═══ Phase: Group Selection ═══ -->
+  <div class="phase hidden" id="phase-group">
+    <div class="group-title">👥 מי אתם?</div>
+    <div class="group-subtitle">בחרו את מספר הקבוצה שלכם</div>
+    <div class="group-grid" id="group-grid"></div>
+  </div>
+
+  <div class="phase hidden" id="phase-puzzle">
+    <div class="puzzle-header">
+      <div class="puzzle-title">📜 גלו את פסוק המגילה</div>
+      <div class="puzzle-subtitle">גרדו את הקלף כדי לחשוף את הסוד</div>
+    </div>
+
+    <div class="scratch-wrapper" id="scratch-wrapper">
+      <!-- Layer 1: hidden text underneath -->
+      <div class="scroll-text-layer">
+        <div class="scroll-hidden-source" id="hidden-source"></div>
+        <div class="scroll-hidden-text" id="hidden-text"></div>
+      </div>
+      <!-- Layer 2: scratch canvas on top -->
+      <canvas id="scratch-canvas"></canvas>
+    </div>
+
+    <div class="scratch-progress-container">
+      <div class="scratch-progress-bar-bg">
+        <div class="scratch-progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="scratch-pct-label" id="pct-label">🪙 גרדו כדי לחשוף...</div>
+    </div>
+
+    <div class="scratch-hint">🪙 לחצו וגררו על הקלף לגרד</div>
+  </div>
+
+  <!-- ═══ Phase 3: Success ═══ -->
+  <div class="phase hidden" id="phase-success">
+    <div class="success-icon">📜</div>
+    <div class="success-title">המגילה נחשפה!</div>
+    <div class="clue-box">
+      <div class="clue-label">📍 הרמז למיקום הכרטיס הבא:</div>
+      <div class="clue-text" id="clue-display"></div>
+    </div>
+    <div class="clue-arrow">⬇️</div>
+    <button class="btn" onclick="resetStation()" style="margin-top:20px; font-size:1rem; padding:10px 30px;">🔄 קבוצה הבאה</button>
+  </div>
+
+  <button class="reset-btn" onclick="resetStation()">איפוס</button>
+
+  <script>
+    // ══════════════════════════════════════════════════════════
+    // ✏️ הגדרות — ערכו כאן את הטקסטים!
+    // ══════════════════════════════════════════════════════════
+    const CONFIG = {
+      stationNumber: 3,
+      stationName: 'מגילת הסודות',
+      acceptColor: 'green',
+      hiddenText: 'ונהפוך הוא — אשר ישלטו היהודים המה בשונאיהם',
+      textSource: 'אסתר ט:א',
+      clueText: '״ויושט המלך לאסתר את שרביט הזהב״ — צהוב כזהב תמצאוהו, במקום שבו יושבים בחצר, אך מתחת ולא מעל',
+      scratchThreshold: 45,
+    };
+
+    // ══ Color definitions ══
+    const COLORS = {
+      red:    { he: 'אדום 🔴',   min: [150, 0,   0],   max: [255, 100, 100], bg: '#ff3333' },
+      blue:   { he: 'תכלת 🔵',   min: [0,   0,   140], max: [100, 100, 255], bg: '#3366ff' },
+      green:  { he: 'ירוק 🟢',   min: [0,   120, 0],   max: [100, 255, 100], bg: '#33cc33' },
+      yellow: { he: 'צהוב 🟡',   min: [180, 180, 0],   max: [255, 255, 100], bg: '#ffcc00' },
+      orange: { he: 'כתום 🟠',   min: [200, 100, 0],   max: [255, 180, 80],  bg: '#ff8800' },
+      purple: { he: 'סגול 🟣',   min: [100, 0,   120], max: [200, 80,  255], bg: '#9933ff' },
+    };
+
+    // ══ Stars ══
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 80; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 3 + 1;
+      s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${1+Math.random()*3}s;animation-delay:${Math.random()*3}s;`;
+      starsEl.appendChild(s);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 1: Color Detection  (identical to station-1)
+    // ══════════════════════════════════════════════════════════
+    const video       = document.getElementById('camera');
+    const colorCanvas = document.getElementById('color-canvas');
+    const colorCtx    = colorCanvas.getContext('2d', { willReadFrequently: true });
+    const indicator   = document.getElementById('color-indicator');
+    const statusEl    = document.getElementById('color-status');
+    const acceptLabel = document.getElementById('accept-label');
+
+    acceptLabel.textContent = `תחנה ${CONFIG.stationNumber}`;
+    let colorDetected = false;
+    let matchCount = 0;
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: 320, height: 240 } });
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+          colorCanvas.width  = 320;
+          colorCanvas.height = 240;
+          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          detectColor();
+        };
+      } catch (e) {
+        statusEl.textContent = '⚠️ אין גישה למצלמה — לחצו על "אפשר"';
+      }
+    }
+
+    function detectColor() {
+      if (colorDetected) return;
+      colorCtx.drawImage(video, 0, 0, 320, 240);
+      const cx = 110, cy = 70, cw = 100, ch = 100;
+      const imageData = colorCtx.getImageData(cx, cy, cw, ch);
+      const data = imageData.data;
+      let rSum = 0, gSum = 0, bSum = 0, count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        rSum += data[i]; gSum += data[i+1]; bSum += data[i+2]; count++;
+      }
+      const r = Math.round(rSum / count);
+      const g = Math.round(gSum / count);
+      const b = Math.round(bSum / count);
+      indicator.style.background = `rgb(${r},${g},${b})`;
+
+      let detected = null;
+      for (const [name, col] of Object.entries(COLORS)) {
+        if (r >= col.min[0] && r <= col.max[0] &&
+            g >= col.min[1] && g <= col.max[1] &&
+            b >= col.min[2] && b <= col.max[2]) {
+          detected = name; break;
+        }
+      }
+
+      if (detected === CONFIG.acceptColor) {
+        matchCount++;
+        statusEl.textContent = `🎯 מזהה ${COLORS[detected].he}... (${matchCount}/10)`;
+        statusEl.style.color = '#4ade80';
+        if (matchCount >= 10) {
+          colorDetected = true;
+          indicator.classList.add('color-matched');
+          statusEl.textContent = `✅ ${COLORS[detected].he} — זוהה! נכנסים...`;
+          setTimeout(showGroupSelect, 1200);
+          return;
+        }
+      } else if (detected) {
+        matchCount = Math.max(0, matchCount - 1);
+        statusEl.textContent = `❌ זה ${COLORS[detected].he} — לא הצבע הנכון — נסו תחנה אחרת`;
+        statusEl.style.color = '#f87171';
+      } else {
+        matchCount = Math.max(0, matchCount - 1);
+        // Check if something colorful is visible (not just gray/dark)
+        const maxC = Math.max(r, g, b);
+        const minC = Math.min(r, g, b);
+        const saturation = maxC > 30 ? (maxC - minC) / maxC : 0;
+        if (saturation > 0.25 && maxC > 60) {
+          statusEl.textContent = '🔍 מזהה צבע... קרבו את הכרטיס למצלמה';
+          statusEl.style.color = '#fbbf24';
+        } else {
+          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          statusEl.style.color = 'rgba(255,255,255,0.7)';
+        }
+      }
+      requestAnimationFrame(detectColor);
+    }
+
+    startCamera();
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 2: Scratch Card Puzzle
+    // ══════════════════════════════════════════════════════════
+    const scratchCanvas  = document.getElementById('scratch-canvas');
+    const scratchCtx     = scratchCanvas.getContext('2d');
+    const scratchWrapper = document.getElementById('scratch-wrapper');
+    const progressFill   = document.getElementById('progress-fill');
+    const pctLabel       = document.getElementById('pct-label');
+
+    let isScratching  = false;
+    let puzzleSolved  = false;
+    let audioCtx      = null;
+    let lastX = 0, lastY = 0;
+
+    // ── Web Audio scratch sound ──
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playScratchSound() {
+      if (!audioCtx) return;
+      try {
+        const bufferSize = audioCtx.sampleRate * 0.04; // 40ms noise burst
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data   = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * 0.25;
+        }
+        const source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+
+        // Band-pass filter to make it sound like scratching
+        const filter = audioCtx.createBiquadFilter();
+        filter.type      = 'bandpass';
+        filter.frequency.value = 3000;
+        filter.Q.value   = 0.8;
+
+        // Quick gain envelope
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(0.6, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+
+        source.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        source.start();
+        source.stop(audioCtx.currentTime + 0.05);
+      } catch (e) { /* audio not critical */ }
+    }
+
+    // ── Draw the parchment overlay ──
+    function drawScrollOverlay() {
+      const w = scratchCanvas.width;
+      const h = scratchCanvas.height;
+      const ctx = scratchCtx;
+
+      // Base parchment gradient — warm browns / golds
+      const bg = ctx.createLinearGradient(0, 0, w, h);
+      bg.addColorStop(0.00, '#5c3317');
+      bg.addColorStop(0.15, '#7a4a1e');
+      bg.addColorStop(0.35, '#8B6914');
+      bg.addColorStop(0.50, '#a07830');
+      bg.addColorStop(0.65, '#8B6914');
+      bg.addColorStop(0.85, '#7a4a1e');
+      bg.addColorStop(1.00, '#5c3317');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      // Grain texture — tiny random specks
+      for (let i = 0; i < 2200; i++) {
+        const x  = Math.random() * w;
+        const y  = Math.random() * h;
+        const sz = Math.random() * 2.5;
+        const alpha = 0.05 + Math.random() * 0.18;
+        ctx.fillStyle = `rgba(${Math.random() > 0.5 ? 200 : 40},${Math.random() > 0.5 ? 160 : 30},0,${alpha})`;
+        ctx.fillRect(x, y, sz, sz);
+      }
+
+      // Radial vignette — darker edges
+      const vignette = ctx.createRadialGradient(w/2, h/2, h * 0.2, w/2, h/2, h * 0.8);
+      vignette.addColorStop(0,   'rgba(0,0,0,0)');
+      vignette.addColorStop(0.7, 'rgba(0,0,0,0.1)');
+      vignette.addColorStop(1,   'rgba(0,0,0,0.5)');
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, w, h);
+
+      // Horizontal aged lines
+      ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+      ctx.lineWidth = 1;
+      for (let y = 20; y < h; y += 18 + Math.random() * 8) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + (Math.random() - 0.5) * 2);
+        ctx.lineTo(w, y + (Math.random() - 0.5) * 2);
+        ctx.stroke();
+      }
+
+      // Top & bottom decorative border bands
+      const topBand = ctx.createLinearGradient(0, 0, 0, 30);
+      topBand.addColorStop(0,   'rgba(0,0,0,0.4)');
+      topBand.addColorStop(1,   'rgba(0,0,0,0)');
+      ctx.fillStyle = topBand;
+      ctx.fillRect(0, 0, w, 30);
+
+      const botBand = ctx.createLinearGradient(0, h - 30, 0, h);
+      botBand.addColorStop(0,   'rgba(0,0,0,0)');
+      botBand.addColorStop(1,   'rgba(0,0,0,0.4)');
+      ctx.fillStyle = botBand;
+      ctx.fillRect(0, h - 30, w, 30);
+
+      // Central instruction text
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Icon
+      ctx.font = 'bold 42px serif';
+      ctx.fillStyle = 'rgba(255,220,120,0.85)';
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur  = 6;
+      ctx.fillText('🪙', w / 2, h / 2 - 38);
+
+      // Main instruction
+      ctx.font = 'bold 22px "Frank Ruhl Libre", serif';
+      ctx.fillStyle = 'rgba(255,230,140,0.9)';
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur  = 8;
+      ctx.fillText('גרדו כאן לחשוף את מגילת אסתר', w / 2, h / 2 + 8);
+
+      // Decorative sub-line
+      ctx.font = '14px "Heebo", sans-serif';
+      ctx.fillStyle = 'rgba(255,215,0,0.5)';
+      ctx.shadowBlur = 4;
+      ctx.fillText('✦  ✦  ✦', w / 2, h / 2 + 40);
+
+      ctx.restore();
+    }
+
+    // ── Scratch at a point ──
+    function scratch(x, y) {
+      if (puzzleSolved) return;
+      scratchCtx.globalCompositeOperation = 'destination-out';
+      scratchCtx.beginPath();
+      scratchCtx.arc(x, y, 28, 0, Math.PI * 2);
+      scratchCtx.fill();
+
+      // Draw line from last point for smooth stroke
+      scratchCtx.lineWidth  = 56;
+      scratchCtx.lineCap    = 'round';
+      scratchCtx.lineJoin   = 'round';
+      scratchCtx.beginPath();
+      scratchCtx.moveTo(lastX, lastY);
+      scratchCtx.lineTo(x, y);
+      scratchCtx.stroke();
+
+      scratchCtx.globalCompositeOperation = 'source-over';
+      lastX = x; lastY = y;
+    }
+
+    // ── Calculate % of canvas scratched ──
+    function calcScratchedPercent() {
+      const imgData = scratchCtx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height);
+      const pixels  = imgData.data;
+      let transparent = 0;
+      // Sample every 4th pixel for performance
+      const step = 4 * 4;
+      let total  = 0;
+      for (let i = 3; i < pixels.length; i += step) {
+        if (pixels[i] < 128) transparent++;
+        total++;
+      }
+      return Math.round((transparent / total) * 100);
+    }
+
+    // ── Update progress UI ──
+    let lastSoundTime = 0;
+    function onScratch(x, y) {
+      scratch(x, y);
+
+      // Throttle sound to ~30fps feel
+      const now = Date.now();
+      if (now - lastSoundTime > 33) {
+        playScratchSound();
+        lastSoundTime = now;
+      }
+
+      const pct = calcScratchedPercent();
+      progressFill.style.width = Math.min(pct, 100) + '%';
+      pctLabel.textContent = pct < CONFIG.scratchThreshold
+        ? `🪙 ${pct}% — המשיכו לגרד!`
+        : `🎉 ${pct}% — מעולה!`;
+
+      if (pct >= CONFIG.scratchThreshold && !puzzleSolved) {
+        puzzleSolved = true;
+        revealScroll();
+      }
+    }
+
+    // ── Full reveal animation ──
+    function revealScroll() {
+      // Fade out the scratch canvas completely
+      scratchWrapper.classList.add('revealed');
+      pctLabel.textContent = '✨ המגילה נחשפה!';
+      setTimeout(showSuccess, 1600);
+    }
+
+    // ── Canvas coordinate helper ──
+    function getCanvasXY(e, touch) {
+      const rect = scratchCanvas.getBoundingClientRect();
+      const scaleX = scratchCanvas.width  / rect.width;
+      const scaleY = scratchCanvas.height / rect.height;
+      if (touch) {
+        return [
+          (touch.clientX - rect.left) * scaleX,
+          (touch.clientY - rect.top)  * scaleY,
+        ];
+      }
+      return [
+        (e.clientX - rect.left) * scaleX,
+        (e.clientY - rect.top)  * scaleY,
+      ];
+    }
+
+    // ── Mouse events ──
+    scratchCanvas.addEventListener('mousedown', (e) => {
+      initAudio();
+      isScratching = true;
+      const [x, y] = getCanvasXY(e, null);
+      lastX = x; lastY = y;
+      onScratch(x, y);
+    });
+    scratchCanvas.addEventListener('mousemove', (e) => {
+      if (!isScratching) return;
+      const [x, y] = getCanvasXY(e, null);
+      onScratch(x, y);
+    });
+    scratchCanvas.addEventListener('mouseup',   () => { isScratching = false; });
+    scratchCanvas.addEventListener('mouseleave',() => { isScratching = false; });
+
+    // ── Touch events ──
+    scratchCanvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      initAudio();
+      isScratching = true;
+      const [x, y] = getCanvasXY(null, e.touches[0]);
+      lastX = x; lastY = y;
+      onScratch(x, y);
+    }, { passive: false });
+    scratchCanvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!isScratching) return;
+      const [x, y] = getCanvasXY(null, e.touches[0]);
+      onScratch(x, y);
+    }, { passive: false });
+    scratchCanvas.addEventListener('touchend', () => { isScratching = false; });
+
+    // ══════════════════════════════════════════════════════════
+    // startPuzzle — called after color detected
+    // ══════════════════════════════════════════════════════════
+    // ══ Group Selection ══
+    let selectedGroup = null;
+    const groupGrid = document.getElementById('group-grid');
+    for (let i = 1; i <= 10; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'group-btn';
+      btn.textContent = i;
+      btn.onclick = () => selectGroup(i);
+      groupGrid.appendChild(btn);
+    }
+
+    function showGroupSelect() {
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      document.getElementById('phase-color').classList.add('hidden');
+      document.getElementById('phase-group').classList.remove('hidden');
+    }
+
+    function selectGroup(num) {
+      selectedGroup = num;
+      document.getElementById('phase-group').classList.add('hidden');
+      startPuzzle();
+    }
+
+    function saveCompletion() {
+      if (!selectedGroup) return;
+      const key = 'purim_progress';
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      if (!data[selectedGroup]) data[selectedGroup] = [];
+      if (!data[selectedGroup].includes(CONFIG.stationNumber)) {
+        data[selectedGroup].push(CONFIG.stationNumber);
+      }
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+
+    function startPuzzle() {
+      // Stop camera
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      document.getElementById('phase-color').classList.add('hidden');
+      document.getElementById('phase-puzzle').classList.remove('hidden');
+
+      // Populate text
+      document.getElementById('hidden-text').textContent   = CONFIG.hiddenText;
+      document.getElementById('hidden-source').textContent = `📜 ${CONFIG.textSource}`;
+
+      // Size canvas to wrapper
+      const rect = scratchWrapper.getBoundingClientRect();
+      scratchCanvas.width  = rect.width  || scratchWrapper.offsetWidth;
+      scratchCanvas.height = rect.height || scratchWrapper.offsetHeight;
+
+      drawScrollOverlay();
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // Phase 3: Success
+    // ══════════════════════════════════════════════════════════
+    function showSuccess() {
+      document.getElementById('phase-puzzle').classList.add('hidden');
+      document.getElementById('phase-success').classList.remove('hidden');
+      document.getElementById('clue-display').textContent = CONFIG.clueText;
+      spawnConfetti();
+    }
+
+    function spawnConfetti() {
+      const colors = ['#ffd700', '#ff3366', '#33ccff', '#33ff66', '#ff8800', '#cc33ff', '#DAA520', '#8B4513'];
+      for (let i = 0; i < 70; i++) {
+        setTimeout(() => {
+          const c = document.createElement('div');
+          c.className = 'confetti';
+          c.style.cssText = `left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*9}px;height:${6+Math.random()*9}px;border-radius:${Math.random()>0.5?'50%':'2px'};--fall-dur:${2+Math.random()*3}s;--rot:${Math.random()*720}deg;--drift:${-60+Math.random()*120}px;`;
+          document.body.appendChild(c);
+          setTimeout(() => c.remove(), 5500);
+        }, i * 45);
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // Reset
+    // ══════════════════════════════════════════════════════════
+    function resetStation() {
+      colorDetected = false;
+      matchCount    = 0;
+      puzzleSolved  = false;
+      isScratching  = false;
+
+      scratchWrapper.classList.remove('revealed');
+      scratchCtx.clearRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+      progressFill.style.width = '0%';
+      pctLabel.textContent = '🪙 גרדו כדי לחשוף...';
+
+      document.getElementById('phase-success').classList.add('hidden');
+      document.getElementById('phase-puzzle').classList.add('hidden');
+      document.getElementById('phase-color').classList.remove('hidden');
+
+      statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+      statusEl.style.color  = 'rgba(255,255,255,0.7)';
+      indicator.classList.remove('color-matched');
+      indicator.style.background = '';
+      startCamera();
+    }
+  </script>
+</body>
+</html>

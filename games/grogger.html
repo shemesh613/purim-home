@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📢 רעשן דיגיטלי — פורים!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📢</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700;900&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: linear-gradient(135deg, #1e0a3c, #7c2d12);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .back-link {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      font-size: 0.9rem;
+      z-index: 100;
+      background: rgba(0,0,0,0.3);
+      padding: 6px 14px;
+      border-radius: 8px;
+    }
+    .back-link:hover { color: #fbbf24; }
+
+    h1 {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(2rem, 6vw, 3rem);
+      color: #fbbf24;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    .instruction {
+      color: rgba(255,255,255,0.6);
+      font-size: 1rem;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .grogger-area {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 30px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .grogger-emoji {
+      font-size: 10rem;
+      line-height: 1;
+      display: block;
+      text-align: center;
+      transition: transform 0.1s;
+      filter: drop-shadow(0 0 30px rgba(251,191,36,0.5));
+    }
+    .grogger-emoji.shaking {
+      animation: groggerShake 0.15s ease-in-out;
+    }
+    @keyframes groggerShake {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(25deg); }
+      50% { transform: rotate(-25deg); }
+      75% { transform: rotate(15deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .counter {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #fbbf24;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    .counter-label {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .sound-options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+    .sound-btn {
+      font-family: 'Heebo', sans-serif;
+      padding: 8px 18px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+    .sound-btn:hover, .sound-btn.active {
+      border-color: #fbbf24;
+      background: rgba(251,191,36,0.2);
+      color: #fbbf24;
+    }
+
+    .tap-hint {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+
+    /* Ripple effect */
+    .ripple {
+      position: fixed;
+      border-radius: 50%;
+      border: 3px solid #fbbf24;
+      opacity: 0;
+      pointer-events: none;
+      animation: rippleOut 0.6s ease-out forwards;
+    }
+    @keyframes rippleOut {
+      0% { width: 0; height: 0; opacity: 0.8; }
+      100% { width: 300px; height: 300px; opacity: 0; margin-top: -150px; margin-left: -150px; }
+    }
+
+    /* Screen flash */
+    .flash {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    .flash.active {
+      opacity: 1;
+      animation: flashAnim 0.15s ease-out;
+    }
+    @keyframes flashAnim {
+      0% { opacity: 0.4; }
+      100% { opacity: 0; }
+    }
+
+    .enable-motion-btn {
+      font-family: 'Heebo', sans-serif;
+      padding: 10px 25px;
+      border: 2px solid #22c55e;
+      background: rgba(34,197,94,0.2);
+      color: #22c55e;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+      display: none;
+    }
+    .enable-motion-btn:hover { background: rgba(34,197,94,0.4); }
+  </style>
+</head>
+<body>
+
+<a href="../index.html" class="back-link">→ חזרה לתפריט</a>
+
+<h1>📢 רעשן פורים!</h1>
+<p class="instruction">לחצו על הרעשן או נערו את הטלפון!</p>
+
+<button class="enable-motion-btn" id="enableMotion" onclick="requestMotion()">📱 הפעילו זיהוי ניעור</button>
+
+<div class="grogger-area" id="groggerArea">
+  <span class="grogger-emoji" id="groggerEmoji">📢</span>
+</div>
+
+<div class="counter" id="counter">0</div>
+<div class="counter-label">פעמים רעשנו!</div>
+
+<div class="sound-options">
+  <button class="sound-btn active" data-sound="classic" onclick="selectSound(this, 'classic')">🔔 קלאסי</button>
+  <button class="sound-btn" data-sound="crazy" onclick="selectSound(this, 'crazy')">🤪 מטורף</button>
+  <button class="sound-btn" data-sound="electronic" onclick="selectSound(this, 'electronic')">🎛️ אלקטרוני</button>
+  <button class="sound-btn" data-sound="drum" onclick="selectSound(this, 'drum')">🥁 תוף</button>
+</div>
+
+<div class="tap-hint">💡 טיפ: נערו את הטלפון לחוויה הכי כיפית!</div>
+
+<div class="flash" id="flash"></div>
+
+<script>
+let count = 0;
+let currentSound = 'classic';
+let audioCtx = null;
+let lastShakeTime = 0;
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
+
+// Sound generators
+const sounds = {
+  classic(ctx) {
+    const now = ctx.currentTime;
+    // Metallic rattle sound
+    for (let i = 0; i < 5; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(800 + Math.random() * 2000, now + i * 0.03);
+      gain.gain.setValueAtTime(0.08, now + i * 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.03 + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + i * 0.03);
+      osc.stop(now + i * 0.03 + 0.08);
+    }
+  },
+  crazy(ctx) {
+    const now = ctx.currentTime;
+    for (let i = 0; i < 8; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200 + Math.random() * 3000, now + i * 0.02);
+      osc.frequency.exponentialRampToValueAtTime(100 + Math.random() * 1000, now + i * 0.02 + 0.06);
+      gain.gain.setValueAtTime(0.06, now + i * 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.02 + 0.06);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + i * 0.02);
+      osc.stop(now + i * 0.02 + 0.06);
+    }
+  },
+  electronic(ctx) {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, now);
+    osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.15);
+  },
+  drum(ctx) {
+    const now = ctx.currentTime;
+    // Kick
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150, now);
+    osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.15);
+
+    // Noise burst (hi-hat)
+    const bufferSize = ctx.sampleRate * 0.05;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    const noise = ctx.createBufferSource();
+    const noiseGain = ctx.createGain();
+    noise.buffer = buffer;
+    noiseGain.gain.setValueAtTime(0.1, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    noise.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noise.start(now);
+  }
+};
+
+function playSound() {
+  const ctx = getAudioCtx();
+  sounds[currentSound](ctx);
+}
+
+function selectSound(btn, sound) {
+  currentSound = sound;
+  document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  shake(); // Demo the sound
+}
+
+function shake() {
+  count++;
+  document.getElementById('counter').textContent = count;
+
+  // Animate grogger
+  const emoji = document.getElementById('groggerEmoji');
+  emoji.classList.remove('shaking');
+  void emoji.offsetWidth; // Reflow
+  emoji.classList.add('shaking');
+
+  // Flash
+  const flash = document.getElementById('flash');
+  const colors = ['rgba(251,191,36,0.3)', 'rgba(236,72,153,0.3)', 'rgba(124,58,237,0.3)', 'rgba(249,115,22,0.3)'];
+  flash.style.background = colors[Math.floor(Math.random() * colors.length)];
+  flash.classList.remove('active');
+  void flash.offsetWidth;
+  flash.classList.add('active');
+
+  // Ripple at center
+  const ripple = document.createElement('div');
+  ripple.className = 'ripple';
+  ripple.style.left = '50%';
+  ripple.style.top = '50%';
+  document.body.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+
+  // Play sound
+  playSound();
+}
+
+// Click/tap to shake
+document.getElementById('groggerArea').addEventListener('click', shake);
+document.getElementById('groggerArea').addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  shake();
+}, { passive: false });
+
+// Device motion (shake detection)
+let shakeThreshold = 25;
+
+function handleMotion(event) {
+  const acc = event.acceleration || event.accelerationIncludingGravity;
+  if (!acc) return;
+
+  const magnitude = Math.sqrt(
+    (acc.x || 0) ** 2 +
+    (acc.y || 0) ** 2 +
+    (acc.z || 0) ** 2
+  );
+
+  // For accelerationIncludingGravity, subtract gravity
+  const adjusted = event.acceleration ? magnitude : Math.abs(magnitude - 9.8);
+
+  if (adjusted > shakeThreshold) {
+    const now = Date.now();
+    if (now - lastShakeTime > 300) {
+      lastShakeTime = now;
+      shake();
+    }
+  }
+}
+
+// Request motion permission (iOS)
+async function requestMotion() {
+  if (typeof DeviceMotionEvent !== 'undefined' &&
+      typeof DeviceMotionEvent.requestPermission === 'function') {
+    try {
+      const perm = await DeviceMotionEvent.requestPermission();
+      if (perm === 'granted') {
+        window.addEventListener('devicemotion', handleMotion);
+        document.getElementById('enableMotion').style.display = 'none';
+      }
+    } catch (e) {
+      console.log('Motion permission denied');
+    }
+  }
+}
+
+// Auto-enable on Android / check iOS
+if (typeof DeviceMotionEvent !== 'undefined') {
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    // iOS — show button
+    document.getElementById('enableMotion').style.display = 'block';
+  } else {
+    // Android — auto-enable
+    window.addEventListener('devicemotion', handleMotion);
+  }
+}
+
+// Keyboard support (spacebar)
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    shake();
+  }
+});
+</script>
+
+</body>
+</html>
