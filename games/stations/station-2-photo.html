@@ -24,17 +24,7 @@
     .btn { font-family: 'Heebo', sans-serif; font-size: 1.2rem; padding: 14px 40px; border: 2px solid #ffd700; background: rgba(255,215,0,0.15); color: #ffd700; border-radius: 12px; cursor: pointer; transition: all 0.3s; letter-spacing: 1px; }
     .btn:hover { background: rgba(255,215,0,0.3); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,215,0,0.3); }
 
-    /* ══ Phase 1: Color Detection ══ */
-    #phase-color { z-index: 20; }
-    .camera-container { position: relative; width: 320px; height: 240px; border-radius: 16px; overflow: hidden; border: 3px solid rgba(255,215,0,0.4); box-shadow: 0 0 30px rgba(139,92,246,0.3); }
-    .camera-container video { width: 100%; height: 100%; object-fit: cover; }
-    .color-indicator { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin: 20px auto; transition: all 0.5s; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
-    .color-status { font-size: 1.3rem; color: rgba(255,255,255,0.7); margin-top: 10px; min-height: 2em; }
-    .color-matched { animation: colorPulse 0.5s ease-out; }
-    @keyframes colorPulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-    .accept-color-label { font-size: 0.9rem; color: rgba(255,215,0,0.5); margin-top: 8px; }
-
-    /* ══ Phase 2: Photo Booth ══ */
+    /* ══ Photo Booth ══ */
     #phase-puzzle {
       background: radial-gradient(ellipse at center, #1a0030 0%, #0a0015 100%);
       z-index: 20;
@@ -266,33 +256,20 @@
   <!-- Flash Effect -->
   <div class="flash-overlay" id="flash-overlay"></div>
 
-  <!-- ═══ Phase 1: Color Detection ═══ -->
-  <div class="phase" id="phase-color">
-    <div class="station-badge">📸 תחנה 2</div>
-    <div class="title">חדר הצילום המלכותי</div>
-    <div class="subtitle">צבעו דף לבן בצבע המתאים והרימו למצלמה</div>
-    <div class="camera-container">
-      <video id="camera-color" autoplay playsinline muted></video>
-      <canvas id="color-canvas" style="display:none"></canvas>
-    </div>
-    <div class="color-indicator" id="color-indicator"></div>
-    <div class="color-status" id="color-status">ממתין למצלמה...</div>
-    <div class="accept-color-label" id="accept-label"></div>
-  </div>
-
-  <!-- ═══ Phase 2: Photo Booth ═══ -->
-  
-  <!-- ═══ Phase: Group Selection ═══ -->
-  <div class="phase hidden" id="phase-group">
-    <div class="group-title" id="group-phase-title">👥 מי אתם?</div>
-    <div class="group-subtitle" id="group-phase-sub">בחרו את מספר הקבוצה שלכם</div>
-    <div class="group-grid" id="group-grid"></div>
+  <!-- ═══ Phase: Group Selection (shown first) ═══ -->
+  <div class="phase" id="phase-group">
+    <div class="group-title">👋 מה השם שלך?</div>
+    <div class="group-subtitle">כתבו את השם ותתחילו!</div>
+    <input id="nameInput" type="text" placeholder="השם שלי..." style="font-family:'Heebo',sans-serif; font-size:1.5rem; padding:14px 24px; border:3px solid rgba(255,215,0,0.4); border-radius:14px; background:rgba(255,255,255,0.1); color:#ffd700; text-align:center; width:280px; outline:none;" onkeydown="if(event.key==='Enter')submitName()">
+    <br>
+    <button class="btn" onclick="submitName()" style="margin-top:15px;">🚀 יאללה!</button>
+    <div id="groupInfo" style="margin-top:12px; font-size:1rem; color:rgba(255,215,0,0.6);"></div>
   </div>
 
   <div class="phase hidden" id="phase-puzzle">
     <!-- Live camera view (shown before capture) -->
     <div class="photo-booth-wrapper" id="live-view">
-      <div class="station-badge">📸 תחנה 2</div>
+      <div class="station-badge">📸 תחנה 6</div>
       <div class="title" style="font-size:clamp(1.5rem,4vw,2.5rem);">חדר הצילום המלכותי</div>
       <div class="royal-divider">✦ ✦ ✦</div>
 
@@ -308,7 +285,7 @@
 
     <!-- Result view (shown after capture) -->
     <div class="result-container" id="result-view">
-      <div class="station-badge">📸 תחנה 2</div>
+      <div class="station-badge">📸 תחנה 6</div>
       <div style="font-family:'Frank Ruhl Libre',serif; font-size:1.4rem; color:#ffd700; text-align:center;">הצילום המלכותי שלכם ✨</div>
 
       <div class="result-photo-wrapper" id="photo-wrapper">
@@ -351,20 +328,9 @@
     if (ROOM) { const bl = document.getElementById('back-link'); if (bl) bl.href = 'index.html?room=' + encodeURIComponent(ROOM); }
 
     const CONFIG = {
-      stationNumber: 2,
+      stationNumber: 6,
       stationName: 'חדר הצילום המלכותי',
-      acceptColor: 'blue',
       clueText: '״ויכתוב מרדכי את הדברים האלה״ — חפשו ליד המקום שבו כותבים הודעות לכל העם. ירוק כגן הביתן ימתין לכם שם',
-    };
-
-    // ══ Color definitions ══
-    const COLORS = {
-      red:    { he: 'אדום 🔴', min: [150, 0, 0],   max: [255, 100, 100], bg: '#ff3333' },
-      blue:   { he: 'כחול 🔵', min: [0, 0, 140],   max: [100, 100, 255], bg: '#3366ff' },
-      green:  { he: 'ירוק 🟢', min: [0, 120, 0],   max: [100, 255, 100], bg: '#33cc33' },
-      yellow: { he: 'צהוב 🟡', min: [180, 180, 0], max: [255, 255, 100], bg: '#ffcc00' },
-      orange: { he: 'כתום 🟠', min: [200, 100, 0], max: [255, 180, 80],  bg: '#ff8800' },
-      purple: { he: 'סגול בהיר 🟣', min: [80, 30, 100], max: [230, 180, 255], bg: '#b366ff' },
     };
 
     // ══ Stars ══
@@ -377,92 +343,8 @@
       starsEl.appendChild(s);
     }
 
-    // ══════════════════════════════════════════════════════════
-    // Phase 1: Color Detection
-    // ══════════════════════════════════════════════════════════
-    const videoColor   = document.getElementById('camera-color');
-    const colorCanvas  = document.getElementById('color-canvas');
-    const colorCtx     = colorCanvas.getContext('2d', { willReadFrequently: true });
-    const indicator    = document.getElementById('color-indicator');
-    const statusEl     = document.getElementById('color-status');
-    const acceptLabel  = document.getElementById('accept-label');
-
-    acceptLabel.textContent = `תחנה ${CONFIG.stationNumber}`;
-    let colorDetected = false;
-    let matchCount    = 0;
-
-    async function startCameraColor() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: 320, height: 240 } });
-        videoColor.srcObject = stream;
-        videoColor.onloadedmetadata = () => {
-          colorCanvas.width  = 320;
-          colorCanvas.height = 240;
-          statusEl.textContent = '🎨 צבעו דף לבן בצבע הנכון והרימו למצלמה';
-          detectColor();
-        };
-      } catch (e) {
-        statusEl.textContent = '⚠️ אין גישה למצלמה — לחצו על "אפשר"';
-      }
-    }
-
-    function detectColor() {
-      if (colorDetected) return;
-      colorCtx.drawImage(videoColor, 0, 0, 320, 240);
-      const cx = 110, cy = 70, cw = 100, ch = 100;
-      const imageData = colorCtx.getImageData(cx, cy, cw, ch);
-      const data = imageData.data;
-      let rSum = 0, gSum = 0, bSum = 0, count = 0;
-      for (let i = 0; i < data.length; i += 4) {
-        rSum += data[i]; gSum += data[i+1]; bSum += data[i+2]; count++;
-      }
-      const r = Math.round(rSum / count);
-      const g = Math.round(gSum / count);
-      const b = Math.round(bSum / count);
-      indicator.style.background = `rgb(${r},${g},${b})`;
-
-      let detected = null;
-      for (const [name, col] of Object.entries(COLORS)) {
-        if (r >= col.min[0] && r <= col.max[0] && g >= col.min[1] && g <= col.max[1] && b >= col.min[2] && b <= col.max[2]) {
-          detected = name; break;
-        }
-      }
-
-      if (detected === CONFIG.acceptColor) {
-        matchCount++;
-        statusEl.textContent = `🎯 מזהה ${COLORS[detected].he}... (${matchCount}/10)`;
-        statusEl.style.color = '#4ade80';
-        if (matchCount >= 10) {
-          colorDetected = true;
-          indicator.classList.add('color-matched');
-          statusEl.textContent = `✅ ${COLORS[detected].he} — זוהה! נכנסים לחדר הצילום...`;
-          // Stop color-detection camera
-          if (videoColor.srcObject) videoColor.srcObject.getTracks().forEach(t => t.stop());
-          setTimeout(showGroupSelect, 1200);
-          return;
-        }
-      } else if (detected) {
-        matchCount = Math.max(0, matchCount - 1);
-        statusEl.textContent = `❌ זה ${COLORS[detected].he} — לא הצבע הנכון — נסו תחנה אחרת`;
-        statusEl.style.color = '#f87171';
-      } else {
-        matchCount = Math.max(0, matchCount - 1);
-        // Check if something colorful is visible (not just gray/dark)
-        const maxC = Math.max(r, g, b);
-        const minC = Math.min(r, g, b);
-        const saturation = maxC > 30 ? (maxC - minC) / maxC : 0;
-        if (saturation > 0.25 && maxC > 60) {
-          statusEl.textContent = '🔍 מזהה צבע... קרבו את הדף הצבוע למצלמה';
-          statusEl.style.color = '#fbbf24';
-        } else {
-          statusEl.textContent = '🎨 צבעו דף לבן בצבע הנכון והרימו למצלמה';
-          statusEl.style.color = 'rgba(255,255,255,0.7)';
-        }
-      }
-      requestAnimationFrame(detectColor);
-    }
-
-    startCameraColor();
+    // Color detection phase removed — station starts directly with name input
+    setTimeout(() => document.getElementById('nameInput').focus(), 300);
 
     // ══════════════════════════════════════════════════════════
     // Phase 2: Photo Booth
@@ -486,41 +368,17 @@
     // ══ Group & Member Selection ══
     let selectedGroup = null;
     let selectedMember = null;
-    const groupGrid = document.getElementById('group-grid');
     const settings = JSON.parse(localStorage.getItem(K + 'purim_settings') || '{"numGroups":10,"groupSize":4}');
 
-    for (let i = 1; i <= settings.numGroups; i++) {
-      const btn = document.createElement('button');
-      btn.className = 'group-btn';
-      btn.textContent = i;
-      btn.onclick = () => selectGroup(i);
-      groupGrid.appendChild(btn);
-    }
-
-    function showGroupSelect() {
-      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
-      document.getElementById('phase-color').classList.add('hidden');
-      document.getElementById('phase-group').classList.remove('hidden');
-    }
-
-    function selectGroup(num) {
-      selectedGroup = num;
-      document.getElementById('group-phase-title').textContent = `👤 קבוצה ${num} — מי אתה?`;
-      document.getElementById('group-phase-sub').textContent = 'בחרו את מספר השחקן שלכם';
-      groupGrid.innerHTML = '';
-      for (let m = 1; m <= settings.groupSize; m++) {
-        const btn = document.createElement('button');
-        btn.className = 'group-btn';
-        btn.textContent = m;
-        btn.onclick = () => selectMember(m);
-        groupGrid.appendChild(btn);
-      }
-    }
-
-    function selectMember(num) {
-      selectedMember = num;
-      document.getElementById('phase-group').classList.add('hidden');
-      startPhotoBooth();
+    function submitName() {
+      const name = document.getElementById('nameInput').value.trim();
+      if (!name) { alert('כתבו את השם שלכם!'); return; }
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) { hash = ((hash << 5) - hash) + name.charCodeAt(i); hash |= 0; }
+      selectedGroup = (Math.abs(hash) % settings.numGroups) + 1;
+      selectedMember = name;
+      document.getElementById('groupInfo').textContent = `קבוצה ${selectedGroup} — בהצלחה ${name}! 🎯`;
+      setTimeout(() => { document.getElementById('phase-group').classList.add('hidden'); startPhotoBooth(); }, 800);
     }
 
     function saveCompletion() {
@@ -549,7 +407,6 @@
 
 
     async function startPhotoBooth() {
-      document.getElementById('phase-color').classList.add('hidden');
       document.getElementById('phase-puzzle').classList.remove('hidden');
       puzzleStartTime = Date.now();
 
@@ -861,13 +718,12 @@
 
       // Stop any streams
       if (videoPhoto.srcObject) videoPhoto.srcObject.getTracks().forEach(t => t.stop());
-      if (videoColor.srcObject) videoColor.srcObject.getTracks().forEach(t => t.stop());
       photoStream = null;
 
       // Reset state
-      colorDetected = false;
-      matchCount    = 0;
       photoCaptured = false;
+      selectedGroup = null;
+      selectedMember = null;
 
       // Reset UI
       resultView.classList.remove('show');
@@ -878,20 +734,18 @@
       shootBtn.style.opacity = '1';
       countdownEl.classList.remove('active');
       countdownEl.innerHTML = '';
-      indicator.classList.remove('color-matched');
-      indicator.style.background = '';
-      statusEl.textContent = '🎨 צבעו דף לבן בצבע הנכון והרימו למצלמה';
-      statusEl.style.color  = 'rgba(255,255,255,0.7)';
+      document.getElementById('nameInput').value = '';
+      document.getElementById('groupInfo').textContent = '';
 
-      // Show phase 1
+      // Show name input phase
       document.getElementById('phase-success').classList.add('hidden');
       document.getElementById('phase-puzzle').classList.add('hidden');
-      document.getElementById('phase-color').classList.remove('hidden');
+      document.getElementById('phase-group').classList.remove('hidden');
 
       // Clear sparkles
       photoWrapper.querySelectorAll('.sparkle').forEach(s => s.remove());
 
-      startCameraColor();
+      setTimeout(() => document.getElementById('nameInput').focus(), 300);
     }
   </script>
 </body>

@@ -198,8 +198,8 @@
 </div>
 <div class="setup-bar" id="setupBar" style="display:none;">
   <label>⚙️ הגדרת מורה:</label>
-  <label>קבוצות <input type="number" id="numGroups" min="1" max="20" value="10"></label>
-  <label>משתתפים בקבוצה <input type="number" id="groupSize" min="1" max="15" value="4"></label>
+  <label>תלמידים <input type="number" id="numStudents" min="1" max="100" value="30"></label>
+  <label>בקבוצה <input type="number" id="groupSize" min="2" max="15" value="5"></label>
   <button class="save-btn" onclick="saveSettings()">💾 שמור</button>
   <button class="reset-data-btn" onclick="resetAllData()">🗑️ אפס נתונים</button>
 </div>
@@ -315,14 +315,14 @@
   }
 
   const STATIONS = [
-    { id: 3, emoji: '🎫', name: 'גירוד' },
-    { id: 5, emoji: '🔨', name: 'המן' },
-    { id: 4, emoji: '🔤', name: 'אותיות' },
-    { id: 1, emoji: '🔦', name: 'סנפיר' },
-    { id: 6, emoji: '🌡️', name: 'טמפרטורה' },
-    { id: 2, emoji: '📸', name: 'צילום' },
+    { id: 1, emoji: '🎫', name: 'גירוד' },
+    { id: 2, emoji: '🔨', name: 'המן' },
+    { id: 3, emoji: '🔤', name: 'אותיות' },
+    { id: 4, emoji: '🔦', name: 'סנפיר' },
+    { id: 5, emoji: '🌡️', name: 'טמפרטורה' },
+    { id: 6, emoji: '📸', name: 'צילום' },
   ];
-  const STATION_ORDER = [3, 5, 4, 1, 6, 2]; // unlock order (easy → hard)
+  const STATION_ORDER = [1, 2, 3, 4, 5, 6];
 
   // ══ Teacher Auth ══
   const TEACHER_PASS = '1234';
@@ -341,23 +341,28 @@
 
   // ══ Settings ══
   function getSettings() {
-    return JSON.parse(localStorage.getItem(K + 'purim_settings') || '{"numGroups":10,"groupSize":4}');
+    const s = JSON.parse(localStorage.getItem(K + 'purim_settings') || '{}');
+    const numStudents = s.numStudents || 30;
+    const groupSize = s.groupSize || 5;
+    const numGroups = Math.ceil(numStudents / groupSize);
+    return { numStudents, groupSize, numGroups };
   }
 
   function loadSettings() {
     const s = getSettings();
-    document.getElementById('numGroups').value = s.numGroups;
+    document.getElementById('numStudents').value = s.numStudents;
     document.getElementById('groupSize').value = s.groupSize;
   }
 
   function saveSettings() {
-    const numGroups = Math.max(1, Math.min(20, parseInt(document.getElementById('numGroups').value) || 10));
-    const groupSize = Math.max(1, Math.min(15, parseInt(document.getElementById('groupSize').value) || 4));
-    localStorage.setItem(K + 'purim_settings', JSON.stringify({ numGroups, groupSize }));
-    document.getElementById('numGroups').value = numGroups;
+    const numStudents = Math.max(1, Math.min(100, parseInt(document.getElementById('numStudents').value) || 30));
+    const groupSize = Math.max(2, Math.min(15, parseInt(document.getElementById('groupSize').value) || 5));
+    const numGroups = Math.ceil(numStudents / groupSize);
+    localStorage.setItem(K + 'purim_settings', JSON.stringify({ numStudents, groupSize, numGroups }));
+    document.getElementById('numStudents').value = numStudents;
     document.getElementById('groupSize').value = groupSize;
     renderProgress();
-    alert('✅ ההגדרות נשמרו!');
+    alert(`✅ נשמר! ${numStudents} תלמידים → ${numGroups} קבוצות (${groupSize} בכל קבוצה)`);
   }
 
   function resetAllData() {
@@ -374,14 +379,16 @@
     document.getElementById('progressSection').classList.toggle('expanded');
   }
 
-  function getGroupCompletion(groupData, stationId, groupSize) {
-    if (!groupData || typeof groupData !== 'object') return { done: 0, total: groupSize, pct: 0 };
+  function getGroupCompletion(groupData, stationId) {
+    if (!groupData || typeof groupData !== 'object') return { done: 0, total: 0, pct: 0 };
+    const members = Object.keys(groupData);
     let done = 0;
-    for (let m = 1; m <= groupSize; m++) {
-      const memberStations = groupData[String(m)] || [];
+    members.forEach(m => {
+      const memberStations = groupData[m] || [];
       if (memberStations.includes(stationId)) done++;
-    }
-    return { done, total: groupSize, pct: groupSize > 0 ? (done / groupSize * 100) : 0 };
+    });
+    const total = members.length || 1;
+    return { done, total, pct: (done / total * 100) };
   }
 
   function renderProgress() {
@@ -413,7 +420,7 @@
       const gData = data[g] || {};
       html += `<tr><td class="group-header" onclick="toggleGroupDetail('group-${g}')">👥 קבוצה ${g} ▾</td>`;
       STATIONS.forEach(st => {
-        const comp = getGroupCompletion(gData, st.id, s.groupSize);
+        const comp = getGroupCompletion(gData, st.id);
         const pctClass = comp.pct >= 80 ? 'pct-green' : comp.pct >= 40 ? 'pct-yellow' : 'pct-red';
         const icon = comp.pct >= 80 ? '✅' : `${comp.done}/${comp.total}`;
         html += `<td class="pct-cell ${pctClass}">${icon}</td>`;
@@ -421,11 +428,10 @@
       });
       html += '</tr>';
 
-      for (let m = 1; m <= s.groupSize; m++) {
-        const memberStations = gData[String(m)] || [];
-        html += `<tr class="member-row group-${g}" style="display:none"><td>  שחקן ${m}</td>`;
+      for (const [memberName, memberStations] of Object.entries(gData)) {
+        html += `<tr class="member-row group-${g}" style="display:none"><td>  ${memberName}</td>`;
         STATIONS.forEach(st => {
-          html += `<td>${memberStations.includes(st.id) ? '✅' : '⬜'}</td>`;
+          html += `<td>${(memberStations || []).includes(st.id) ? '✅' : '⬜'}</td>`;
         });
         html += '</tr>';
       }

@@ -210,7 +210,7 @@
 
   <!-- ═══ Phase 1: Color Detection ═══ -->
   <div class="phase" id="phase-color">
-    <div class="station-badge">🌡️ תחנה 6</div>
+    <div class="station-badge">🌡️ תחנה 5</div>
     <div class="title">חדר הטמפרטורה</div>
     <div class="subtitle">צבעו דף לבן בצבע המתאים והרימו למצלמה</div>
     <div class="camera-container">
@@ -226,9 +226,12 @@
   
   <!-- ═══ Phase: Group Selection ═══ -->
   <div class="phase hidden" id="phase-group">
-    <div class="group-title" id="group-phase-title">👥 מי אתם?</div>
-    <div class="group-subtitle" id="group-phase-sub">בחרו את מספר הקבוצה שלכם</div>
-    <div class="group-grid" id="group-grid"></div>
+    <div class="group-title">👋 מה השם שלך?</div>
+    <div class="group-subtitle">כתבו את השם ותתחילו!</div>
+    <input id="nameInput" type="text" placeholder="השם שלי..." style="font-family:'Heebo',sans-serif; font-size:1.5rem; padding:14px 24px; border:3px solid rgba(255,215,0,0.4); border-radius:14px; background:rgba(255,255,255,0.1); color:#ffd700; text-align:center; width:280px; outline:none;" onkeydown="if(event.key==='Enter')submitName()">
+    <br>
+    <button class="btn" onclick="submitName()" style="margin-top:15px;">🚀 יאללה!</button>
+    <div id="groupInfo" style="margin-top:12px; font-size:1rem; color:rgba(255,215,0,0.6);"></div>
   </div>
 
   <div class="phase hidden" id="phase-puzzle">
@@ -298,7 +301,7 @@
     if (ROOM) { const bl = document.getElementById('back-link'); if (bl) bl.href = 'index.html?room=' + encodeURIComponent(ROOM); }
 
     const CONFIG = {
-      stationNumber: 6,
+      stationNumber: 5,
       stationName: 'חדר הטמפרטורה',
       acceptColor: 'orange',
       hiddenText: 'ליהודים היתה אורה ושמחה וששון ויקר',
@@ -430,41 +433,24 @@
     // ══ Group & Member Selection ══
     let selectedGroup = null;
     let selectedMember = null;
-    const groupGrid = document.getElementById('group-grid');
     const settings = JSON.parse(localStorage.getItem(K + 'purim_settings') || '{"numGroups":10,"groupSize":4}');
-
-    for (let i = 1; i <= settings.numGroups; i++) {
-      const btn = document.createElement('button');
-      btn.className = 'group-btn';
-      btn.textContent = i;
-      btn.onclick = () => selectGroup(i);
-      groupGrid.appendChild(btn);
-    }
 
     function showGroupSelect() {
       if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
       document.getElementById('phase-color').classList.add('hidden');
       document.getElementById('phase-group').classList.remove('hidden');
+      setTimeout(() => document.getElementById('nameInput').focus(), 300);
     }
 
-    function selectGroup(num) {
-      selectedGroup = num;
-      document.getElementById('group-phase-title').textContent = `👤 קבוצה ${num} — מי אתה?`;
-      document.getElementById('group-phase-sub').textContent = 'בחרו את מספר השחקן שלכם';
-      groupGrid.innerHTML = '';
-      for (let m = 1; m <= settings.groupSize; m++) {
-        const btn = document.createElement('button');
-        btn.className = 'group-btn';
-        btn.textContent = m;
-        btn.onclick = () => selectMember(m);
-        groupGrid.appendChild(btn);
-      }
-    }
-
-    function selectMember(num) {
-      selectedMember = num;
-      document.getElementById('phase-group').classList.add('hidden');
-      startPuzzle();
+    function submitName() {
+      const name = document.getElementById('nameInput').value.trim();
+      if (!name) { alert('כתבו את השם שלכם!'); return; }
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) { hash = ((hash << 5) - hash) + name.charCodeAt(i); hash |= 0; }
+      selectedGroup = (Math.abs(hash) % settings.numGroups) + 1;
+      selectedMember = name;
+      document.getElementById('groupInfo').textContent = `קבוצה ${selectedGroup} — בהצלחה ${name}! 🎯`;
+      setTimeout(() => { document.getElementById('phase-group').classList.add('hidden'); startPuzzle(); }, 800);
     }
 
     function saveCompletion() {
