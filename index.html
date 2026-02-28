@@ -10,6 +10,21 @@
     @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700;900&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    /* ══ Accessibility ══ */
+    :focus-visible {
+      outline: 3px solid #fbbf24;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    .skip-link {
+      position: absolute; top: -40px; left: 0;
+      background: #7c3aed; color: #fff;
+      padding: 8px 16px; z-index: 999;
+      font-size: 0.9rem; text-decoration: none;
+      border-radius: 0 0 8px 0;
+    }
+    .skip-link:focus { top: 0; }
+
     body {
       font-family: 'Heebo', sans-serif;
       background: linear-gradient(180deg, #fef9ef 0%, #fff7ed 30%, #fdf4ff 60%, #f0f9ff 100%);
@@ -430,8 +445,9 @@
 </head>
 <body>
 
-<img src="logo.jpeg" alt="לוגו" class="corner-logo" onclick="switchTab('main')">
-<div class="confetti-bg" id="confettiBg"></div>
+<a href="#main-content" class="skip-link">דלג לתוכן הראשי</a>
+<img src="logo.jpeg" alt="לוגו שמשון ג'יקוב — AI בדקה 1" class="corner-logo" onclick="switchTab('main')">
+<div class="confetti-bg" id="confettiBg" aria-hidden="true"></div>
 
 <!-- ══ Header ══ -->
 <header class="header">
@@ -443,13 +459,14 @@
 </header>
 
 <!-- ══ Tabs ══ -->
-<nav class="tabs" id="tabsNav">
-  <button class="tab-btn active" data-tab="main">🏠 ראשי</button>
-  <button class="tab-btn" data-tab="games">🎮 משחקים</button>
-  <button class="tab-btn" data-tab="videos">🎬 סרטונים</button>
+<nav class="tabs" id="tabsNav" role="tablist" aria-label="תפריט ראשי">
+  <button class="tab-btn active" data-tab="main" role="tab" aria-selected="true">🏠 ראשי</button>
+  <button class="tab-btn" data-tab="games" role="tab" aria-selected="false">🎮 משחקים</button>
+  <button class="tab-btn" data-tab="videos" role="tab" aria-selected="false">🎬 סרטונים</button>
 </nav>
 
 <!-- ══ Tab: Main ══ -->
+<main id="main-content">
 <div class="tab-content active" id="tab-main">
 
   <!-- Featured Games -->
@@ -623,6 +640,7 @@
   </div>
 </div>
 
+</main>
 <!-- ══ Footer ══ -->
 <footer class="footer">
   <a class="share-btn" href="#" onclick="shareWA(event)">
@@ -638,17 +656,15 @@
 document.getElementById('tabsNav').addEventListener('click', function(e) {
   const btn = e.target.closest('.tab-btn');
   if (!btn) return;
-  const tabId = btn.dataset.tab;
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + tabId).classList.add('active');
-  btn.classList.add('active');
+  switchTab(btn.dataset.tab);
 });
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
   document.getElementById('tab-' + id).classList.add('active');
-  document.querySelector(`.tab-btn[data-tab="${id}"]`).classList.add('active');
+  const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`);
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected','true');
 }
 
 // ══ Continuous Confetti ══
