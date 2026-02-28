@@ -390,8 +390,8 @@
 
     // Schedule word flashes
     // answerCols: which column indices are currently showing answer letters
-    let nextSingleFlash = 150;    // frame when next single golden letter appears
-    let nextWordFlash   = 300;    // frame when full word appears
+    let nextSingleFlash = 60;     // frame when next single golden letter appears
+    let nextWordFlash   = 120;    // frame when full word appears
     const FONT_SIZE = 22;
 
     function drawMatrix() {
@@ -401,31 +401,32 @@
       const W = matrixCanvas.width;
       const H = matrixCanvas.height;
 
-      // Dim previous frame (trail effect)
-      mCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      // Dim previous frame (trail effect) — faster fade so golden pops
+      mCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
       mCtx.fillRect(0, 0, W, H);
 
       // ── Single golden letter flash ──
       if (frameCount >= nextSingleFlash) {
         const letter = ANSWER[Math.floor(Math.random() * ANSWER.length)];
         const colIdx = Math.floor(Math.random() * columns.length);
-        columns[colIdx].goldenState = { letter, brightness: 1.0, size: 1.6 };
-        columns[colIdx].goldenTimer = 60; // frames to show it
-        nextSingleFlash = frameCount + 130 + Math.floor(Math.random() * 60);
+        columns[colIdx].goldenState = { letter, brightness: 1.0, size: 2.2 };
+        columns[colIdx].goldenTimer = 120; // show longer
+        nextSingleFlash = frameCount + 50 + Math.floor(Math.random() * 40);
       }
 
       // ── Full word flash across adjacent columns ──
       if (frameCount >= nextWordFlash) {
-        // Pick a start column so the whole word fits
-        const startCol = Math.floor(Math.random() * Math.max(1, columns.length - ANSWER.length));
+        // Pick a start column so the whole word fits — center it
+        const startCol = Math.floor((columns.length - ANSWER.length) / 2) + Math.floor(Math.random() * 5 - 2);
+        const safeStart = Math.max(0, Math.min(startCol, columns.length - ANSWER.length));
         for (let i = 0; i < ANSWER.length; i++) {
-          const c = columns[startCol + i];
+          const c = columns[safeStart + i];
           if (c) {
-            c.goldenState = { letter: ANSWER[i], brightness: 1.0, size: 1.9 };
-            c.goldenTimer = 90;
+            c.goldenState = { letter: ANSWER[i], brightness: 1.0, size: 2.8 };
+            c.goldenTimer = 150; // show much longer
           }
         }
-        nextWordFlash = frameCount + 280 + Math.floor(Math.random() * 80);
+        nextWordFlash = frameCount + 120 + Math.floor(Math.random() * 50);
       }
 
       // ── Draw each column ──
@@ -480,10 +481,10 @@
           mCtx.save();
           mCtx.font = `bold ${fontSize}px monospace`;
 
-          // Outer glow
+          // Outer glow — extra bright
           mCtx.shadowColor = '#ffd700';
-          mCtx.shadowBlur = 18 + pulse * 10;
-          mCtx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+          mCtx.shadowBlur = 30 + pulse * 20;
+          mCtx.fillStyle = `rgba(255, 215, 0, ${Math.min(1, alpha * 1.3)})`;
 
           // Center the larger glyph in the column
           const offset = (fontSize - FONT_SIZE) / 2;
@@ -543,8 +544,8 @@
 
       initMatrix();
       frameCount = 0;
-      nextSingleFlash = 150;
-      nextWordFlash   = 300;
+      nextSingleFlash = 60;
+      nextWordFlash   = 120;
       drawMatrix();
 
       // Focus input
