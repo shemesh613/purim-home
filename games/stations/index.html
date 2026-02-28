@@ -181,6 +181,17 @@
 <h1>🏰 משימת פורים</h1>
 <p class="subtitle">חדרי אתגר מהמגילה — לשחק בבית!</p>
 
+<!-- ══ Room Gate ══ -->
+<div id="roomGate" style="max-width:400px; margin:40px auto; text-align:center; background:#fff; padding:30px; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+  <div style="font-size:3rem; margin-bottom:10px;">🎫</div>
+  <h2 style="font-family:'Frank Ruhl Libre',serif; color:#4c1d95; margin-bottom:15px;">הכניסו קוד חדר</h2>
+  <input id="roomInput" type="text" placeholder="לדוגמה: 101" style="font-family:'Heebo',sans-serif; font-size:1.5rem; padding:12px 20px; border:3px solid #c084fc; border-radius:14px; text-align:center; width:200px; color:#4c1d95; font-weight:900;" onkeydown="if(event.key==='Enter')enterRoom()">
+  <br>
+  <button onclick="enterRoom()" style="font-family:'Heebo',sans-serif; margin-top:12px; padding:12px 40px; background:linear-gradient(135deg,#7c3aed,#ec4899); color:#fff; border:none; border-radius:14px; font-size:1.1rem; font-weight:700; cursor:pointer;">🚀 כנסו!</button>
+</div>
+
+<div id="mainContent" style="display:none;">
+
 <!-- ══ Teacher Setup ══ -->
 <div style="max-width:700px; margin:0 auto 10px; text-align:center;">
   <button onclick="teacherLogin()" style="font-family:'Heebo',sans-serif; font-size:0.85rem; padding:6px 18px; background:rgba(124,58,237,0.08); border:1px solid rgba(124,58,237,0.25); color:#7c3aed; border-radius:10px; cursor:pointer;">🔐 כניסת מורה</button>
@@ -280,7 +291,29 @@
   <div class="progress-body" id="progressBody"></div>
 </div>
 
+</div><!-- end mainContent -->
+
 <script>
+  // ══ Room Code System ══
+  const ROOM = new URLSearchParams(window.location.search).get('room') || '';
+  const K = ROOM ? ROOM + '_' : ''; // localStorage key prefix
+
+  function enterRoom() {
+    const code = document.getElementById('roomInput').value.trim();
+    if (!code) { alert('הכניסו קוד חדר'); return; }
+    window.location.href = '?room=' + encodeURIComponent(code);
+  }
+
+  if (ROOM) {
+    document.getElementById('roomGate').style.display = 'none';
+    document.getElementById('mainContent').style.display = '';
+    document.querySelector('.subtitle').textContent = `חדר: ${ROOM}`;
+    // Update station links with room param
+    document.querySelectorAll('.room-card').forEach(a => {
+      a.href = a.href.split('?')[0] + '?room=' + encodeURIComponent(ROOM);
+    });
+  }
+
   const STATIONS = [
     { id: 3, emoji: '🎫', name: 'גירוד' },
     { id: 5, emoji: '🔨', name: 'המן' },
@@ -308,7 +341,7 @@
 
   // ══ Settings ══
   function getSettings() {
-    return JSON.parse(localStorage.getItem('purim_settings') || '{"numGroups":10,"groupSize":4}');
+    return JSON.parse(localStorage.getItem(K + 'purim_settings') || '{"numGroups":10,"groupSize":4}');
   }
 
   function loadSettings() {
@@ -320,7 +353,7 @@
   function saveSettings() {
     const numGroups = Math.max(1, Math.min(20, parseInt(document.getElementById('numGroups').value) || 10));
     const groupSize = Math.max(1, Math.min(15, parseInt(document.getElementById('groupSize').value) || 4));
-    localStorage.setItem('purim_settings', JSON.stringify({ numGroups, groupSize }));
+    localStorage.setItem(K + 'purim_settings', JSON.stringify({ numGroups, groupSize }));
     document.getElementById('numGroups').value = numGroups;
     document.getElementById('groupSize').value = groupSize;
     renderProgress();
@@ -329,8 +362,8 @@
 
   function resetAllData() {
     if (confirm('⚠️ למחוק את כל נתוני ההתקדמות והניקוד?')) {
-      localStorage.removeItem('purim_progress');
-      localStorage.removeItem('purim_scores');
+      localStorage.removeItem(K + 'purim_progress');
+      localStorage.removeItem(K + 'purim_scores');
       renderProgress();
       renderLeaderboard();
     }
@@ -342,7 +375,6 @@
   }
 
   function getGroupCompletion(groupData, stationId, groupSize) {
-    // groupData = { "1": [stationIds], "2": [stationIds], ... } (member → completed stations)
     if (!groupData || typeof groupData !== 'object') return { done: 0, total: groupSize, pct: 0 };
     let done = 0;
     for (let m = 1; m <= groupSize; m++) {
@@ -353,7 +385,7 @@
   }
 
   function renderProgress() {
-    const data = JSON.parse(localStorage.getItem('purim_progress') || '{}');
+    const data = JSON.parse(localStorage.getItem(K + 'purim_progress') || '{}');
     const s = getSettings();
     const body = document.getElementById('progressBody');
 
@@ -379,7 +411,6 @@
 
     activeGroups.forEach(g => {
       const gData = data[g] || {};
-      // Group summary row
       html += `<tr><td class="group-header" onclick="toggleGroupDetail('group-${g}')">👥 קבוצה ${g} ▾</td>`;
       STATIONS.forEach(st => {
         const comp = getGroupCompletion(gData, st.id, s.groupSize);
@@ -390,7 +421,6 @@
       });
       html += '</tr>';
 
-      // Member detail rows (hidden by default)
       for (let m = 1; m <= s.groupSize; m++) {
         const memberStations = gData[String(m)] || [];
         html += `<tr class="member-row group-${g}" style="display:none"><td>  שחקן ${m}</td>`;
@@ -417,29 +447,20 @@
   function updateRoomLocks(data, settings) {
     const cards = document.querySelectorAll('.room-card[data-station]');
     cards.forEach((card, idx) => {
-      const stationId = parseInt(card.dataset.station);
       card.classList.remove('locked');
       const existingLock = card.querySelector('.room-lock');
       if (existingLock) existingLock.remove();
       const existingProg = card.querySelector('.room-progress');
       if (existingProg) existingProg.remove();
-
-      // First station always unlocked
       if (idx === 0) return;
-
-      // Check if ANY group has 80%+ on the previous station
-      const prevStationId = STATION_ORDER[idx - 1];
-      // For simplicity: room is accessible if at least one group can enter
-      // The actual gate is per-group, shown as info text
     });
   }
 
   // ══ Leaderboard ══
   function renderLeaderboard() {
-    const scores = JSON.parse(localStorage.getItem('purim_scores') || '{}');
+    const scores = JSON.parse(localStorage.getItem(K + 'purim_scores') || '{}');
     const content = document.getElementById('leaderboard-content');
 
-    // Build array of {group, total}
     const entries = [];
     for (const [g, stationScores] of Object.entries(scores)) {
       let total = 0;
@@ -464,12 +485,12 @@
     `).join('');
   }
 
-  loadSettings();
-  renderProgress();
-  renderLeaderboard();
-
-  // Auto-refresh every 3 seconds
-  setInterval(() => { renderProgress(); renderLeaderboard(); }, 3000);
+  if (ROOM) {
+    loadSettings();
+    renderProgress();
+    renderLeaderboard();
+    setInterval(() => { renderProgress(); renderLeaderboard(); }, 3000);
+  }
 </script>
 </body>
 </html>

@@ -271,7 +271,7 @@
     </div>
     <div class="clue-arrow">⬇️</div>
     <div style="display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; justify-content:center;">
-      <a href="index.html" class="btn" style="font-size:1rem; padding:10px 30px; text-decoration:none;">🏠 חזרה לחדרים</a>
+      <a id="back-link" href="index.html" class="btn" style="font-size:1rem; padding:10px 30px; text-decoration:none;">🏠 חזרה לחדרים</a>
     </div>
   </div>
 
@@ -281,6 +281,10 @@
     // ══════════════════════════════════════════════════════════
     // ✏️ הגדרות — ערכו כאן את הטקסטים!
     // ══════════════════════════════════════════════════════════
+    const ROOM = new URLSearchParams(window.location.search).get('room') || '';
+    const K = ROOM ? ROOM + '_' : '';
+    if (ROOM) { const bl = document.getElementById('back-link'); if (bl) bl.href = 'index.html?room=' + encodeURIComponent(ROOM); }
+
     const CONFIG = {
       stationNumber: 3,
       stationName: 'מגילת הסודות',
@@ -663,7 +667,7 @@
     let selectedGroup = null;
     let selectedMember = null;
     const groupGrid = document.getElementById('group-grid');
-    const settings = JSON.parse(localStorage.getItem('purim_settings') || '{"numGroups":10,"groupSize":4}');
+    const settings = JSON.parse(localStorage.getItem(K + 'purim_settings') || '{"numGroups":10,"groupSize":4}');
 
     for (let i = 1; i <= settings.numGroups; i++) {
       const btn = document.createElement('button');
@@ -701,7 +705,7 @@
 
     function saveCompletion() {
       if (!selectedGroup || !selectedMember) return;
-      const key = 'purim_progress';
+      const key = K + 'purim_progress';
       const data = JSON.parse(localStorage.getItem(key) || '{}');
       if (!data[selectedGroup]) data[selectedGroup] = {};
       if (!data[selectedGroup][selectedMember]) data[selectedGroup][selectedMember] = [];
@@ -715,11 +719,11 @@
       if (!selectedGroup) return;
       const elapsed = Math.floor((Date.now() - puzzleStartTime) / 1000);
       const score = Math.max(100 - elapsed, 10);
-      const scores = JSON.parse(localStorage.getItem('purim_scores') || '{}');
+      const scores = JSON.parse(localStorage.getItem(K + 'purim_scores') || '{}');
       const g = String(selectedGroup);
       if (!scores[g]) scores[g] = {};
       scores[g][CONFIG.stationNumber] = Math.max(scores[g][CONFIG.stationNumber] || 0, score);
-      localStorage.setItem('purim_scores', JSON.stringify(scores));
+      localStorage.setItem(K + 'purim_scores', JSON.stringify(scores));
     }
 
     function startPuzzle() {
