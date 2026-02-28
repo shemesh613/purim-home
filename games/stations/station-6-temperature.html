@@ -435,7 +435,7 @@
     let selectedMember = null;
     const settings = JSON.parse(localStorage.getItem(K + 'purim_settings') || '{}');
     if (!settings.numGroups) settings.numGroups = Math.ceil((settings.numStudents || 30) / (settings.groupSize || 5));
-    if (ROOM) { fetch(`https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim/${encodeURIComponent(ROOM)}/settings.json`).then(r=>r.json()).then(s=>{if(s){Object.assign(settings,s);if(!settings.numGroups)settings.numGroups=Math.ceil((settings.numStudents||30)/(settings.groupSize||5));localStorage.setItem(K+'purim_settings',JSON.stringify(s))}}).catch(()=>{}); }
+    const _sr = ROOM ? fetch(`https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim/${encodeURIComponent(ROOM)}/settings.json`).then(r=>r.json()).then(s=>{if(s){Object.assign(settings,s);if(!settings.numGroups)settings.numGroups=Math.ceil((settings.numStudents||30)/(settings.groupSize||5));localStorage.setItem(K+'purim_settings',JSON.stringify(s))}}).catch(()=>{}) : Promise.resolve();
 
     const FB = 'https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim';
     function fbPatch(path, val) { if (!ROOM) return; fetch(`${FB}/${encodeURIComponent(ROOM)}/${path}.json`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify(val) }).catch(()=>{}); }
@@ -447,7 +447,8 @@
       setTimeout(() => document.getElementById('nameInput').focus(), 300);
     }
 
-    function submitName() {
+    async function submitName() {
+      await _sr;
       const name = document.getElementById('nameInput').value.trim();
       if (!name) { alert('כתבו את השם שלכם!'); return; }
       let hash = 0;
