@@ -427,7 +427,6 @@
     <div class="clue-arrow">⬇️</div>
     <div style="display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; justify-content:center;">
       <a href="index.html" class="btn" style="font-size:1rem; padding:10px 30px; text-decoration:none;">🏠 חזרה לחדרים</a>
-      <button class="btn" onclick="resetStation()" style="font-size:1rem; padding:10px 30px;">🔄 קבוצה הבאה</button>
     </div>
   </div>
 
@@ -562,6 +561,7 @@
     let puzzleActive = false;
     let puzzleSolved = false;
     let lastFrameTime = 0;
+    let puzzleStartTime = 0;
     let shakeTimeout = null;
     let animFrameId = null;
     let peakVolume = 0;
@@ -624,12 +624,22 @@
       localStorage.setItem(key, JSON.stringify(data));
     }
 
-
+    function saveScore() {
+      if (!selectedGroup) return;
+      const elapsed = Math.floor((Date.now() - puzzleStartTime) / 1000);
+      const score = Math.max(100 - elapsed, 10);
+      const scores = JSON.parse(localStorage.getItem('purim_scores') || '{}');
+      const g = String(selectedGroup);
+      if (!scores[g]) scores[g] = {};
+      scores[g][CONFIG.stationNumber] = Math.max(scores[g][CONFIG.stationNumber] || 0, score);
+      localStorage.setItem('purim_scores', JSON.stringify(scores));
+    }
 
     function startPuzzle() {
       if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
       document.getElementById('phase-color').classList.add('hidden');
       document.getElementById('phase-puzzle').classList.remove('hidden');
+      puzzleStartTime = Date.now();
       initMicrophone();
     }
 
@@ -805,6 +815,7 @@
     // ══════════════════════════════════════════════════════════
     function showSuccess() {
       saveCompletion();
+      saveScore();
       // Stop mic
       if (micStream) micStream.getTracks().forEach(t => t.stop());
       if (audioCtx) audioCtx.close();

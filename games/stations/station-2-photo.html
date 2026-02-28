@@ -337,7 +337,6 @@
     <div class="clue-arrow">⬇️</div>
     <div style="display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; justify-content:center;">
       <a href="index.html" class="btn" style="font-size:1rem; padding:10px 30px; text-decoration:none;">🏠 חזרה לחדרים</a>
-      <button class="btn" onclick="resetStation()" style="font-size:1rem; padding:10px 30px;">🔄 קבוצה הבאה</button>
     </div>
   </div>
 
@@ -479,6 +478,7 @@
     let photoCaptured = false;
     let photoStream   = null;
     let successTimer  = null;
+    let puzzleStartTime = 0;
     // ══ Group & Member Selection ══
     let selectedGroup = null;
     let selectedMember = null;
@@ -531,11 +531,23 @@
       localStorage.setItem(key, JSON.stringify(data));
     }
 
+    function saveScore() {
+      if (!selectedGroup) return;
+      const elapsed = Math.floor((Date.now() - puzzleStartTime) / 1000);
+      const score = Math.max(100 - elapsed, 10);
+      const scores = JSON.parse(localStorage.getItem('purim_scores') || '{}');
+      const g = String(selectedGroup);
+      if (!scores[g]) scores[g] = {};
+      scores[g][CONFIG.stationNumber] = Math.max(scores[g][CONFIG.stationNumber] || 0, score);
+      localStorage.setItem('purim_scores', JSON.stringify(scores));
+    }
+
 
 
     async function startPhotoBooth() {
       document.getElementById('phase-color').classList.add('hidden');
       document.getElementById('phase-puzzle').classList.remove('hidden');
+      puzzleStartTime = Date.now();
 
       try {
         // Prefer front camera for group selfie
@@ -811,6 +823,7 @@
     // ══════════════════════════════════════════════════════════
     function showSuccess() {
       saveCompletion();
+      saveScore();
       // Stop photo camera
       if (photoStream) photoStream.getTracks().forEach(t => t.stop());
 
