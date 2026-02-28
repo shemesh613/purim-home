@@ -339,6 +339,46 @@
     document.getElementById('setupBar').style.display = '';
   }
 
+  // ══ Firebase Sync ══
+  const FB = 'https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim';
+  function fbPut(path, val) { if (!ROOM) return; fetch(`${FB}/${encodeURIComponent(ROOM)}/${path}.json`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(val) }).catch(()=>{}); }
+
+  async function syncFromFirebase() {
+    if (!ROOM) return;
+    try {
+      const r = await fetch(`${FB}/${encodeURIComponent(ROOM)}.json`);
+      const fb = await r.json();
+      if (!fb) return;
+      // Merge progress
+      if (fb.progress) {
+        const local = JSON.parse(localStorage.getItem(K + 'purim_progress') || '{}');
+        for (const [g, members] of Object.entries(fb.progress)) {
+          if (!local[g]) local[g] = {};
+          for (const [m, stations] of Object.entries(members || {})) {
+            if (!local[g][m]) local[g][m] = [];
+            if (typeof stations === 'object' && !Array.isArray(stations)) {
+              for (const s of Object.keys(stations)) { const n = parseInt(s); if (!local[g][m].includes(n)) local[g][m].push(n); }
+            }
+          }
+        }
+        localStorage.setItem(K + 'purim_progress', JSON.stringify(local));
+      }
+      // Merge scores
+      if (fb.scores) {
+        const local = JSON.parse(localStorage.getItem(K + 'purim_scores') || '{}');
+        for (const [g, ss] of Object.entries(fb.scores)) {
+          if (!local[g]) local[g] = {};
+          for (const [s, sc] of Object.entries(ss || {})) { local[g][s] = Math.max(local[g][s] || 0, sc); }
+        }
+        localStorage.setItem(K + 'purim_scores', JSON.stringify(local));
+      }
+      // Settings
+      if (fb.settings) {
+        localStorage.setItem(K + 'purim_settings', JSON.stringify(fb.settings));
+      }
+    } catch {}
+  }
+
   // ══ Settings ══
   function getSettings() {
     const s = JSON.parse(localStorage.getItem(K + 'purim_settings') || '{}');
@@ -358,7 +398,9 @@
     const numStudents = Math.max(1, Math.min(100, parseInt(document.getElementById('numStudents').value) || 30));
     const groupSize = Math.max(2, Math.min(15, parseInt(document.getElementById('groupSize').value) || 5));
     const numGroups = Math.ceil(numStudents / groupSize);
-    localStorage.setItem(K + 'purim_settings', JSON.stringify({ numStudents, groupSize, numGroups }));
+    const settingsObj = { numStudents, groupSize, numGroups };
+    localStorage.setItem(K + 'purim_settings', JSON.stringify(settingsObj));
+    fbPut('settings', settingsObj);
     document.getElementById('numStudents').value = numStudents;
     document.getElementById('groupSize').value = groupSize;
     renderProgress();
@@ -369,6 +411,8 @@
     if (confirm('⚠️ למחוק את כל נתוני ההתקדמות והניקוד?')) {
       localStorage.removeItem(K + 'purim_progress');
       localStorage.removeItem(K + 'purim_scores');
+      fbPut('progress', null);
+      fbPut('scores', null);
       renderProgress();
       renderLeaderboard();
     }
@@ -495,7 +539,9 @@
     loadSettings();
     renderProgress();
     renderLeaderboard();
-    setInterval(() => { renderProgress(); renderLeaderboard(); }, 3000);
+    // Sync from Firebase every 5 seconds for cross-device updates
+    syncFromFirebase().then(() => { loadSettings(); renderProgress(); renderLeaderboard(); });
+    setInterval(() => { syncFromFirebase().then(() => { renderProgress(); renderLeaderboard(); }); }, 5000);
   }
 </script>
 </body>

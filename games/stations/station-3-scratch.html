@@ -669,7 +669,12 @@
     // ══ Group & Member Selection ══
     let selectedGroup = null;
     let selectedMember = null;
-    const settings = JSON.parse(localStorage.getItem(K + 'purim_settings') || '{"numGroups":10,"groupSize":4}');
+    const settings = JSON.parse(localStorage.getItem(K + 'purim_settings') || '{}');
+    if (!settings.numGroups) settings.numGroups = Math.ceil((settings.numStudents || 30) / (settings.groupSize || 5));
+    if (ROOM) { fetch(`https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim/${encodeURIComponent(ROOM)}/settings.json`).then(r=>r.json()).then(s=>{if(s){Object.assign(settings,s);if(!settings.numGroups)settings.numGroups=Math.ceil((settings.numStudents||30)/(settings.groupSize||5));localStorage.setItem(K+'purim_settings',JSON.stringify(s))}}).catch(()=>{}); }
+
+    const FB = 'https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim';
+    function fbPatch(path, val) { if (!ROOM) return; fetch(`${FB}/${encodeURIComponent(ROOM)}/${path}.json`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify(val) }).catch(()=>{}); }
 
     function showGroupSelect() {
       if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
@@ -699,6 +704,7 @@
         data[selectedGroup][selectedMember].push(CONFIG.stationNumber);
       }
       localStorage.setItem(key, JSON.stringify(data));
+      fbPatch(`progress/${selectedGroup}/${encodeURIComponent(selectedMember)}`, { [CONFIG.stationNumber]: true });
     }
 
     function saveScore() {
@@ -710,6 +716,7 @@
       if (!scores[g]) scores[g] = {};
       scores[g][CONFIG.stationNumber] = Math.max(scores[g][CONFIG.stationNumber] || 0, score);
       localStorage.setItem(K + 'purim_scores', JSON.stringify(scores));
+      fbPatch(`scores/${g}`, { [CONFIG.stationNumber]: score });
     }
 
     function startPuzzle() {
