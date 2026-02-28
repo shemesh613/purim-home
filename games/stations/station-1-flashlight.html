@@ -110,8 +110,8 @@
   
   <!-- ═══ Phase: Group Selection ═══ -->
   <div class="phase hidden" id="phase-group">
-    <div class="group-title">👥 מי אתם?</div>
-    <div class="group-subtitle">בחרו את מספר הקבוצה שלכם</div>
+    <div class="group-title" id="group-phase-title">👥 מי אתם?</div>
+    <div class="group-subtitle" id="group-phase-sub">בחרו את מספר הקבוצה שלכם</div>
     <div class="group-grid" id="group-grid"></div>
   </div>
 
@@ -139,7 +139,10 @@
       <div class="clue-text" id="clue-display"></div>
     </div>
     <div class="clue-arrow">⬇️</div>
-    <button class="btn" onclick="resetStation()" style="margin-top:20px; font-size:1rem; padding:10px 30px;">🔄 קבוצה הבאה</button>
+    <div style="display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; justify-content:center;">
+      <a href="index.html" class="btn" style="font-size:1rem; padding:10px 30px; text-decoration:none;">🏠 חזרה לחדרים</a>
+      <button class="btn" onclick="resetStation()" style="font-size:1rem; padding:10px 30px;">🔄 קבוצה הבאה</button>
+    </div>
   </div>
 
   <button class="reset-btn" onclick="resetStation()">איפוס</button>
@@ -361,10 +364,13 @@
         container.appendChild(el);
       });
     }
-    // ══ Group Selection ══
+    // ══ Group & Member Selection ══
     let selectedGroup = null;
+    let selectedMember = null;
     const groupGrid = document.getElementById('group-grid');
-    for (let i = 1; i <= 10; i++) {
+    const settings = JSON.parse(localStorage.getItem('purim_settings') || '{"numGroups":10,"groupSize":4}');
+
+    for (let i = 1; i <= settings.numGroups; i++) {
       const btn = document.createElement('button');
       btn.className = 'group-btn';
       btn.textContent = i;
@@ -380,17 +386,33 @@
 
     function selectGroup(num) {
       selectedGroup = num;
+      // Show member selection
+      document.getElementById('group-phase-title').textContent = `👤 קבוצה ${num} — מי אתה?`;
+      document.getElementById('group-phase-sub').textContent = 'בחרו את מספר השחקן שלכם';
+      groupGrid.innerHTML = '';
+      for (let m = 1; m <= settings.groupSize; m++) {
+        const btn = document.createElement('button');
+        btn.className = 'group-btn';
+        btn.textContent = m;
+        btn.onclick = () => selectMember(m);
+        groupGrid.appendChild(btn);
+      }
+    }
+
+    function selectMember(num) {
+      selectedMember = num;
       document.getElementById('phase-group').classList.add('hidden');
       startPuzzle();
     }
 
     function saveCompletion() {
-      if (!selectedGroup) return;
+      if (!selectedGroup || !selectedMember) return;
       const key = 'purim_progress';
       const data = JSON.parse(localStorage.getItem(key) || '{}');
-      if (!data[selectedGroup]) data[selectedGroup] = [];
-      if (!data[selectedGroup].includes(CONFIG.stationNumber)) {
-        data[selectedGroup].push(CONFIG.stationNumber);
+      if (!data[selectedGroup]) data[selectedGroup] = {};
+      if (!data[selectedGroup][selectedMember]) data[selectedGroup][selectedMember] = [];
+      if (!data[selectedGroup][selectedMember].includes(CONFIG.stationNumber)) {
+        data[selectedGroup][selectedMember].push(CONFIG.stationNumber);
       }
       localStorage.setItem(key, JSON.stringify(data));
     }
@@ -530,6 +552,7 @@
     // Phase 3: Success
     // ══════════════════════════════════════════════════════════
     function showSuccess() {
+      saveCompletion();
       document.getElementById('phase-puzzle').classList.add('hidden');
       document.getElementById('phase-success').classList.remove('hidden');
       document.getElementById('clue-display').textContent = CONFIG.clueText;
