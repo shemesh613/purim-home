@@ -460,9 +460,12 @@
 
     let totalDoneAll = 0;
 
+    const scores = JSON.parse(localStorage.getItem(K + 'purim_scores') || '{}');
     activeGroups.forEach(g => {
       const gData = data[g] || {};
-      html += `<tr><td class="group-header" onclick="toggleGroupDetail('group-${g}')">👥 קבוצה ${g} ▾</td>`;
+      const gScore = scores[g] ? Object.values(scores[g]).reduce((a,b) => a + (b||0), 0) : 0;
+      const scoreLabel = gScore > 0 ? ` <span style="color:#ffd700;font-size:0.85em;">⭐${gScore}</span>` : '';
+      html += `<tr><td class="group-header" onclick="toggleGroupDetail('group-${g}')">👥 קבוצה ${g}${scoreLabel} ▾</td>`;
       STATIONS.forEach(st => {
         const comp = getGroupCompletion(gData, st.id);
         const pctClass = comp.pct >= 80 ? 'pct-green' : comp.pct >= 40 ? 'pct-yellow' : 'pct-red';
