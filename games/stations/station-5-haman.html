@@ -353,7 +353,7 @@
   <div class="phase" id="phase-color">
     <div class="station-badge">🔊 תחנה 5</div>
     <div class="title">הכו בהמן!</div>
-    <div class="subtitle">הרימו את הכרטיס הצבעוני מול המצלמה</div>
+    <div class="subtitle">צבעו דף לבן בצבע המתאים והרימו למצלמה</div>
     <div class="camera-container">
       <video id="camera" autoplay playsinline muted></video>
       <canvas id="color-canvas" style="display:none"></canvas>
@@ -421,7 +421,7 @@
     <div class="success-icon">🎉</div>
     <div class="success-title">המן הובס! ניצחתם!</div>
     <div class="clue-box">
-      <div class="clue-label">📍 הרמז למיקום הכרטיס הבא:</div>
+      <div class="clue-label">📍 הרמז לשלב הבא:</div>
       <div class="clue-text" id="clue-display"></div>
     </div>
     <div class="clue-arrow">⬇️</div>
@@ -484,7 +484,7 @@
         video.onloadedmetadata = () => {
           colorCanvas.width = 320;
           colorCanvas.height = 240;
-          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          statusEl.textContent = '🎨 צבעו דף לבן בצבע הנכון והרימו למצלמה';
           detectColor();
         };
       } catch (e) {
@@ -536,10 +536,10 @@
         const minC = Math.min(r, g, b);
         const saturation = maxC > 30 ? (maxC - minC) / maxC : 0;
         if (saturation > 0.25 && maxC > 60) {
-          statusEl.textContent = '🔍 מזהה צבע... קרבו את הכרטיס למצלמה';
+          statusEl.textContent = '🔍 מזהה צבע... קרבו את הדף הצבוע למצלמה';
           statusEl.style.color = '#fbbf24';
         } else {
-          statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+          statusEl.textContent = '🎨 צבעו דף לבן בצבע הנכון והרימו למצלמה';
           statusEl.style.color = 'rgba(255,255,255,0.7)';
         }
       }
@@ -839,7 +839,7 @@
       document.getElementById('phase-success').classList.add('hidden');
       document.getElementById('phase-puzzle').classList.add('hidden');
       document.getElementById('phase-color').classList.remove('hidden');
-      statusEl.textContent = '📷 הרימו את הכרטיס מול המצלמה';
+      statusEl.textContent = '🎨 צבעו דף לבן בצבע הנכון והרימו למצלמה';
       statusEl.style.color = 'rgba(255,255,255,0.7)';
       indicator.classList.remove('color-matched');
       indicator.style.background = '';
