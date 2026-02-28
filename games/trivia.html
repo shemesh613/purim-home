@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>❓ חידון מגילת אסתר</title>
+  <title>❓ חידון מגילת אסתר — מטורף!</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❓</text></svg>">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700;900&display=swap');
@@ -16,6 +16,7 @@
       display: flex; flex-direction: column; align-items: center;
       padding: 15px;
       overflow-x: hidden;
+      transition: filter 0.1s, transform 0.1s;
     }
     .back-link {
       position: fixed; top: 12px; right: 12px;
@@ -29,191 +30,318 @@
       font-size: clamp(1.6rem, 5vw, 2.2rem);
       color: #7c3aed; text-align: center; margin: 8px 0 5px;
     }
+
+    /* Progress */
     .progress-bar {
-      width: 100%; max-width: 600px; height: 10px;
-      background: #e9d5ff; border-radius: 5px;
+      width: 100%; max-width: 600px; height: 12px;
+      background: #e9d5ff; border-radius: 6px;
       margin: 10px 0; overflow: hidden;
     }
     .progress-fill {
-      height: 100%; border-radius: 5px;
-      background: linear-gradient(90deg, #7c3aed, #ec4899, #fbbf24);
-      background-size: 200% 100%;
-      animation: progShimmer 2s linear infinite;
+      height: 100%; border-radius: 6px;
+      background: linear-gradient(90deg, #7c3aed, #ec4899, #fbbf24, #22c55e, #3b82f6);
+      background-size: 400% 100%;
+      animation: progShimmer 3s linear infinite;
       transition: width 0.5s;
     }
-    @keyframes progShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    @keyframes progShimmer { 0% { background-position: 400% 0; } 100% { background-position: -400% 0; } }
+
+    /* Top bar */
     .top-bar {
-      display: flex; gap: 15px; align-items: center;
+      display: flex; gap: 12px; align-items: center;
       margin-bottom: 12px; font-size: 0.95rem;
+      flex-wrap: wrap; justify-content: center;
     }
     .score-box {
       background: linear-gradient(135deg, #fbbf24, #f97316);
-      color: #fff; padding: 5px 16px; border-radius: 10px;
-      font-weight: 900; font-size: 1.1rem;
-      box-shadow: 0 3px 10px rgba(251,191,36,0.3);
+      color: #fff; padding: 6px 18px; border-radius: 12px;
+      font-weight: 900; font-size: 1.2rem;
+      box-shadow: 0 3px 12px rgba(251,191,36,0.4);
       transition: transform 0.3s;
     }
-    .score-box.bump { animation: scoreBump 0.4s ease-out; }
-    @keyframes scoreBump { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+    .score-box.bump { animation: scoreBump 0.5s ease-out; }
+    @keyframes scoreBump { 0% { transform: scale(1); } 30% { transform: scale(1.4) rotate(5deg); } 60% { transform: scale(1.1) rotate(-3deg); } 100% { transform: scale(1); } }
+
     .streak-box {
-      background: #fff; padding: 5px 14px; border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      color: #fff; padding: 6px 16px; border-radius: 12px;
+      font-weight: 900; font-size: 1.1rem;
+      box-shadow: 0 3px 12px rgba(239,68,68,0.4);
       display: none;
     }
-    .streak-box.active { display: block; animation: streakPop 0.3s ease-out; }
-    @keyframes streakPop { 0% { transform: scale(0.8); } 100% { transform: scale(1); } }
-
-    .question-card {
-      background: #fff; border-radius: 20px;
-      padding: 25px; max-width: 600px; width: 100%;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-      position: relative; overflow: hidden;
+    .streak-box.active { display: block; animation: streakFire 0.4s ease-out; }
+    @keyframes streakFire {
+      0% { transform: scale(0.5) rotate(-10deg); }
+      60% { transform: scale(1.2) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); }
     }
-    .question-emoji { font-size: 3rem; margin-bottom: 10px; }
+
+    /* COMBO display (huge!) */
+    .combo-display {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(4rem, 15vw, 8rem);
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(251,191,36,0.8), 0 0 60px rgba(236,72,153,0.6), 0 5px 15px rgba(0,0,0,0.3);
+      pointer-events: none;
+      z-index: 200;
+      opacity: 0;
+      display: none;
+    }
+    .combo-display.active {
+      display: block;
+      animation: comboShow 1.2s ease-out forwards;
+    }
+    @keyframes comboShow {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(-20deg); }
+      20% { opacity: 1; transform: translate(-50%, -50%) scale(1.5) rotate(10deg); }
+      40% { transform: translate(-50%, -50%) scale(1.2) rotate(-5deg); }
+      60% { transform: translate(-50%, -50%) scale(1.3) rotate(3deg); }
+      80% { opacity: 1; transform: translate(-50%, -50%) scale(1.1) rotate(0deg); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(2) rotate(0deg); }
+    }
+
+    /* Question card */
+    .question-card {
+      background: #fff; border-radius: 24px;
+      padding: 28px; max-width: 600px; width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      position: relative; overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .question-card.rainbow-border {
+      animation: rainbowBorder 1s ease-out;
+    }
+    @keyframes rainbowBorder {
+      0% { box-shadow: 0 0 0 4px #ef4444, 0 4px 24px rgba(0,0,0,0.08); }
+      15% { box-shadow: 0 0 0 4px #f97316, 0 4px 24px rgba(0,0,0,0.08); }
+      30% { box-shadow: 0 0 0 4px #fbbf24, 0 4px 24px rgba(0,0,0,0.08); }
+      45% { box-shadow: 0 0 0 4px #22c55e, 0 4px 24px rgba(0,0,0,0.08); }
+      60% { box-shadow: 0 0 0 4px #3b82f6, 0 4px 24px rgba(0,0,0,0.08); }
+      75% { box-shadow: 0 0 0 4px #8b5cf6, 0 4px 24px rgba(0,0,0,0.08); }
+      90% { box-shadow: 0 0 0 4px #ec4899, 0 4px 24px rgba(0,0,0,0.08); }
+      100% { box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    }
+
+    .question-emoji { font-size: 3.5rem; margin-bottom: 10px; }
     .question-text {
       font-family: 'Frank Ruhl Libre', serif;
-      font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+      font-size: clamp(1.15rem, 3.5vw, 1.5rem);
       color: #1e1b4b; line-height: 1.6; margin-bottom: 20px;
     }
-    .options {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    }
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     @media (max-width: 500px) { .options { grid-template-columns: 1fr; } }
     .option-btn {
       font-family: 'Heebo', sans-serif;
-      font-size: 1rem; padding: 12px 16px;
+      font-size: 1.05rem; padding: 14px 16px;
       border: 2px solid #e9d5ff; background: #faf5ff;
       color: #4c1d95; border-radius: 14px;
       cursor: pointer; transition: all 0.3s;
-      text-align: center; font-weight: 500;
+      text-align: center; font-weight: 600;
+      position: relative; overflow: hidden;
     }
     .option-btn:hover:not(.disabled) {
       border-color: #7c3aed; background: #ede9fe;
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(124,58,237,0.15);
     }
     .option-btn.correct {
-      border-color: #22c55e; background: #dcfce7; color: #166534;
-      animation: correctBounce 0.5s ease-out;
+      border-color: #22c55e; background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #166534;
+      animation: correctBounce 0.6s ease-out;
+      box-shadow: 0 0 20px rgba(34,197,94,0.3);
     }
-    @keyframes correctBounce { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 100% { transform: scale(1); } }
+    @keyframes correctBounce { 0% { transform: scale(1); } 30% { transform: scale(1.12) rotate(2deg); } 60% { transform: scale(1.05) rotate(-1deg); } 100% { transform: scale(1); } }
     .option-btn.wrong {
       border-color: #ef4444; background: #fef2f2; color: #991b1b;
-      animation: wrongShake 0.4s ease-out;
+      animation: wrongShake 0.5s ease-out;
     }
-    @keyframes wrongShake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-    .option-btn.disabled { pointer-events: none; opacity: 0.5; }
+    @keyframes wrongShake {
+      0%,100% { transform: translateX(0); }
+      10% { transform: translateX(-12px) rotate(-2deg); }
+      30% { transform: translateX(12px) rotate(2deg); }
+      50% { transform: translateX(-8px) rotate(-1deg); }
+      70% { transform: translateX(8px) rotate(1deg); }
+      90% { transform: translateX(-4px); }
+    }
+    .option-btn.disabled { pointer-events: none; opacity: 0.45; }
     .option-btn.disabled.correct { opacity: 1; }
 
     .feedback {
       margin-top: 15px; font-size: 1rem;
       min-height: 2em; line-height: 1.5;
-      padding: 10px; border-radius: 12px;
+      padding: 12px; border-radius: 14px;
     }
-    .feedback.correct-fb { background: #dcfce7; color: #166534; }
+    .feedback.correct-fb { background: linear-gradient(135deg, #dcfce7, #d1fae5); color: #166534; }
     .feedback.wrong-fb { background: #fef2f2; color: #991b1b; }
 
     .next-btn {
       font-family: 'Heebo', sans-serif;
-      padding: 10px 30px; border: none;
+      padding: 12px 35px; border: none;
       background: linear-gradient(135deg, #7c3aed, #ec4899);
-      color: #fff; border-radius: 12px;
-      cursor: pointer; font-size: 1rem; font-weight: 700;
-      margin-top: 12px; display: none;
+      color: #fff; border-radius: 14px;
+      cursor: pointer; font-size: 1.05rem; font-weight: 700;
+      margin-top: 14px; display: none;
       transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(124,58,237,0.3);
     }
-    .next-btn.visible { display: inline-block; }
-    .next-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(124,58,237,0.3); }
+    .next-btn.visible { display: inline-block; animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .next-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(124,58,237,0.4); }
 
-    /* ══ CRAZY EFFECTS ══ */
+    /* ══════════ MEGA EFFECTS ══════════ */
     .effect-layer {
       position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
-      pointer-events: none; z-index: 100;
+      pointer-events: none; z-index: 150;
       overflow: hidden;
     }
+
+    /* Flying emoji */
     .flying-emoji {
       position: absolute; font-size: 3rem;
-      animation: flyUp 1.5s ease-out forwards;
-      pointer-events: none;
+      animation: flyUp var(--dur, 1.5s) ease-out forwards;
+      pointer-events: none; z-index: 151;
     }
     @keyframes flyUp {
-      0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(-300px) scale(1.5) rotate(var(--rot, 30deg)); opacity: 0; }
+      0% { transform: translateY(0) scale(0.3) rotate(0deg); opacity: 1; }
+      50% { opacity: 1; }
+      100% { transform: translateY(var(--fly, -400px)) scale(var(--sc, 1.5)) rotate(var(--rot, 30deg)); opacity: 0; }
     }
-    .confetti-burst .conf-p {
-      position: absolute; width: var(--s, 8px); height: var(--s, 8px);
-      border-radius: 50%; background: var(--c);
-      animation: confBurst 1s ease-out forwards;
+
+    /* Confetti particles */
+    .conf-p {
+      position: absolute;
+      width: var(--s, 8px); height: var(--s, 8px);
+      border-radius: var(--br, 50%);
+      background: var(--c);
+      animation: confBurst var(--cd, 1.2s) ease-out forwards;
     }
     @keyframes confBurst {
-      0% { transform: translate(0,0) scale(1); opacity: 1; }
-      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+      0% { transform: translate(0,0) scale(1) rotate(0deg); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--cr, 360deg)); opacity: 0; }
     }
+
+    /* Screen effects */
     .screen-flash {
       position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
-      pointer-events: none; z-index: 99;
-      animation: screenFlash 0.3s ease-out forwards;
+      pointer-events: none; z-index: 140;
+      animation: screenFlash 0.4s ease-out forwards;
     }
-    @keyframes screenFlash {
-      0% { opacity: 0.5; } 100% { opacity: 0; }
+    @keyframes screenFlash { 0% { opacity: 0.6; } 100% { opacity: 0; } }
+
+    /* Rainbow wave overlay */
+    .rainbow-wave {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 139;
+      background: linear-gradient(45deg,
+        rgba(255,0,0,0.15), rgba(255,165,0,0.15),
+        rgba(255,255,0,0.15), rgba(0,255,0,0.15),
+        rgba(0,0,255,0.15), rgba(128,0,128,0.15));
+      background-size: 600% 600%;
+      animation: rainbowWave 0.8s ease-out forwards;
     }
+    @keyframes rainbowWave {
+      0% { background-position: 0% 50%; opacity: 0.8; }
+      50% { background-position: 100% 50%; opacity: 0.5; }
+      100% { background-position: 200% 50%; opacity: 0; }
+    }
+
+    /* Score float */
     .score-float {
-      position: fixed; z-index: 101;
-      font-size: 2rem; font-weight: 900;
-      color: #fbbf24; pointer-events: none;
-      animation: scoreFloat 1s ease-out forwards;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      position: fixed; z-index: 200;
+      font-size: 2.5rem; font-weight: 900;
+      pointer-events: none;
+      text-shadow: 0 2px 15px rgba(0,0,0,0.3);
+      animation: scoreFloat 1.2s ease-out forwards;
     }
     @keyframes scoreFloat {
-      0% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(-80px) scale(1.5); opacity: 0; }
+      0% { transform: translateY(0) scale(0.5) rotate(-10deg); opacity: 1; }
+      40% { transform: translateY(-40px) scale(1.5) rotate(5deg); opacity: 1; }
+      100% { transform: translateY(-120px) scale(1) rotate(0deg); opacity: 0; }
     }
+
+    /* Flying text */
+    .flying-text {
+      position: fixed; z-index: 200;
+      font-family: 'Frank Ruhl Libre', serif;
+      font-weight: 900;
+      pointer-events: none;
+      text-shadow: 0 3px 15px rgba(0,0,0,0.3);
+      animation: flyingText 1.5s ease-out forwards;
+    }
+    @keyframes flyingText {
+      0% { transform: translate(-50%, -50%) scale(0) rotate(-30deg); opacity: 0; }
+      20% { transform: translate(-50%, -50%) scale(1.8) rotate(10deg); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.3) rotate(-5deg); opacity: 1; }
+      100% { transform: translate(-50%, calc(-50% - 80px)) scale(0.8) rotate(0deg); opacity: 0; }
+    }
+
+    /* Wrong X */
     .wrong-x {
-      position: fixed; z-index: 101;
-      font-size: 5rem; pointer-events: none;
-      animation: wrongX 0.6s ease-out forwards;
+      position: fixed; z-index: 200;
+      font-size: 6rem; pointer-events: none;
+      animation: wrongX 0.7s ease-out forwards;
     }
     @keyframes wrongX {
-      0% { transform: scale(0) rotate(0deg); opacity: 1; }
-      50% { transform: scale(1.2) rotate(10deg); opacity: 1; }
-      100% { transform: scale(0.8) rotate(-5deg); opacity: 0; }
+      0% { transform: translate(-50%,-50%) scale(0) rotate(0deg); opacity: 1; }
+      40% { transform: translate(-50%,-50%) scale(1.3) rotate(15deg); opacity: 1; }
+      100% { transform: translate(-50%,-50%) scale(0.8) rotate(-5deg); opacity: 0; }
     }
-    .firework-burst {
-      position: fixed; pointer-events: none; z-index: 100;
-    }
+
+    /* Firework */
+    .firework-burst { position: fixed; pointer-events: none; z-index: 155; }
     .fw-p {
-      position: absolute; width: 4px; height: 4px;
+      position: absolute;
+      width: var(--fws, 5px); height: var(--fws, 5px);
       border-radius: 50%;
-      animation: fwPop 0.8s ease-out forwards;
+      animation: fwPop var(--fwd, 1s) ease-out forwards;
     }
     @keyframes fwPop {
-      0% { transform: translate(0,0) scale(1); opacity: 1; }
+      0% { transform: translate(0,0) scale(1.5); opacity: 1; }
+      60% { opacity: 1; }
       100% { transform: translate(var(--fx), var(--fy)) scale(0); opacity: 0; }
+    }
+
+    /* Star spin */
+    .star-spin {
+      position: fixed; pointer-events: none; z-index: 160;
+      font-size: 4rem;
+      animation: starSpin 1.5s ease-out forwards;
+    }
+    @keyframes starSpin {
+      0% { transform: translate(-50%,-50%) scale(0) rotate(0deg); opacity: 1; }
+      30% { transform: translate(-50%,-50%) scale(1.5) rotate(360deg); opacity: 1; }
+      100% { transform: translate(-50%,-50%) scale(0.3) rotate(1080deg); opacity: 0; }
     }
 
     /* Results */
     .results {
       text-align: center; display: none;
       max-width: 600px; width: 100%;
-      background: #fff; border-radius: 20px;
-      padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      background: #fff; border-radius: 24px;
+      padding: 35px; box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     }
     .results.active { display: block; }
-    .results-emoji { font-size: 4rem; margin: 15px 0; }
-    .results-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.2rem; color: #7c3aed; }
-    .results-score { font-size: 1.3rem; color: #6b7280; margin: 10px 0; }
+    .results-emoji { font-size: 5rem; margin: 15px 0; animation: bounce 1s ease-in-out infinite; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    .results-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.4rem; color: #7c3aed; }
+    .results-score { font-size: 1.3rem; color: #6b7280; margin: 12px 0; line-height: 1.8; }
     .results-message { font-size: 1rem; color: #9ca3af; margin-bottom: 20px; }
     .results-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
     .res-btn {
       font-family: 'Heebo', sans-serif;
-      padding: 10px 25px; border: none; border-radius: 12px;
-      cursor: pointer; font-size: 0.95rem; font-weight: 700;
+      padding: 12px 28px; border: none; border-radius: 14px;
+      cursor: pointer; font-size: 1rem; font-weight: 700;
       transition: all 0.3s;
     }
-    .res-btn:hover { transform: translateY(-2px); }
-    .res-btn.primary { background: #7c3aed; color: #fff; }
+    .res-btn:hover { transform: translateY(-3px); }
+    .res-btn.primary { background: linear-gradient(135deg, #7c3aed, #ec4899); color: #fff; box-shadow: 0 4px 15px rgba(124,58,237,0.3); }
     .res-btn.share { background: #25d366; color: #fff; }
     .res-btn.home { background: #f3f4f6; color: #4b5563; }
   </style>
@@ -221,6 +349,7 @@
 <body>
 
 <div class="effect-layer" id="effects"></div>
+<div class="combo-display" id="comboDisplay"></div>
 <a href="../index.html" class="back-link">→ חזרה</a>
 <h1>❓ חידון מגילת אסתר</h1>
 <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
@@ -256,7 +385,7 @@ const QUESTIONS = [
   { q: "מה שם העיר הבירה של אחשורוש?", options: ["ירושלים", "בבל", "שושן", "רומא"], correct: 2, emoji: "🏰", fact: "שושן הבירה הייתה בפרס — איראן של היום!" },
   { q: "מי היתה המלכה לפני אסתר?", options: ["רחל", "ושתי", "מרים", "שרה"], correct: 1, emoji: "👰", fact: "ושתי סירבה להופיע במשתה המלך!" },
   { q: "מי היה דוד (אפוטרופוס) של אסתר?", options: ["המן", "חרבונא", "מרדכי", "ביגתן"], correct: 2, emoji: "🧔", fact: "מרדכי היה בן דודה ואפוטרופוס שלה" },
-  { q: "למה המן רצה להשמיד את היהודים?", options: ["כי היו עשירים", "כי מרדכי לא השתחווה לו", "כי גנבו ממנו", "כי הוא שנא את אסתר"], correct: 1, emoji: "😈", fact: "מרדכי סירב להשתחוות כי השתחוויה שייכת רק לה'!" },
+  { q: "למה המן רצה להשמיד את היהודים?", options: ["כי היו עשירים", "כי מרדכי לא השתחווה לו", "כי גנבו ממנו", "כי שנא את אסתר"], correct: 1, emoji: "😈", fact: "מרדכי סירב להשתחוות כי השתחוויה שייכת רק לה'!" },
   { q: "כמה ימים צמה אסתר?", options: ["יום אחד", "שלושה ימים", "שבעה ימים", "ארבעים יום"], correct: 1, emoji: "🙏", fact: "אסתר ביקשה מכל היהודים לצום 3 ימים!" },
   { q: "מה המשמעות של המילה 'פורים'?", options: ["חג", "גורל", "שמחה", "נס"], correct: 1, emoji: "🎲", fact: "'פור' = גורל! המן הפיל גורלות!" },
   { q: "מה אסתר הכינה למלך ולהמן?", options: ["משחק", "מסיבה", "משתה יין", "מתנות"], correct: 2, emoji: "🍷", fact: "אסתר הזמינה אותם לשני משתאות!" },
@@ -277,110 +406,401 @@ const QUESTIONS = [
 let currentQ = 0, score = 0, streak = 0, maxStreak = 0, answered = false, shuffledQ = [];
 const effectsEl = document.getElementById('effects');
 
-// ══ Audio Context ══
+// ══════════ AUDIO ENGINE ══════════
 let audioCtx = null;
 function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
 
-function playCorrectSound() {
+function playCorrectSound(streakLevel) {
   const ctx = getAudio(), now = ctx.currentTime;
-  [523.25, 659.25, 783.99].forEach((freq, i) => {
+  // Base melody gets more epic with streak
+  const baseFreqs = [523.25, 659.25, 783.99];
+  const epicFreqs = [523.25, 659.25, 783.99, 1046.5];
+  const megaFreqs = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+  const freqs = streakLevel >= 5 ? megaFreqs : streakLevel >= 3 ? epicFreqs : baseFreqs;
+  const vol = Math.min(0.2, 0.1 + streakLevel * 0.02);
+
+  freqs.forEach((freq, i) => {
     const osc = ctx.createOscillator(), gain = ctx.createGain();
-    osc.type = 'sine'; osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.15, now + i * 0.1);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
+    osc.type = streakLevel >= 5 ? 'triangle' : streakLevel >= 3 ? 'square' : 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, now + i * 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.4);
     osc.connect(gain); gain.connect(ctx.destination);
-    osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.3);
+    osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.4);
   });
+
+  // Bass drop for big streaks
+  if (streakLevel >= 4) {
+    const bass = ctx.createOscillator(), bassGain = ctx.createGain();
+    bass.type = 'sine'; bass.frequency.setValueAtTime(80, now);
+    bass.frequency.exponentialRampToValueAtTime(40, now + 0.5);
+    bassGain.gain.setValueAtTime(0.3, now);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    bass.connect(bassGain); bassGain.connect(ctx.destination);
+    bass.start(now); bass.stop(now + 0.5);
+  }
 }
 
 function playWrongSound() {
   const ctx = getAudio(), now = ctx.currentTime;
   const osc = ctx.createOscillator(), gain = ctx.createGain();
-  osc.type = 'square'; osc.frequency.setValueAtTime(200, now);
-  osc.frequency.linearRampToValueAtTime(100, now + 0.3);
-  gain.gain.setValueAtTime(0.1, now);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+  osc.type = 'sawtooth'; osc.frequency.setValueAtTime(250, now);
+  osc.frequency.linearRampToValueAtTime(80, now + 0.4);
+  gain.gain.setValueAtTime(0.08, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
   osc.connect(gain); gain.connect(ctx.destination);
-  osc.start(now); osc.stop(now + 0.3);
+  osc.start(now); osc.stop(now + 0.4);
 }
 
-// ══ Visual Effects ══
-function spawnFlyingEmojis(emojis, count) {
-  for (let i = 0; i < count; i++) {
+function playVictoryFanfare() {
+  const ctx = getAudio(), now = ctx.currentTime;
+  [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568].forEach((freq, i) => {
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.15, now + i * 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.6);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.6);
+  });
+}
+
+// ══════════ MEGA EFFECTS ENGINE ══════════
+const FX = {
+  // Emoji rain — dozens of emojis flying from everywhere
+  emojiRain(emojis, count, opts = {}) {
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'flying-emoji';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      const size = 1.5 + Math.random() * 2.5;
+      const x = Math.random() * 100;
+      const fly = -(200 + Math.random() * 500);
+      const dur = 1 + Math.random() * 1.5;
+      const rot = Math.random() * 90 - 45;
+      el.style.cssText = `
+        left:${x}%; bottom:${opts.fromTop ? 'auto' : '10%'};
+        ${opts.fromTop ? 'top: -50px;' : ''}
+        font-size:${size}rem;
+        --fly:${fly}px; --sc:${0.8 + Math.random()}; --rot:${rot}deg; --dur:${dur}s;
+        animation-delay:${Math.random() * 0.8}s;
+      `;
+      effectsEl.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 1) * 1000);
+    }
+  },
+
+  // Confetti burst — from a point
+  confettiBurst(x, y, count = 40) {
+    const colors = ['#fbbf24','#ec4899','#7c3aed','#3b82f6','#22c55e','#ef4444','#f97316','#06b6d4','#e879f9'];
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'conf-p';
+      const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
+      const dist = 80 + Math.random() * 180;
+      const size = Math.random() * 10 + 4;
+      p.style.cssText = `
+        left:${x}px; top:${y}px;
+        --c:${colors[Math.floor(Math.random()*colors.length)]};
+        --s:${size}px; --br:${Math.random() > 0.5 ? '50%' : '2px'};
+        --tx:${Math.cos(angle)*dist}px; --ty:${Math.sin(angle)*dist}px;
+        --cr:${Math.random()*720}deg; --cd:${0.8 + Math.random()*0.6}s;
+      `;
+      effectsEl.appendChild(p);
+      setTimeout(() => p.remove(), 1600);
+    }
+  },
+
+  // Particle explosion — hundreds of tiny particles
+  particleExplosion(x, y, count = 150) {
+    const colors = ['#fbbf24','#ec4899','#7c3aed','#22c55e','#ef4444','#f97316','#3b82f6'];
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'conf-p';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 30 + Math.random() * 250;
+      p.style.cssText = `
+        left:${x}px; top:${y}px;
+        --c:${colors[Math.floor(Math.random()*colors.length)]};
+        --s:${Math.random() * 6 + 2}px; --br:50%;
+        --tx:${Math.cos(angle)*dist}px; --ty:${Math.sin(angle)*dist}px;
+        --cr:${Math.random()*360}deg; --cd:${0.5 + Math.random()*1}s;
+      `;
+      effectsEl.appendChild(p);
+      setTimeout(() => p.remove(), 1800);
+    }
+  },
+
+  // Firework — big beautiful burst
+  firework(x, y, size = 'normal') {
+    const fw = document.createElement('div');
+    fw.className = 'firework-burst';
+    fw.style.left = x + 'px'; fw.style.top = y + 'px';
+    const colors = ['#fbbf24','#ec4899','#7c3aed','#22c55e','#ef4444','#f97316','#06b6d4','#e879f9'];
+    const count = size === 'mega' ? 60 : size === 'big' ? 40 : 24;
+    const dist = size === 'mega' ? 120 : size === 'big' ? 80 : 50;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'fw-p';
+      const angle = (i / count) * Math.PI * 2;
+      const d = dist + Math.random() * (dist * 0.5);
+      p.style.cssText = `
+        background:${colors[i%colors.length]};
+        --fx:${Math.cos(angle)*d}px; --fy:${Math.sin(angle)*d}px;
+        --fws:${Math.random()*5+3}px; --fwd:${0.6+Math.random()*0.6}s;
+      `;
+      fw.appendChild(p);
+    }
+    effectsEl.appendChild(fw);
+    setTimeout(() => fw.remove(), 1500);
+  },
+
+  // Screen flash
+  flash(color) {
     const el = document.createElement('div');
-    el.className = 'flying-emoji';
-    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    el.style.cssText = `left:${Math.random()*80+10}%; bottom:20%; --rot:${Math.random()*60-30}deg; animation-delay:${Math.random()*0.5}s;`;
+    el.className = 'screen-flash';
+    el.style.background = color;
     effectsEl.appendChild(el);
-    setTimeout(() => el.remove(), 2000);
-  }
-}
+    setTimeout(() => el.remove(), 500);
+  },
 
-function spawnConfettiBurst(x, y) {
-  const colors = ['#fbbf24','#ec4899','#7c3aed','#3b82f6','#22c55e','#ef4444'];
-  for (let i = 0; i < 30; i++) {
-    const p = document.createElement('div');
-    p.className = 'conf-p';
-    const angle = (i / 30) * Math.PI * 2;
-    const dist = 60 + Math.random() * 100;
-    p.style.cssText = `
-      left:${x}px; top:${y}px;
-      --c:${colors[Math.floor(Math.random()*colors.length)]};
-      --s:${Math.random()*8+4}px;
-      --tx:${Math.cos(angle)*dist}px;
-      --ty:${Math.sin(angle)*dist}px;
+  // Rainbow wave
+  rainbowWave() {
+    const el = document.createElement('div');
+    el.className = 'rainbow-wave';
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  },
+
+  // Screen shake
+  shake(intensity = 1) {
+    const dur = 300 + intensity * 100;
+    const str = 3 + intensity * 4;
+    let start = null;
+    function frame(time) {
+      if (!start) start = time;
+      const elapsed = time - start;
+      if (elapsed < dur) {
+        const decay = 1 - elapsed / dur;
+        const x = (Math.random() - 0.5) * str * decay * 2;
+        const y = (Math.random() - 0.5) * str * decay * 2;
+        const r = (Math.random() - 0.5) * decay * 2;
+        document.body.style.transform = `translate(${x}px, ${y}px) rotate(${r}deg)`;
+        requestAnimationFrame(frame);
+      } else {
+        document.body.style.transform = '';
+      }
+    }
+    requestAnimationFrame(frame);
+  },
+
+  // Score float
+  scoreFloat(points, x, y) {
+    const el = document.createElement('div');
+    el.className = 'score-float';
+    el.textContent = `+${points}`;
+    el.style.cssText = `left:${x || '50%'}; top:${y || '40%'}; color:#fbbf24;`;
+    if (typeof x !== 'string') el.style.transform = 'translateX(-50%)';
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 1300);
+  },
+
+  // Flying Hebrew text
+  flyingText(text, opts = {}) {
+    const el = document.createElement('div');
+    el.className = 'flying-text';
+    el.textContent = text;
+    el.style.cssText = `
+      left:${opts.x || '50%'}; top:${opts.y || '50%'};
+      font-size:${opts.size || 'clamp(2rem, 8vw, 4rem)'};
+      color:${opts.color || '#fbbf24'};
     `;
-    effectsEl.appendChild(p);
-    setTimeout(() => p.remove(), 1200);
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 1800);
+  },
+
+  // Star spin
+  starSpin(count = 3) {
+    const stars = ['⭐','🌟','✨','💫'];
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'star-spin';
+      el.textContent = stars[Math.floor(Math.random() * stars.length)];
+      el.style.cssText = `
+        left:${20 + Math.random()*60}%; top:${20 + Math.random()*60}%;
+        animation-delay:${i * 0.15}s;
+      `;
+      effectsEl.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }
+  },
+
+  // Camera flash (white)
+  cameraFlash() {
+    const el = document.createElement('div');
+    el.className = 'screen-flash';
+    el.style.background = '#fff';
+    el.style.animation = 'screenFlash 0.15s ease-out forwards';
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 200);
+  },
+
+  // Bass drop zoom
+  bassDrop() {
+    document.body.style.transition = 'transform 0.15s ease-out';
+    document.body.style.transform = 'scale(1.08)';
+    setTimeout(() => {
+      document.body.style.transform = 'scale(0.97)';
+      setTimeout(() => {
+        document.body.style.transition = 'transform 0.3s ease-out';
+        document.body.style.transform = '';
+      }, 100);
+    }, 150);
+  },
+
+  // Combo display (huge text in center)
+  showCombo(streak) {
+    const el = document.getElementById('comboDisplay');
+    const texts = {
+      3: '🔥 רצף 3!',
+      4: '💥 רצף 4!!',
+      5: '⚡ COMBO x5!!!',
+      6: '🌟 MEGA x6!!!!',
+      7: '👑 ULTRA x7!!!!!',
+      8: '💎 INSANE x8!!!!!!',
+      9: '🔮 LEGENDARY x9!!!!!!!',
+      10: '🏆 GODLIKE x10!!!!!!!!'
+    };
+    el.textContent = texts[Math.min(streak, 10)] || `🔥 x${streak}!!!!`;
+    el.classList.remove('active');
+    void el.offsetWidth;
+    el.classList.add('active');
+    setTimeout(() => el.classList.remove('active'), 1300);
+  },
+
+  // Wrong X
+  wrongX() {
+    const el = document.createElement('div');
+    el.className = 'wrong-x';
+    el.textContent = '❌';
+    el.style.cssText = 'left:50%; top:45%;';
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+  },
+
+  // Victory dance — ultimate celebration
+  victoryDance() {
+    // Multi-firework cascade
+    for (let i = 0; i < 12; i++) {
+      setTimeout(() => {
+        this.firework(
+          Math.random() * window.innerWidth,
+          Math.random() * window.innerHeight * 0.7,
+          i % 3 === 0 ? 'mega' : 'big'
+        );
+      }, i * 250);
+    }
+    // Massive emoji rain
+    this.emojiRain(['🎉','🏆','⭐','🎭','👑','🎊','✨','💫','🌟','🥳','🎶','💃'], 40);
+    // Particle explosions
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        this.particleExplosion(
+          Math.random() * window.innerWidth,
+          Math.random() * window.innerHeight * 0.6,
+          100
+        );
+      }, i * 400);
+    }
+    // Star spins
+    this.starSpin(8);
+    // Rainbow
+    this.rainbowWave();
+    setTimeout(() => this.rainbowWave(), 500);
+    // Camera flashes
+    setTimeout(() => this.cameraFlash(), 200);
+    setTimeout(() => this.cameraFlash(), 800);
+    // Flying texts
+    this.flyingText('!כל הכבוד', { size: 'clamp(3rem, 10vw, 6rem)', color: '#fbbf24' });
+    setTimeout(() => this.flyingText('!מדהים', { size: 'clamp(2.5rem, 8vw, 5rem)', color: '#ec4899', y: '60%' }), 600);
+    setTimeout(() => this.flyingText('🎭 פורים שמח', { size: 'clamp(2rem, 7vw, 4rem)', color: '#22c55e', y: '40%' }), 1200);
+  }
+};
+
+// ══════════ STREAK-BASED EFFECT LEVELS ══════════
+function triggerCorrectEffects(streakLevel, btnRect) {
+  const cx = btnRect.left + btnRect.width / 2;
+  const cy = btnRect.top;
+  const wx = window.innerWidth;
+  const wy = window.innerHeight;
+
+  // LEVEL 1: Basic (streak 1) — confetti + emojis + flash + sound
+  FX.flash('rgba(34,197,94,0.25)');
+  FX.confettiBurst(cx, cy, 30);
+  FX.emojiRain(['⭐','🎉','✨','👑'], 6);
+  FX.scoreFloat(10 + (streakLevel > 1 ? streakLevel * 5 : 0), '50%', '40%');
+  playCorrectSound(streakLevel);
+
+  if (streakLevel < 2) return;
+
+  // LEVEL 2: Streak 2 — add firework + more emojis
+  FX.firework(wx * 0.3, wy * 0.3);
+  FX.emojiRain(['⭐','🎉','🏆','✨','👑','🎭','🎊'], 10);
+  FX.shake(1);
+
+  if (streakLevel < 3) return;
+
+  // LEVEL 3: Streak 3 — COMBO display + rainbow + star spin + double firework
+  FX.showCombo(streakLevel);
+  FX.rainbowWave();
+  FX.starSpin(3);
+  setTimeout(() => FX.firework(wx * 0.7, wy * 0.4, 'big'), 200);
+  FX.flyingText('!נכון', { color: '#22c55e', size: 'clamp(2rem, 6vw, 3.5rem)' });
+  document.getElementById('questionCard').classList.add('rainbow-border');
+  setTimeout(() => document.getElementById('questionCard').classList.remove('rainbow-border'), 1200);
+
+  if (streakLevel < 4) return;
+
+  // LEVEL 4: Streak 4 — bass drop + particle explosion + camera flash
+  FX.bassDrop();
+  FX.particleExplosion(wx / 2, wy / 2, 100);
+  FX.cameraFlash();
+  FX.emojiRain(['🔥','🔥','💥','💥','⚡','⚡'], 15);
+
+  if (streakLevel < 5) return;
+
+  // LEVEL 5+: MEGA — everything maxed out
+  FX.showCombo(streakLevel);
+  FX.shake(Math.min(streakLevel - 3, 4));
+  FX.particleExplosion(wx * 0.3, wy * 0.3, 80);
+  FX.particleExplosion(wx * 0.7, wy * 0.5, 80);
+  FX.flyingText(streakLevel >= 7 ? '!!!LEGENDARY' : '!!!MEGA', {
+    color: '#ec4899',
+    size: 'clamp(2.5rem, 10vw, 5rem)',
+    y: '35%'
+  });
+
+  // Triple fireworks
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => FX.firework(
+      Math.random() * wx,
+      Math.random() * wy * 0.5,
+      'mega'
+    ), i * 150);
+  }
+
+  // Extra emoji tsunami for insane streaks
+  if (streakLevel >= 7) {
+    FX.emojiRain(['🔥','⚡','💎','🌟','👑','🏆','💫','🎆','🎇'], 30);
+    setTimeout(() => FX.cameraFlash(), 300);
+    setTimeout(() => FX.rainbowWave(), 400);
+  }
+
+  if (streakLevel >= 10) {
+    FX.victoryDance();
   }
 }
 
-function spawnFirework(x, y) {
-  const fw = document.createElement('div');
-  fw.className = 'firework-burst';
-  fw.style.left = x + 'px'; fw.style.top = y + 'px';
-  const colors = ['#fbbf24','#ec4899','#7c3aed','#22c55e','#f97316'];
-  for (let i = 0; i < 24; i++) {
-    const p = document.createElement('div');
-    p.className = 'fw-p';
-    const angle = (i / 24) * Math.PI * 2;
-    const dist = 30 + Math.random() * 50;
-    p.style.cssText = `background:${colors[i%colors.length]}; --fx:${Math.cos(angle)*dist}px; --fy:${Math.sin(angle)*dist}px;`;
-    fw.appendChild(p);
-  }
-  effectsEl.appendChild(fw);
-  setTimeout(() => fw.remove(), 1000);
-}
-
-function spawnScoreFloat(points) {
-  const el = document.createElement('div');
-  el.className = 'score-float';
-  el.textContent = `+${points}`;
-  el.style.left = '50%'; el.style.top = '40%';
-  el.style.transform = 'translateX(-50%)';
-  effectsEl.appendChild(el);
-  setTimeout(() => el.remove(), 1000);
-}
-
-function flashScreen(color) {
-  const el = document.createElement('div');
-  el.className = 'screen-flash';
-  el.style.background = color;
-  effectsEl.appendChild(el);
-  setTimeout(() => el.remove(), 400);
-}
-
-function spawnWrongX() {
-  const el = document.createElement('div');
-  el.className = 'wrong-x';
-  el.textContent = '❌';
-  el.style.left = '50%'; el.style.top = '40%';
-  el.style.transform = 'translateX(-50%)';
-  effectsEl.appendChild(el);
-  setTimeout(() => el.remove(), 700);
-}
-
-// ══ Game Logic ══
+// ══════════ GAME LOGIC ══════════
 function shuffle(a) { const b=[...a]; for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];} return b; }
 
 function startQuiz() {
@@ -431,14 +851,22 @@ function selectAnswer(index, clickedBtn) {
   });
 
   if (index === q.correct) {
-    // CORRECT! GO CRAZY!
+    // ═══ CORRECT! GO ABSOLUTELY INSANE! ═══
     streak++;
     if (streak > maxStreak) maxStreak = streak;
     const points = 10 + (streak > 1 ? streak * 5 : 0);
     score += points;
 
     clickedBtn.classList.add('correct');
-    feedbackEl.innerHTML = `✅ נכון! ${streak > 1 ? `<b>🔥 רצף ${streak}! +${points} נקודות!</b>` : ''}<br>${q.fact}`;
+
+    // Feedback text
+    let streakText = '';
+    if (streak >= 10) streakText = `<b>🏆💎 GODLIKE! רצף ${streak}! +${points} נקודות!</b>`;
+    else if (streak >= 7) streakText = `<b>⚡👑 LEGENDARY! רצף ${streak}! +${points} נקודות!</b>`;
+    else if (streak >= 5) streakText = `<b>🔥💥 MEGA COMBO! רצף ${streak}! +${points} נקודות!</b>`;
+    else if (streak >= 3) streakText = `<b>🔥 רצף ${streak}! +${points} נקודות!</b>`;
+    else if (streak >= 2) streakText = `<b>רצף ${streak}! +${points}</b>`;
+    feedbackEl.innerHTML = `✅ נכון! ${streakText}<br>💡 ${q.fact}`;
     feedbackEl.className = 'feedback correct-fb';
 
     // Update score with animation
@@ -449,39 +877,28 @@ function selectAnswer(index, clickedBtn) {
 
     // Streak display
     if (streak >= 2) {
-      streakBox.textContent = `🔥 רצף: ${streak}`;
+      const fireEmojis = streak >= 7 ? '💎⚡🔥' : streak >= 5 ? '⚡🔥🔥' : streak >= 3 ? '🔥🔥' : '🔥';
+      streakBox.textContent = `${fireEmojis} רצף: ${streak}`;
+      streakBox.classList.remove('active');
+      void streakBox.offsetWidth;
       streakBox.classList.add('active');
     }
 
-    // EFFECTS!
-    playCorrectSound();
-    flashScreen('rgba(34,197,94,0.2)');
-    spawnScoreFloat(points);
-    spawnConfettiBurst(rect.left + rect.width/2, rect.top);
-    spawnFlyingEmojis(['⭐','🎉','🏆','✨','👑','🎭'], streak >= 3 ? 12 : 6);
+    // TRIGGER MEGA EFFECTS
+    triggerCorrectEffects(streak, rect);
 
-    // Extra effects for streaks
-    if (streak >= 3) {
-      setTimeout(() => spawnFirework(window.innerWidth * 0.3, window.innerHeight * 0.3), 200);
-      setTimeout(() => spawnFirework(window.innerWidth * 0.7, window.innerHeight * 0.4), 400);
-    }
-    if (streak >= 5) {
-      setTimeout(() => spawnFirework(window.innerWidth * 0.5, window.innerHeight * 0.2), 300);
-      spawnFlyingEmojis(['🔥','🔥','🔥','💥','💥'], 8);
-    }
   } else {
-    // WRONG
+    // ═══ WRONG ═══
     streak = 0;
     clickedBtn.classList.add('wrong');
-    feedbackEl.textContent = `❌ טעות! ${q.fact}`;
+    feedbackEl.innerHTML = `❌ לא נכון! 💡 ${q.fact}`;
     feedbackEl.className = 'feedback wrong-fb';
     streakBox.classList.remove('active');
 
     playWrongSound();
-    flashScreen('rgba(239,68,68,0.15)');
-    spawnWrongX();
-    document.body.style.animation = 'none';
-    void document.body.offsetWidth;
+    FX.flash('rgba(239,68,68,0.2)');
+    FX.wrongX();
+    FX.shake(1);
   }
 
   document.getElementById('nextBtn').classList.add('visible');
@@ -497,30 +914,25 @@ function showResults() {
   document.getElementById('questionCard').style.display = 'none';
   document.getElementById('progress').style.width = '100%';
 
-  const total = shuffledQ.length * 10;
-  const pct = Math.round((score / (shuffledQ.length * 15)) * 100);
-
   let emoji, title, msg;
-  if (score >= shuffledQ.length * 12) { emoji = '🏆'; title = 'גאון המגילה!'; msg = 'מדהים! אתם מומחי מגילה!'; }
-  else if (score >= shuffledQ.length * 8) { emoji = '⭐'; title = 'כל הכבוד!'; msg = 'יופי! ידע מרשים!'; }
-  else if (score >= shuffledQ.length * 5) { emoji = '👍'; title = 'לא רע!'; msg = 'נסו שוב לשיא חדש!'; }
+  if (score >= shuffledQ.length * 12) { emoji = '🏆'; title = 'גאון המגילה!'; msg = 'מדהים! אתם מומחי מגילה אמיתיים!'; }
+  else if (score >= shuffledQ.length * 8) { emoji = '⭐'; title = 'כל הכבוד!'; msg = 'ידע מרשים! מלכי המגילה!'; }
+  else if (score >= shuffledQ.length * 5) { emoji = '👍'; title = 'לא רע בכלל!'; msg = 'נסו שוב לשיא חדש!'; }
   else { emoji = '📖'; title = 'יש מה ללמוד!'; msg = 'קראו את המגילה ונסו שוב!'; }
 
   document.getElementById('resEmoji').textContent = emoji;
   document.getElementById('resTitle').textContent = title;
-  document.getElementById('resScore').innerHTML = `${score} נקודות | רצף שיא: ${maxStreak} 🔥`;
+  document.getElementById('resScore').innerHTML = `🏆 ${score} נקודות<br>🔥 רצף שיא: ${maxStreak}<br>⭐ ${Math.round((score / (shuffledQ.length * 15)) * 100)}% הצלחה`;
   document.getElementById('resMsg').textContent = msg;
   document.getElementById('results').classList.add('active');
 
-  // Final celebration
-  for (let i = 0; i < 5; i++) {
-    setTimeout(() => spawnFirework(Math.random()*window.innerWidth, Math.random()*window.innerHeight*0.7), i * 300);
-  }
-  spawnFlyingEmojis(['🎉','🏆','⭐','🎭','👑'], 15);
+  // VICTORY CELEBRATION
+  playVictoryFanfare();
+  FX.victoryDance();
 }
 
 function shareResult() {
-  const text = `🎭 *חידון מגילת אסתר*\n\nקיבלתי ${score} נקודות!\n🔥 רצף שיא: ${maxStreak}\n\nנסו גם!\n${window.location.href.replace('/games/trivia.html', '')}`;
+  const text = `🎭 *חידון מגילת אסתר — מטורף!*\n\n🏆 ${score} נקודות!\n🔥 רצף שיא: ${maxStreak}\n\nנסו גם!\n${window.location.href.split('/games/')[0]}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 }
 

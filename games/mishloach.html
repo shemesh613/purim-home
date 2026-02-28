@@ -10,251 +10,193 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Heebo', sans-serif;
-      background: linear-gradient(135deg, #064e3b, #065f46, #047857);
-      color: #fff;
+      background: linear-gradient(180deg, #fef9ef, #fdf4ff);
+      color: #1e1b4b;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      display: flex; flex-direction: column; align-items: center;
       padding: 20px;
     }
     .back-link {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      color: rgba(255,255,255,0.5);
-      text-decoration: none;
-      font-size: 0.9rem;
-      z-index: 100;
-      background: rgba(0,0,0,0.3);
-      padding: 6px 14px;
-      border-radius: 8px;
+      position: fixed; top: 12px; right: 12px;
+      color: #7c3aed; text-decoration: none;
+      font-size: 0.85rem; z-index: 100;
+      background: #fff; padding: 5px 12px;
+      border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .back-link:hover { color: #fbbf24; }
 
     h1 {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: clamp(1.8rem, 5vw, 2.5rem);
-      color: #fbbf24;
+      color: #7c3aed;
       text-align: center;
       margin: 10px 0 5px;
     }
     .subtitle {
-      color: rgba(255,255,255,0.6);
+      color: #6b7280;
       text-align: center;
       margin-bottom: 20px;
     }
 
-    .builder {
-      max-width: 600px;
-      width: 100%;
-    }
+    .builder { max-width: 600px; width: 100%; }
 
     .section-label {
       font-size: 1rem;
-      color: #fbbf24;
+      color: #4c1d95;
       margin: 15px 0 8px;
       font-weight: 700;
     }
 
-    /* Names */
     .name-inputs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 10px;
     }
     .name-input {
       font-family: 'Heebo', sans-serif;
       padding: 10px 15px;
-      border: 2px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-      border-radius: 12px;
-      font-size: 1rem;
-      outline: none;
-      direction: rtl;
+      border: 2px solid #e9d5ff;
+      background: #fff; color: #1e1b4b;
+      border-radius: 12px; font-size: 1rem;
+      outline: none; direction: rtl;
     }
-    .name-input:focus { border-color: #fbbf24; }
-    .name-input::placeholder { color: rgba(255,255,255,0.3); }
+    .name-input:focus { border-color: #7c3aed; }
+    .name-input::placeholder { color: #a78bfa; }
 
-    /* Items grid */
+    /* Items grid — expanded! */
     .items-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
       gap: 8px;
     }
     .item-btn {
       aspect-ratio: 1;
-      border: 2px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.05);
+      border: 2px solid #e9d5ff;
+      background: #faf5ff;
       border-radius: 14px;
-      font-size: 2rem;
+      font-size: 1.8rem;
       cursor: pointer;
       transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
     }
-    .item-btn:hover { border-color: #fbbf24; background: rgba(251,191,36,0.15); }
+    .item-btn:hover { border-color: #7c3aed; background: #ede9fe; }
     .item-btn.selected {
       border-color: #22c55e;
-      background: rgba(34,197,94,0.2);
+      background: #dcfce7;
       transform: scale(1.1);
+      box-shadow: 0 3px 10px rgba(34,197,94,0.2);
     }
 
-    /* Color picker */
-    .colors {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+    .colors { display: flex; gap: 8px; flex-wrap: wrap; }
     .color-btn {
-      width: 40px;
-      height: 40px;
+      width: 40px; height: 40px;
       border-radius: 50%;
-      border: 3px solid rgba(255,255,255,0.2);
+      border: 3px solid #e9d5ff;
       cursor: pointer;
       transition: all 0.3s;
     }
     .color-btn:hover { transform: scale(1.15); }
-    .color-btn.selected { border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+    .color-btn.selected { border-color: #7c3aed; box-shadow: 0 0 15px rgba(124,58,237,0.3); }
 
-    /* Blessing text */
     .blessing-input {
       font-family: 'Heebo', sans-serif;
-      width: 100%;
-      padding: 10px 15px;
-      border: 2px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-      border-radius: 12px;
-      font-size: 1rem;
-      outline: none;
-      direction: rtl;
-      resize: vertical;
-      min-height: 60px;
+      width: 100%; padding: 10px 15px;
+      border: 2px solid #e9d5ff;
+      background: #fff; color: #1e1b4b;
+      border-radius: 12px; font-size: 1rem;
+      outline: none; direction: rtl;
+      resize: vertical; min-height: 60px;
     }
-    .blessing-input:focus { border-color: #fbbf24; }
-    .blessing-input::placeholder { color: rgba(255,255,255,0.3); }
+    .blessing-input:focus { border-color: #7c3aed; }
+    .blessing-input::placeholder { color: #a78bfa; }
+
+    /* Blessing presets */
+    .blessings-presets {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .blessing-preset {
+      font-family: 'Heebo', sans-serif;
+      padding: 5px 12px;
+      background: #ede9fe; color: #6d28d9;
+      border: none; border-radius: 8px;
+      font-size: 0.8rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .blessing-preset:hover { background: #ddd6fe; }
 
     /* Preview */
-    .preview-section {
-      margin-top: 25px;
-      text-align: center;
-    }
+    .preview-section { margin-top: 25px; text-align: center; }
     .preview-card {
       background: var(--card-bg, linear-gradient(135deg, #fbbf24, #f97316));
       border-radius: 24px;
       padding: 30px 25px;
       max-width: 400px;
       margin: 0 auto;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-      position: relative;
-      overflow: hidden;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+      position: relative; overflow: hidden;
     }
     .preview-card::before {
-      content: '✨';
-      position: absolute;
-      top: 10px;
-      left: 15px;
-      font-size: 1.5rem;
-      opacity: 0.5;
+      content: '✨'; position: absolute;
+      top: 10px; left: 15px;
+      font-size: 1.5rem; opacity: 0.5;
     }
     .preview-card::after {
-      content: '✨';
-      position: absolute;
-      bottom: 10px;
-      right: 15px;
-      font-size: 1.5rem;
-      opacity: 0.5;
+      content: '✨'; position: absolute;
+      bottom: 10px; right: 15px;
+      font-size: 1.5rem; opacity: 0.5;
     }
     .preview-header {
       font-family: 'Frank Ruhl Libre', serif;
-      font-size: 1rem;
-      color: rgba(0,0,0,0.5);
-      margin-bottom: 5px;
+      font-size: 1rem; color: rgba(0,0,0,0.5); margin-bottom: 5px;
     }
     .preview-to {
       font-family: 'Frank Ruhl Libre', serif;
-      font-size: 1.8rem;
-      color: #1a0a3c;
-      margin-bottom: 15px;
+      font-size: 1.8rem; color: #1a0a3c; margin-bottom: 15px;
     }
-    .preview-items {
-      font-size: 3rem;
-      margin: 15px 0;
-      letter-spacing: 5px;
-    }
+    .preview-items { font-size: 3rem; margin: 15px 0; letter-spacing: 5px; }
     .preview-blessing {
-      font-size: 1.1rem;
-      color: rgba(0,0,0,0.7);
-      line-height: 1.6;
-      margin: 15px 0;
-      font-style: italic;
+      font-size: 1.1rem; color: rgba(0,0,0,0.7);
+      line-height: 1.6; margin: 15px 0; font-style: italic;
     }
     .preview-from {
-      font-size: 0.9rem;
-      color: rgba(0,0,0,0.4);
-      margin-top: 10px;
+      font-size: 0.9rem; color: rgba(0,0,0,0.4); margin-top: 10px;
     }
     .preview-purim {
       font-family: 'Frank Ruhl Libre', serif;
-      font-size: 1.3rem;
-      color: #1a0a3c;
-      margin-top: 10px;
+      font-size: 1.3rem; color: #1a0a3c; margin-top: 10px;
     }
 
-    /* Buttons */
     .actions {
-      display: flex;
-      gap: 10px;
+      display: flex; gap: 10px;
       justify-content: center;
-      margin-top: 20px;
-      flex-wrap: wrap;
+      margin-top: 20px; flex-wrap: wrap;
     }
     .action-btn {
       font-family: 'Heebo', sans-serif;
-      padding: 12px 25px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 700;
+      padding: 12px 25px; border: none;
+      border-radius: 12px; cursor: pointer;
+      font-size: 1rem; font-weight: 700;
       transition: all 0.3s;
     }
     .action-btn:hover { transform: translateY(-2px); }
-    .btn-share {
-      background: #25d366;
-      color: #fff;
-    }
-    .btn-download {
-      background: #3b82f6;
-      color: #fff;
-    }
-    .btn-reset {
-      background: rgba(255,255,255,0.15);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
+    .btn-share { background: #25d366; color: #fff; box-shadow: 0 4px 12px rgba(37,211,102,0.3); }
+    .btn-download { background: #3b82f6; color: #fff; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+    .btn-reset { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
   </style>
 </head>
 <body>
 
-<a href="../index.html" class="back-link">→ חזרה לתפריט</a>
-
+<a href="../index.html" class="back-link">→ חזרה</a>
 <h1>🎁 משלוח מנות דיגיטלי</h1>
 <p class="subtitle">בחרו פריטים, כתבו ברכה, ושלחו לחברים!</p>
 
 <div class="builder">
-
   <div class="section-label">👤 מאת / אל</div>
   <div class="name-inputs">
     <input type="text" class="name-input" id="fromName" placeholder="השם שלך" oninput="updatePreview()">
     <input type="text" class="name-input" id="toName" placeholder="שם החבר/ה" oninput="updatePreview()">
   </div>
 
-  <div class="section-label">🍬 בחרו פריטים למשלוח</div>
+  <div class="section-label">🍬 בחרו פריטים למשלוח (עד 8)</div>
   <div class="items-grid" id="itemsGrid"></div>
 
   <div class="section-label">🎨 צבע עיטוף</div>
@@ -262,6 +204,14 @@
 
   <div class="section-label">💌 הוסיפו ברכה</div>
   <textarea class="blessing-input" id="blessing" placeholder="פורים שמח! שיהיה לך חג מלא שמחה..." oninput="updatePreview()"></textarea>
+  <div class="blessings-presets">
+    <button class="blessing-preset" onclick="setBlessing('פורים שמח! שיהיה חג מלא שמחה ואור!')">פורים שמח!</button>
+    <button class="blessing-preset" onclick="setBlessing('חג פורים שמח! שנזכה לשמוח ולשמח!')">שמחה ואור</button>
+    <button class="blessing-preset" onclick="setBlessing('ליידידי היקר/ה — פורים שמח מכל הלב!')">מכל הלב</button>
+    <button class="blessing-preset" onclick="setBlessing('משנכנס אדר מרבין בשמחה! פורים שמח!')">אדר שמח</button>
+    <button class="blessing-preset" onclick="setBlessing('ונהפוך הוא — שכל הרע יתהפך לטובה!')">ונהפוך הוא</button>
+    <button class="blessing-preset" onclick="setBlessing('לחבר/ה הכי טוב/ה בעולם — פורים שמח!')">לחבר הכי טוב</button>
+  </div>
 
   <div class="preview-section">
     <div class="section-label" style="text-align: center;">👁️ תצוגה מקדימה</div>
@@ -283,12 +233,14 @@
 </div>
 
 <script>
-// Items
+// Expanded items list!
 const ITEMS = [
   '🍪', '🍫', '🍬', '🍩', '🧁', '🍰',
   '🍷', '🧃', '🥤', '🍎', '🍊', '🍇',
   '🥜', '🍯', '🌺', '🎀', '💝', '🧸',
-  '🍭', '🥐', '🍿', '🫘', '🍉', '🥝'
+  '🍭', '🥐', '🍿', '🫘', '🍉', '🥝',
+  '🍓', '🍌', '🥧', '🧀', '🥨', '🫕',
+  '☕', '🍵', '🧋', '🎂', '🍡', '🥮'
 ];
 
 const COLORS = [
@@ -300,6 +252,8 @@ const COLORS = [
   { bg: 'linear-gradient(135deg, #f97316, #ef4444)', name: 'כתום' },
   { bg: 'linear-gradient(135deg, #e879f9, #a855f7)', name: 'לילך' },
   { bg: 'linear-gradient(135deg, #fbbf24, #22c55e)', name: 'ירוק-זהב' },
+  { bg: 'linear-gradient(135deg, #fca5a5, #fde68a)', name: 'אפרסק' },
+  { bg: 'linear-gradient(135deg, #06b6d4, #3b82f6)', name: 'תכלת' },
 ];
 
 let selectedItems = new Set();
@@ -340,6 +294,11 @@ COLORS.forEach((c, i) => {
   colorsRow.appendChild(btn);
 });
 
+function setBlessing(text) {
+  document.getElementById('blessing').value = text;
+  updatePreview();
+}
+
 function updatePreview() {
   const to = document.getElementById('toName').value || 'לחבר/ה שלי ❤️';
   const from = document.getElementById('fromName').value || '___';
@@ -359,27 +318,21 @@ function shareWhatsApp() {
   const blessing = document.getElementById('blessing').value || 'פורים שמח!';
   const items = selectedItems.size > 0 ? [...selectedItems].join(' ') : '🍪 🍫 🍬';
 
-  const text = `🎁 *משלוח מנות דיגיטלי!*\n\nל${to} היקר/ה,\n\n${items}\n\n${blessing}\n\n🎭 פורים שמח תשפ״ו!\nמאת: ${from}\n\n---\nשלחו גם אתם! 👇\n${window.location.href.replace('/games/mishloach.html', '')}`;
-
+  const text = `🎁 *משלוח מנות דיגיטלי!*\n\nל${to} היקר/ה,\n\n${items}\n\n${blessing}\n\n🎭 פורים שמח תשפ״ו!\nמאת: ${from}\n\n---\nשלחו גם אתם! 👇\n${window.location.href.split('/games/')[0]}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 }
 
 function downloadCard() {
-  // Create a canvas from the preview
-  const card = document.getElementById('previewCard');
   const canvas = document.createElement('canvas');
-  canvas.width = 600;
-  canvas.height = 500;
+  canvas.width = 600; canvas.height = 500;
   const ctx = canvas.getContext('2d');
 
-  // Background gradient
   const colors = COLORS[selectedColor].bg.match(/#[a-fA-F0-9]{6}/g);
   const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
   grad.addColorStop(0, colors[0]);
   grad.addColorStop(1, colors[1]);
   ctx.fillStyle = grad;
 
-  // Rounded rect
   const r = 30;
   ctx.beginPath();
   ctx.moveTo(r, 0);
@@ -394,7 +347,6 @@ function downloadCard() {
   ctx.closePath();
   ctx.fill();
 
-  // Text
   ctx.fillStyle = 'rgba(0,0,0,0.5)';
   ctx.font = '18px Heebo, sans-serif';
   ctx.textAlign = 'center';
@@ -409,8 +361,7 @@ function downloadCard() {
 
   ctx.fillStyle = 'rgba(0,0,0,0.7)';
   ctx.font = '20px Heebo, sans-serif';
-  const blessing = document.getElementById('prevBlessing').textContent;
-  ctx.fillText(blessing, canvas.width / 2, 280);
+  ctx.fillText(document.getElementById('prevBlessing').textContent, canvas.width / 2, 280);
 
   ctx.fillStyle = '#1a0a3c';
   ctx.font = 'bold 26px Frank Ruhl Libre, serif';
@@ -420,7 +371,6 @@ function downloadCard() {
   ctx.font = '16px Heebo, sans-serif';
   ctx.fillText(document.getElementById('prevFrom').textContent, canvas.width / 2, 430);
 
-  // Download
   const link = document.createElement('a');
   link.download = 'mishloach-manot.png';
   link.href = canvas.toDataURL();
