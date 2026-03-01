@@ -519,7 +519,22 @@
     <h2 class="section-title">
       <span class="line"></span>📸 גלריית תחפושות 📸<span class="line"></span>
     </h2>
-    <div class="gallery-section">
+
+    <!-- School code gate -->
+    <div id="galleryGate" style="text-align:center; padding:20px;">
+      <p style="font-size:1rem; color:#4c1d95; margin-bottom:10px;">📝 הכניסו קוד בית ספר לפתיחת הגלריה</p>
+      <p style="font-size:0.8rem; color:#6b7280; margin-bottom:12px;">כל בית ספר מקבל גלריה משלו — שתפו את הקוד עם ההורים</p>
+      <div style="display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap;">
+        <input type="text" id="galleryCodeInput" placeholder="לדוגמה: רמבם-ירושלים" style="font-family:'Heebo',sans-serif; padding:10px 16px; border:2px solid #c084fc; border-radius:12px; font-size:1rem; text-align:center; direction:rtl; outline:none; width:200px;">
+        <button onclick="enterGallery()" style="font-family:'Heebo',sans-serif; padding:10px 24px; background:linear-gradient(135deg,#7c3aed,#ec4899); color:#fff; border:none; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer;">📸 כנסו!</button>
+      </div>
+    </div>
+
+    <div class="gallery-section" id="gallerySection" style="display:none;">
+      <div style="text-align:center; margin-bottom:10px;">
+        <span style="font-size:0.8rem; color:#7c3aed; background:#ede9fe; padding:4px 12px; border-radius:8px;" id="gallerySchoolLabel">🏫</span>
+        <button onclick="leaveGallery()" style="font-family:'Heebo',sans-serif; font-size:0.75rem; color:#6b7280; background:none; border:1px solid #d1d5db; padding:3px 10px; border-radius:6px; cursor:pointer; margin-right:8px;">🔄 החלפת בי״ס</button>
+      </div>
       <!-- Class selector -->
       <div class="class-selector">
         <label>🏫 כיתה:</label>
@@ -534,6 +549,7 @@
         <p>לחצו להעלות תמונת תחפושת!</p>
         <p style="font-size:0.8rem; color:#a78bfa; margin-top:5px;">הילדים מתחפשים בבית? צלמו ושתפו!</p>
       </div>
+      <p style="font-size:0.7rem; color:#9ca3af; text-align:center; margin-top:6px;">⚠️ התמונה תוצג בגלריה המשותפת — העלו בהסכמה בלבד</p>
       <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handleUpload(event)">
       <div class="upload-form" id="uploadForm">
         <input type="text" class="upload-input" id="studentName" placeholder="שם התלמיד/ה">
@@ -744,35 +760,64 @@ setTimeout(() => firework(window.innerWidth/2, 200), 500);
 setTimeout(() => firework(window.innerWidth*0.3, 300), 1000);
 setTimeout(() => firework(window.innerWidth*0.7, 250), 1500);
 
-// ══ Costume Gallery with Classes ══
+// ══ Costume Gallery with Firebase Sync ══
+const FB_GAL = 'https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim-gallery';
 let uploadedImage = null;
-const STORAGE_KEY = 'purim-costumes';
-const CLASSES_KEY = 'purim-classes';
-
-// Default classes
+let galleryCode = localStorage.getItem('purim-gallery-code') || '';
+let galleryCostumes = [];
 const defaultClasses = ['א1','א2','ב1','ב2','ג1','ג2','ד1','ד2','ה1','ה2','ו1','ו2'];
 
 function getClasses() {
-  const stored = localStorage.getItem(CLASSES_KEY);
+  if (!galleryCode) return defaultClasses;
+  const stored = localStorage.getItem('purim-classes-' + galleryCode);
   return stored ? JSON.parse(stored) : defaultClasses;
+}
+
+function enterGallery() {
+  const code = document.getElementById('galleryCodeInput').value.trim();
+  if (!code) { alert('הכניסו קוד בית ספר!'); return; }
+  galleryCode = code;
+  localStorage.setItem('purim-gallery-code', code);
+  showGallery();
+}
+
+function leaveGallery() {
+  galleryCode = '';
+  localStorage.removeItem('purim-gallery-code');
+  document.getElementById('galleryGate').style.display = '';
+  document.getElementById('gallerySection').style.display = 'none';
+}
+
+function showGallery() {
+  document.getElementById('galleryGate').style.display = 'none';
+  document.getElementById('gallerySection').style.display = '';
+  document.getElementById('gallerySchoolLabel').textContent = '🏫 ' + galleryCode;
+  renderClassDropdowns();
+  syncGallery();
+}
+
+async function syncGallery() {
+  if (!galleryCode) return;
+  try {
+    const r = await fetch(`${FB_GAL}/${encodeURIComponent(galleryCode)}/photos.json`);
+    const data = await r.json();
+    if (data) {
+      galleryCostumes = Object.values(data).sort((a, b) => (b.time || 0) - (a.time || 0));
+    } else {
+      galleryCostumes = [];
+    }
+  } catch(e) { galleryCostumes = []; }
+  renderGallery();
 }
 
 function renderClassDropdowns() {
   const classes = getClasses();
   const mainSelect = document.getElementById('classSelect');
   const uploadSelect = document.getElementById('uploadClass');
-
-  // Main filter
   mainSelect.innerHTML = '<option value="all">כל הכיתות</option>';
-  classes.forEach(c => {
-    mainSelect.innerHTML += `<option value="${c}">${c}</option>`;
-  });
-
-  // Upload selector
+  classes.forEach(c => { mainSelect.innerHTML += `<option value="${c}">${c}</option>`; });
   uploadSelect.innerHTML = '<option value="">בחרו כיתה</option>';
-  classes.forEach(c => {
-    uploadSelect.innerHTML += `<option value="${c}">${c}</option>`;
-  });
+  classes.forEach(c => { uploadSelect.innerHTML += `<option value="${c}">${c}</option>`; });
 }
 
 function addNewClass() {
@@ -781,17 +826,40 @@ function addNewClass() {
   const classes = getClasses();
   if (!classes.includes(name.trim())) {
     classes.push(name.trim());
-    localStorage.setItem(CLASSES_KEY, JSON.stringify(classes));
+    localStorage.setItem('purim-classes-' + galleryCode, JSON.stringify(classes));
+    // Sync classes to Firebase
+    fetch(`${FB_GAL}/${encodeURIComponent(galleryCode)}/classes.json`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(classes)
+    }).catch(()=>{});
     renderClassDropdowns();
   }
+}
+
+function compressImage(dataUrl) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', 0.6));
+    };
+    img.src = dataUrl;
+  });
 }
 
 function handleUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (ev) => {
-    uploadedImage = ev.target.result;
+  reader.onload = async (ev) => {
+    uploadedImage = await compressImage(ev.target.result);
     document.getElementById('uploadForm').classList.add('active');
     document.getElementById('uploadArea').innerHTML = `
       <img src="${uploadedImage}" style="max-height:150px; border-radius:12px;">
@@ -801,22 +869,24 @@ function handleUpload(e) {
   reader.readAsDataURL(file);
 }
 
-function savePhoto() {
-  if (!uploadedImage) return;
+async function savePhoto() {
+  if (!uploadedImage || !galleryCode) return;
   const name = document.getElementById('studentName').value || 'ילד/ה';
   const cls = document.getElementById('uploadClass').value || '';
+  const photo = { image: uploadedImage, name, cls, time: Date.now() };
 
-  const costumes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  costumes.unshift({ image: uploadedImage, name, cls, time: Date.now() });
-
-  if (costumes.length > 50) costumes.pop();
+  // Save to Firebase
+  const btn = document.querySelector('.upload-btn');
+  btn.textContent = '⏳ מעלה...';
+  btn.disabled = true;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(costumes));
-  } catch(e) {
-    costumes.pop();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(costumes));
-  }
+    await fetch(`${FB_GAL}/${encodeURIComponent(galleryCode)}/photos.json`, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(photo)
+    });
+  } catch(e) { alert('שגיאה בהעלאה, נסו שוב'); btn.textContent = '✅ העלו לגלריה!'; btn.disabled = false; return; }
 
+  btn.textContent = '✅ העלו לגלריה!';
+  btn.disabled = false;
   uploadedImage = null;
   document.getElementById('uploadForm').classList.remove('active');
   document.getElementById('uploadArea').innerHTML = `
@@ -826,14 +896,13 @@ function savePhoto() {
   document.getElementById('studentName').value = '';
   document.getElementById('uploadClass').value = '';
   document.getElementById('photoInput').value = '';
-  renderGallery();
+  await syncGallery();
   firework(window.innerWidth / 2, 400);
 }
 
 function renderGallery() {
-  const costumes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
   const filterClass = document.getElementById('classSelect').value;
-  const filtered = filterClass === 'all' ? costumes : costumes.filter(c => c.cls === filterClass);
+  const filtered = filterClass === 'all' ? galleryCostumes : galleryCostumes.filter(c => c.cls === filterClass);
 
   const grid = document.getElementById('costumeGrid');
   const empty = document.getElementById('costumeEmpty');
@@ -855,8 +924,13 @@ function renderGallery() {
   `).join('');
 }
 
-renderClassDropdowns();
-renderGallery();
+// Auto-enter if code saved
+if (galleryCode) {
+  document.getElementById('galleryCodeInput').value = galleryCode;
+  showGallery();
+} else {
+  renderClassDropdowns();
+}
 
 // ══ WhatsApp Share ══
 function shareWA(e) {
