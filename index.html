@@ -622,7 +622,7 @@
             <div class="hero-feat"><span>⭐</span>מדבקות</div>
             <div class="hero-feat"><span>🎆</span>אפקטים</div>
           </div>
-          <div class="hero-cta">🚀 כנסו — התלחנו!</div>
+          <div class="hero-cta">🚀 כנסו — התחלנו!</div>
         </div>
       </a>
     </div>
@@ -1299,7 +1299,8 @@ const Notes = {
     if (!f) { document.getElementById('nFeeling' + suffix).style.borderColor = '#ef4444'; setTimeout(() => document.getElementById('nFeeling' + suffix).style.borderColor = '', 1500); document.getElementById('nFeeling' + suffix).focus(); return; }
     const note = { n: n || 'אנונימי', c, f, h: h || '...', likes: 0, ts: Date.now() };
     try {
-      await fetch(FB_NOTES + '.json', { method: 'POST', body: JSON.stringify(note) });
+      const res = await fetch(FB_NOTES + '.json', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(note) });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
     } catch (e) { console.error('Note save error:', e); }
     document.getElementById('nName' + suffix).value = '';
     document.getElementById('nCity' + suffix).value = '';
@@ -1318,7 +1319,7 @@ const Notes = {
     localStorage.setItem('purim_liked', JSON.stringify(likedSet));
     const newLikes = (note.likes || 0) + (isLiking ? 1 : -1);
     try {
-      await fetch(FB_NOTES + '/' + note._id + '/likes.json', { method: 'PUT', body: JSON.stringify(newLikes) });
+      await fetch(FB_NOTES + '/' + note._id + '/likes.json', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(newLikes) });
     } catch (e) { console.error('Like error:', e); }
     note.likes = newLikes;
     this.render();
