@@ -1259,6 +1259,20 @@ const Notes = {
   ],
   async init() {
     try {
+      // Migrate old localStorage notes to Firebase (one-time)
+      const oldKey = 'purim_feelings_notes';
+      const oldData = localStorage.getItem(oldKey);
+      if (oldData) {
+        try {
+          const oldNotes = JSON.parse(oldData);
+          const defaultTexts = this.defaults.map(d => d.f);
+          const userNotes = oldNotes.filter(n => !defaultTexts.includes(n.f));
+          for (const note of userNotes) {
+            await fetch(FB_NOTES + '.json', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ n: note.n, c: note.c, f: note.f, h: note.h, likes: note.likes || 0, ts: Date.now() }) });
+          }
+        } catch (e) {}
+        localStorage.removeItem(oldKey);
+      }
       const res = await fetch(FB_NOTES + '.json');
       const data = await res.json();
       if (data && typeof data === 'object') {
@@ -1268,7 +1282,7 @@ const Notes = {
       // Seed defaults if empty
       if (this.notes.length === 0) {
         for (const d of this.defaults) {
-          await fetch(FB_NOTES + '.json', { method: 'POST', body: JSON.stringify({ ...d, ts: Date.now() }) });
+          await fetch(FB_NOTES + '.json', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ ...d, ts: Date.now() }) });
         }
         return this.init();
       }
