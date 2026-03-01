@@ -611,6 +611,28 @@
       </div>
     </div>
   </div>
+
+  <!-- Feelings Wall on Home Page -->
+  <div class="section" style="text-align:center;">
+    <h2 class="section-title">
+      <span class="line"></span>💛 קיר הרגשות 💛<span class="line"></span>
+    </h2>
+    <p style="color:#6b7280;max-width:450px;margin:0 auto 18px;line-height:1.7;font-size:0.95rem;">
+      כאן אפשר לכתוב מה אתם מרגישים — כל רגש לגיטימי! 🤗<br>
+      תקראו מה ילדים אחרים כתבו ותדעו שאתם לא לבד.
+    </p>
+    <div class="note-form">
+      <h3 style="color:#7c3aed;font-size:1.1rem;margin-bottom:10px;">✏️ הוסיפו פתק משלכם</h3>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input class="note-input" id="nNameHome" placeholder="השם שלי" style="flex:1">
+        <input class="note-input" id="nCityHome" placeholder="מאיפה אני" style="flex:1">
+      </div>
+      <textarea class="note-input" id="nFeelingHome" placeholder="אני מרגיש/ה..." style="min-height:60px;resize:vertical;margin-bottom:8px;"></textarea>
+      <textarea class="note-input" id="nHelpHome" placeholder="מה עוזר לי?" style="min-height:50px;resize:vertical;margin-bottom:10px;"></textarea>
+      <button class="note-submit" onclick="Notes.addFrom('Home')">📌 הדביקו את הפתק!</button>
+    </div>
+    <div class="notes-wall" id="notesWallHome"></div>
+  </div>
 </div>
 
 <!-- ══ Tab: Games ══ -->
@@ -1031,8 +1053,8 @@ const Notes = {
   ],
   load() { return JSON.parse(localStorage.getItem(this.KEY) || 'null') || [...this.defaults]; },
   save(notes) { localStorage.setItem(this.KEY, JSON.stringify(notes)); },
-  render() {
-    const notes = this.load(), wall = document.getElementById('notesWall');
+  renderWall(wallId) {
+    const notes = this.load(), wall = document.getElementById(wallId);
     if (!wall) return; wall.innerHTML = '';
     const colors = ['sn1','sn2','sn3','sn4','sn5','sn6','sn7'];
     notes.forEach((note, i) => {
@@ -1041,20 +1063,22 @@ const Notes = {
       wall.appendChild(el);
     });
   },
-  add() {
-    const n = document.getElementById('nName').value.trim();
-    const c = document.getElementById('nCity').value.trim();
-    const f = document.getElementById('nFeeling').value.trim();
-    const h = document.getElementById('nHelp').value.trim();
-    if (!f) { document.getElementById('nFeeling').style.borderColor = '#ef4444'; setTimeout(() => document.getElementById('nFeeling').style.borderColor = '', 1500); document.getElementById('nFeeling').focus(); return; }
+  render() { this.renderWall('notesWall'); this.renderWall('notesWallHome'); },
+  addFrom(suffix) {
+    const n = document.getElementById('nName' + suffix).value.trim();
+    const c = document.getElementById('nCity' + suffix).value.trim();
+    const f = document.getElementById('nFeeling' + suffix).value.trim();
+    const h = document.getElementById('nHelp' + suffix).value.trim();
+    if (!f) { document.getElementById('nFeeling' + suffix).style.borderColor = '#ef4444'; setTimeout(() => document.getElementById('nFeeling' + suffix).style.borderColor = '', 1500); document.getElementById('nFeeling' + suffix).focus(); return; }
     const notes = this.load();
     notes.unshift({ n: n || 'אנונימי', c, f, h: h || '...', likes: 0 });
     this.save(notes); this.render();
-    document.getElementById('nName').value = '';
-    document.getElementById('nCity').value = '';
-    document.getElementById('nFeeling').value = '';
-    document.getElementById('nHelp').value = '';
+    document.getElementById('nName' + suffix).value = '';
+    document.getElementById('nCity' + suffix).value = '';
+    document.getElementById('nFeeling' + suffix).value = '';
+    document.getElementById('nHelp' + suffix).value = '';
   },
+  add() { this.addFrom(''); },
   like(i) {
     const notes = this.load();
     if (notes[i]) { notes[i].liked = !notes[i].liked; notes[i].likes = (notes[i].likes || 0) + (notes[i].liked ? 1 : -1); this.save(notes); this.render(); }
