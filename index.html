@@ -389,6 +389,52 @@
       text-align: center; margin-top: 30px; margin-bottom: 15px;
     }
 
+    /* ══ Sticky Notes Feelings Wall ══ */
+    .note-form {
+      background: #fff; border-radius: 18px; padding: 20px;
+      max-width: 420px; margin: 0 auto 25px; text-align: right;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid #f3e8ff;
+    }
+    .note-input {
+      width: 100%; padding: 10px 14px; border-radius: 10px;
+      border: 2px solid #e9d5ff; background: #faf5ff; color: #1e1b4b;
+      font-size: 0.9rem; font-family: 'Heebo', sans-serif; direction: rtl;
+      transition: border-color 0.3s;
+    }
+    .note-input:focus { outline: none; border-color: #7c3aed; }
+    .note-input::placeholder { color: #c4b5fd; }
+    .note-submit {
+      width: 100%; padding: 12px; border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: 900; cursor: pointer;
+      background: linear-gradient(135deg, #7c3aed, #ec4899); color: #fff;
+      font-family: 'Heebo', sans-serif; transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(124,58,237,0.3);
+    }
+    .note-submit:hover { transform: translateY(-2px); }
+    .notes-wall {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px; max-width: 700px; margin: 0 auto; padding: 10px;
+    }
+    .sticky-note {
+      padding: 14px 12px 30px; border-radius: 3px;
+      box-shadow: 2px 3px 10px rgba(0,0,0,0.12); min-height: 115px;
+      position: relative; font-size: 0.8rem; line-height: 1.6; color: #333;
+      cursor: default; transition: transform 0.3s; transform: rotate(var(--rot, 0deg));
+    }
+    .sticky-note:hover { transform: rotate(0deg) scale(1.05); z-index: 10; }
+    .sticky-note .nf { font-weight: 700; font-size: 0.85rem; margin-bottom: 5px; }
+    .sticky-note .nh { margin-top: 6px; font-size: 0.75rem; font-style: italic; opacity: 0.75; }
+    .sticky-note .na { position: absolute; bottom: 6px; right: 10px; font-size: 0.7rem; font-weight: 700; opacity: 0.5; }
+    .sticky-note .nl { position: absolute; top: 5px; left: 7px; cursor: pointer; font-size: 0.85rem; opacity: 0.4; transition: all 0.2s; }
+    .sticky-note .nl:hover, .sticky-note .nl.liked { opacity: 1; }
+    .sn1 { background: #FFF9C4; --rot: -2deg; }
+    .sn2 { background: #B3E5FC; --rot: 1.5deg; }
+    .sn3 { background: #C8E6C9; --rot: -1deg; }
+    .sn4 { background: #FFE0B2; --rot: 2deg; }
+    .sn5 { background: #E1BEE7; --rot: -1.5deg; }
+    .sn6 { background: #F8BBD0; --rot: 1deg; }
+    .sn7 { background: #B2DFDB; --rot: -0.5deg; }
+
     /* ══ Footer ══ */
     .footer {
       position: relative; z-index: 10;
@@ -463,6 +509,7 @@
   <button class="tab-btn active" data-tab="main" role="tab" aria-selected="true">🏠 ראשי</button>
   <button class="tab-btn" data-tab="games" role="tab" aria-selected="false">🎮 משחקים</button>
   <button class="tab-btn" data-tab="videos" role="tab" aria-selected="false">🎬 סרטונים</button>
+  <button class="tab-btn" data-tab="feelings" role="tab" aria-selected="false">💛 קיר הרגשות</button>
 </nav>
 
 <!-- ══ Tab: Main ══ -->
@@ -659,6 +706,29 @@
         <div class="video-title">🎬 סרטון</div>
       </a>
     </div>
+  </div>
+</div>
+
+<!-- ══ Tab: Feelings Wall ══ -->
+<div class="tab-content" id="tab-feelings">
+  <div class="section" style="text-align:center;">
+    <div style="font-size:3.5rem;margin-bottom:8px;">💛</div>
+    <h2 class="section-title" style="font-size:1.6rem;">קיר הרגשות</h2>
+    <p style="color:#6b7280;max-width:450px;margin:0 auto 20px;line-height:1.7;font-size:0.95rem;">
+      כאן אפשר לכתוב מה אתם מרגישים — כל רגש לגיטימי! 🤗<br>
+      תקראו מה ילדים אחרים כתבו ותדעו שאתם לא לבד.
+    </p>
+    <div class="note-form" id="noteForm">
+      <h3 style="color:#7c3aed;font-size:1.1rem;margin-bottom:10px;">✏️ הוסיפו פתק משלכם</h3>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input class="note-input" id="nName" placeholder="השם שלי" style="flex:1">
+        <input class="note-input" id="nCity" placeholder="מאיפה אני" style="flex:1">
+      </div>
+      <textarea class="note-input" id="nFeeling" placeholder="אני מרגיש/ה..." style="min-height:60px;resize:vertical;margin-bottom:8px;"></textarea>
+      <textarea class="note-input" id="nHelp" placeholder="מה עוזר לי?" style="min-height:50px;resize:vertical;margin-bottom:10px;"></textarea>
+      <button class="note-submit" onclick="Notes.add()">📌 הדביקו את הפתק!</button>
+    </div>
+    <div class="notes-wall" id="notesWall"></div>
   </div>
 </div>
 
@@ -945,6 +1015,53 @@ function shareWA(e) {
   btn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
   setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 4000);
 }
+
+// ══ Sticky Notes Feelings Wall ══
+const Notes = {
+  KEY: 'purim_feelings_notes',
+  defaults: [
+    {n:'דניאל',c:'ירושלים',f:'אני מרגיש לחוץ בגלל המלחמה',h:'לנשום עמוק ולהתפלל',likes:5},
+    {n:'שלמה',c:'תל אביב',f:'אני גם שמח שהאיראנים מפסידים וגם חושש',h:'לדבר על זה עם אמא',likes:3},
+    {n:'רחלי',c:'בני ברק',f:'אני פוחדת כששומעים אזעקות',h:'פרקי תהילים ולחבק את אמא',likes:7},
+    {n:'יוסי',c:'באר שבע',f:'אני גיבור אבל לפעמים גם פוחד וזה בסדר',h:'לשחק עם חברים ולדבר על זה',likes:4},
+    {n:'מיכל',c:'חיפה',f:'אני מרגישה שאנחנו עם חזק',h:'לשמוע סיפורים על גיבורים מהתנ"ך',likes:6},
+    {n:'אלעד',c:'אשדוד',f:'אני חושב על החיילים שלנו כל הזמן',h:'להתפלל עליהם ולצייר להם תמונות',likes:8},
+    {n:'נועה',c:'ירושלים',f:'אני שמחה שיש לנו את הקב"ה שישמור עלינו',h:'לומר תהילים ולעשות מצוות',likes:9},
+    {n:'אברהם',c:'צפת',f:'אני מאמין שהכל לטובה גם אם קשה',h:'ללמוד תורה ולעזור לאחרים',likes:5},
+  ],
+  load() { return JSON.parse(localStorage.getItem(this.KEY) || 'null') || [...this.defaults]; },
+  save(notes) { localStorage.setItem(this.KEY, JSON.stringify(notes)); },
+  render() {
+    const notes = this.load(), wall = document.getElementById('notesWall');
+    if (!wall) return; wall.innerHTML = '';
+    const colors = ['sn1','sn2','sn3','sn4','sn5','sn6','sn7'];
+    notes.forEach((note, i) => {
+      const el = document.createElement('div'); el.className = 'sticky-note ' + colors[i % colors.length];
+      el.innerHTML = '<div class="nf">' + note.f + '</div><div class="nh">💡 מה עוזר לי? ' + note.h + '</div><div class="na">— ' + note.n + (note.c ? ', ' + note.c : '') + '</div><span class="nl' + (note.liked ? ' liked' : '') + '" onclick="Notes.like(' + i + ')">' + (note.liked ? '❤️' : '🤍') + ' ' + (note.likes || 0) + '</span>';
+      wall.appendChild(el);
+    });
+  },
+  add() {
+    const n = document.getElementById('nName').value.trim();
+    const c = document.getElementById('nCity').value.trim();
+    const f = document.getElementById('nFeeling').value.trim();
+    const h = document.getElementById('nHelp').value.trim();
+    if (!f) { document.getElementById('nFeeling').style.borderColor = '#ef4444'; setTimeout(() => document.getElementById('nFeeling').style.borderColor = '', 1500); document.getElementById('nFeeling').focus(); return; }
+    const notes = this.load();
+    notes.unshift({ n: n || 'אנונימי', c, f, h: h || '...', likes: 0 });
+    this.save(notes); this.render();
+    document.getElementById('nName').value = '';
+    document.getElementById('nCity').value = '';
+    document.getElementById('nFeeling').value = '';
+    document.getElementById('nHelp').value = '';
+  },
+  like(i) {
+    const notes = this.load();
+    if (notes[i]) { notes[i].liked = !notes[i].liked; notes[i].likes = (notes[i].likes || 0) + (notes[i].liked ? 1 : -1); this.save(notes); this.render(); }
+  }
+};
+// Render notes when page loads
+Notes.render();
 </script>
 
 </body>

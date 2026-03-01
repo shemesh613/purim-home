@@ -344,6 +344,51 @@
     .res-btn.primary { background: linear-gradient(135deg, #7c3aed, #ec4899); color: #fff; box-shadow: 0 4px 15px rgba(124,58,237,0.3); }
     .res-btn.share { background: #25d366; color: #fff; }
     .res-btn.home { background: #f3f4f6; color: #4b5563; }
+
+    /* ══ Sticker Collection ══ */
+    .sticker-bar { display:flex; align-items:center; gap:6px; background:linear-gradient(135deg,#fef3c7,#fde68a); padding:6px 14px; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 8px rgba(251,191,36,0.2); }
+    .sticker-bar:hover { transform:translateY(-2px); box-shadow:0 4px 15px rgba(251,191,36,0.3); }
+    .sticker-bar .sb-label { font-size:0.8rem; font-weight:700; color:#92400e; }
+    .sticker-bar .sb-count { font-size:1.1rem; font-weight:900; color:#d97706; }
+    .sticker-bar .sb-icons { display:flex; gap:1px; font-size:0.9rem; }
+    @keyframes stickerPop { 0%{transform:translate(-50%,-50%) scale(0) rotate(-180deg);opacity:1} 40%{transform:translate(-50%,-50%) scale(1.6) rotate(10deg);opacity:1} 100%{transform:translate(-50%,-50%) scale(0.3) translateY(-80px);opacity:0} }
+    .sticker-fly { position:fixed; top:50%; left:50%; font-size:3.5rem; z-index:800; pointer-events:none; animation:stickerPop 1s ease-out forwards; }
+
+    /* ══ Sticker Album Overlay ══ */
+    .album-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:900; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+    .album-overlay.visible { display:flex; }
+    .album-box { background:#fff; border-radius:24px; padding:25px; max-width:420px; width:90%; max-height:80vh; overflow-y:auto; text-align:center; box-shadow:0 15px 50px rgba(0,0,0,0.2); }
+    .album-box h2 { font-family:'Frank Ruhl Libre',serif; font-size:1.6rem; color:#7c3aed; margin-bottom:8px; }
+    .album-box .album-count { font-size:0.9rem; color:#9ca3af; margin-bottom:15px; }
+    .album-grid { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+    .album-cell { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; border:2px solid #e9d5ff; background:#faf5ff; transition:all 0.3s; }
+    .album-cell.empty { opacity:0.2; border-color:#e5e7eb; background:#f9fafb; font-size:1rem; }
+    .album-close { margin-top:15px; padding:8px 24px; border:none; border-radius:10px; background:#f3f4f6; color:#4b5563; font-family:'Heebo'; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+    .album-close:hover { background:#e5e7eb; }
+
+    /* ══ Stage Overlay ══ */
+    .stage-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:950; display:none; align-items:center; justify-content:center; flex-direction:column; gap:12px; text-align:center; }
+    .stage-overlay.visible { display:flex; }
+    .stage-medal { font-size:5rem; animation:stageSpin 1.2s cubic-bezier(0.175,0.885,0.32,1.275); }
+    @keyframes stageSpin { 0%{transform:scale(0) rotate(-360deg)} 50%{transform:scale(1.3) rotate(10deg)} 100%{transform:scale(1) rotate(0)} }
+    .stage-title { font-family:'Frank Ruhl Libre',serif; font-size:1.8rem; color:#7c3aed; }
+    .stage-sub { font-size:1rem; color:#9ca3af; }
+    .stage-stats { display:flex; gap:18px; }
+    .stage-stats .ss { text-align:center; }
+    .stage-stats .ss .sv { font-size:1.5rem; font-weight:900; display:block; }
+    .stage-stats .ss .sl { font-size:0.7rem; color:#9ca3af; }
+    .stage-next-btn { padding:14px 40px; border:none; border-radius:14px; font-size:1.1rem; font-weight:900; cursor:pointer; background:linear-gradient(135deg,#7c3aed,#ec4899); color:#fff; font-family:'Heebo'; box-shadow:0 6px 20px rgba(124,58,237,0.3); transition:all 0.3s; }
+    .stage-next-btn:hover { transform:translateY(-3px); }
+
+    /* ══ Medal Tray ══ */
+    .medal-tray { position:fixed; top:80px; left:8px; z-index:100; display:none; flex-direction:column; gap:3px; align-items:center; }
+    .medal-tray.visible { display:flex; }
+    .medal-badge { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; background:#fff; border:2px solid #e5e7eb; opacity:0.3; filter:grayscale(1); transition:all 0.4s; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+    .medal-badge.earned { opacity:1; filter:none; border-color:#fbbf24; box-shadow:0 2px 8px rgba(251,191,36,0.3); }
+    .medal-badge.just-earned { animation:medalPop 0.7s cubic-bezier(0.175,0.885,0.32,1.275); }
+    @keyframes medalPop { 0%{transform:scale(0) rotate(-180deg)} 50%{transform:scale(1.4) rotate(10deg)} 100%{transform:scale(1) rotate(0)} }
+    .medal-count { font-size:0.65rem; font-weight:900; color:#d97706; background:#fef3c7; padding:2px 6px; border-radius:6px; margin-top:2px; }
+    @media(max-width:600px) { .medal-tray { display:none !important; } }
   </style>
 </head>
 <body>
@@ -357,6 +402,7 @@
   <span id="qNum" style="color:#9ca3af;">שאלה 1/20</span>
   <div class="score-box" id="scoreBox">🏆 0</div>
   <div class="streak-box" id="streakBox">🔥 רצף: 0</div>
+  <div class="sticker-bar" onclick="showAlbum()"><span class="sb-label">🎭 מדבקות:</span><span class="sb-count" id="stickerCount">0</span><span class="sb-icons" id="stickerIcons"></span></div>
 </div>
 
 <div class="question-card" id="questionCard">
@@ -376,6 +422,28 @@
     <button class="res-btn primary" onclick="startQuiz()">🔄 שחקו שוב!</button>
     <button class="res-btn share" onclick="shareResult()">📱 שתפו</button>
     <button class="res-btn home" onclick="location.href='../index.html'">🏠 חזרה</button>
+  </div>
+  <div id="resStickers" style="margin:15px 0;display:flex;flex-wrap:wrap;gap:4px;justify-content:center"></div>
+</div>
+
+<div class="medal-tray" id="medalTray"></div>
+<div class="stage-overlay" id="stageOverlay">
+  <div class="stage-medal" id="stageMedal">🥉</div>
+  <div class="stage-title" id="stageTitle"></div>
+  <div class="stage-sub" id="stageSub"></div>
+  <div class="stage-stats">
+    <div class="ss"><span class="sv" id="ssScore" style="color:#d97706">0</span><span class="sl">נקודות</span></div>
+    <div class="ss"><span class="sv" id="ssCorrect" style="color:#22c55e">0</span><span class="sl">נכונות</span></div>
+    <div class="ss"><span class="sv" id="ssStreak" style="color:#ef4444">0</span><span class="sl">רצף מקס׳</span></div>
+  </div>
+  <button class="stage-next-btn" onclick="continueAfterStage()">▶ המשך לשלב הבא!</button>
+</div>
+<div class="album-overlay" id="albumOverlay" onclick="if(event.target===this)closeAlbum()">
+  <div class="album-box">
+    <h2>🎭 אלבום המדבקות שלי</h2>
+    <div class="album-count" id="albumCount">אספתם 0 מדבקות!</div>
+    <div class="album-grid" id="albumGrid"></div>
+    <button class="album-close" onclick="closeAlbum()">סגור ✕</button>
   </div>
 </div>
 
@@ -400,11 +468,91 @@ const QUESTIONS = [
   { q: "מתי קוראים את המגילה?", options: ["בבוקר בלבד", "בערב ובבוקר", "בצהריים", "רק בשבת"], correct: 1, emoji: "📖", fact: "קוראים פעמיים — בערב ובבוקר!" },
   { q: "באיזה חודש חל פורים?", options: ["ניסן", "אדר", "תשרי", "כסלו"], correct: 1, emoji: "📅", fact: "משנכנס אדר מרבין בשמחה!" },
   { q: "מה שם אשתו של המן?", options: ["ושתי", "אסתר", "זרש", "מרים"], correct: 2, emoji: "👿", fact: "זרש יעצה להכין עץ גבוה 50 אמה!" },
-  { q: "מה המשמעות של 'ונהפוך הוא'?", options: ["הכל התהפך!", "נגמר", "התחיל", "נשאר"], correct: 0, emoji: "🔄", fact: "מי שרצה להשמיד — נשמד! מי שהיה בסכנה — ניצל!" }
+  { q: "מה המשמעות של 'ונהפוך הוא'?", options: ["הכל התהפך!", "נגמר", "התחיל", "נשאר"], correct: 0, emoji: "🔄", fact: "מי שרצה להשמיד — נשמד! מי שהיה בסכנה — ניצל!" },
+  { q: "כמה ימים נמשך המשתה הגדול של אחשורוש?", options: ["40 יום", "100 יום", "180 יום", "שנה שלמה"], correct: 2, emoji: "🎉", fact: "מאה ושמונים יום — חצי שנה של חגיגות!" },
+  { q: "למה מתחפשים בפורים?", options: ["כי זה כיף", "כי הנס היה בהסתר פנים", "לכבוד אסתר", "בגלל המן"], correct: 1, emoji: "🎭", fact: "הנס היה נסתר — בלי גילוי שכינה — ולכן מתחפשים!" },
+  { q: "מה הסתירה אסתר מהמלך?", options: ["את שמה", "את עמה ומולדתה", "את גילה", "את מקום מגוריה"], correct: 1, emoji: "🤫", fact: "אסתר לא סיפרה שהיא יהודייה — עד הרגע הנכון!" },
+  { q: "לכמה אנשים חייבים לשלוח משלוח מנות?", options: ["לכולם", "לאחד לפחות", "לשלושה", "לעשרה"], correct: 1, emoji: "🎁", fact: "מצווה לשלוח לפחות לאיש אחד — שתי מנות!" },
+  { q: "כמה מנות מינימום במשלוח מנות?", options: ["אחת", "שתיים", "שלוש", "ארבע"], correct: 1, emoji: "📦", fact: "שתי מנות לאיש אחד — מנות של מאכל מוכן!" },
+  { q: "לכמה עניים נותנים מתנות לאביונים?", options: ["לאחד", "לשניים לפחות", "לשלושה", "לעשרה"], correct: 1, emoji: "💝", fact: "לפחות לשני עניים — מתנה אחת לכל אחד!" },
+  { q: "מאיזה עם היה המן?", options: ["מצרי", "בבלי", "אגגי (עמלק)", "פרסי"], correct: 2, emoji: "😈", fact: "המן היה אגגי — מזרע עמלק, שונא ישראל!" },
+  { q: "מי הכריז 'ככה ייעשה לאיש' ברחובות שושן?", options: ["אסתר", "המלך", "המן", "מרדכי"], correct: 2, emoji: "📣", fact: "המן חשב שהכבוד מיועד לו — אבל הוביל את מרדכי!" },
+  { q: "מה הכין המן למרדכי?", options: ["משתה", "עץ גבוה 50 אמה", "כלא", "מתנה"], correct: 1, emoji: "🪵", fact: "המן הכין עץ — ובסוף הוא עצמו נתלה עליו! ונהפוך הוא!" },
+  { q: "מה קבעו מרדכי ואסתר לדורות?", options: ["צום", "את חג הפורים", "תפילה חדשה", "מצוות חדשות"], correct: 1, emoji: "📜", fact: "מרדכי ואסתר כתבו אגרות לקיים את הפורים לדורות!" },
+  { q: "מה עושים ביום שלפני פורים?", options: ["חוגגים", "תענית אסתר", "קוראים תורה", "ישנים"], correct: 1, emoji: "🙏", fact: "תענית אסתר — זכר לצום של אסתר ועם ישראל!" },
+  { q: "מי אמר 'כי מי יודע אם לעת כזאת הגעת למלכות'?", options: ["אסתר", "מרדכי", "המלך", "חרבונא"], correct: 1, emoji: "💪", fact: "מרדכי אמר לאסתר — כל אחד נולד עם שליחות!" },
+  { q: "כמה ימים צמו אסתר וכל היהודים?", options: ["יום אחד", "שלושה ימים", "שבעה ימים", "ארבעים יום"], correct: 1, emoji: "🍽️", fact: "שלושה ימים — לילה ויום!" },
+  { q: "איפה ישב מרדכי כל יום?", options: ["בבית", "בשער המלך", "בבית הכנסת", "בשוק"], correct: 1, emoji: "🚪", fact: "מרדכי ישב בשער המלך — ומשם שמר על אסתר!" },
+  { q: "כמה משתאות הכינה אסתר?", options: ["אחד", "שניים", "שלושה", "ארבעה"], correct: 1, emoji: "🍷", fact: "אסתר הזמינה את המלך והמן לשני משתאות!" }
 ];
 
 let currentQ = 0, score = 0, streak = 0, maxStreak = 0, answered = false, shuffledQ = [];
+let stickerCount = 0, stickers = [], correctCount = 0, currentStage = 1;
+const PURIM_STICKERS = ['🎭','👑','📜','🍷','🎪','🎉','🎊','🕍','🔯','🌟','💫','🎵','🕎','🛡️','⚔️','🦁','🐴','👸','🤴','🧙','🃏','🎯','💎','🪙','🏆','🥇','🎁','🍬','🍪','🍩','🎂','🫓','🏰','📯','🪘','🎺','✡️','🫒','🕊️','🔥'];
+const MEDALS = [
+  {id:'first',i:'⭐',t:'תשובה ראשונה!'},{id:'s3',i:'🔥',t:'רצף 3!'},{id:'s5',i:'⚡',t:'רצף 5!'},
+  {id:'s7',i:'🌟',t:'רצף 7!'},{id:'s10',i:'🏆',t:'רצף 10!'},{id:'p50',i:'💰',t:'50 נקודות'},
+  {id:'p100',i:'💯',t:'100 נקודות'},{id:'p200',i:'💎',t:'200 נקודות'},{id:'p300',i:'👑',t:'300 נקודות'},
+  {id:'stage1',i:'🥉',t:'שלב 1'},{id:'stage2',i:'🥈',t:'שלב 2'},{id:'stage3',i:'🥇',t:'שלב 3'},{id:'stage4',i:'🏅',t:'שלב 4'}
+];
+let earnedMedals = new Set();
 const effectsEl = document.getElementById('effects');
+
+function initMedals() {
+  const tray = document.getElementById('medalTray'); tray.innerHTML = '';
+  MEDALS.forEach(m => {
+    const el = document.createElement('div'); el.className = 'medal-badge'; el.id = 'medal_'+m.id;
+    el.textContent = m.i; el.title = m.t; tray.appendChild(el);
+  });
+  const c = document.createElement('div'); c.className = 'medal-count'; c.id = 'medalCount'; c.textContent = '0/'+MEDALS.length;
+  tray.appendChild(c); tray.classList.add('visible');
+}
+function earnMedal(id) {
+  if (earnedMedals.has(id)) return; earnedMedals.add(id);
+  const el = document.getElementById('medal_'+id);
+  if (el) { el.classList.add('earned','just-earned'); setTimeout(()=>el.classList.remove('just-earned'),2000); }
+  document.getElementById('medalCount').textContent = earnedMedals.size+'/'+MEDALS.length;
+}
+function checkMedals() {
+  if (correctCount===1) earnMedal('first');
+  if (streak>=3) earnMedal('s3'); if (streak>=5) earnMedal('s5');
+  if (streak>=7) earnMedal('s7'); if (streak>=10) earnMedal('s10');
+  if (score>=50) earnMedal('p50'); if (score>=100) earnMedal('p100');
+  if (score>=200) earnMedal('p200'); if (score>=300) earnMedal('p300');
+}
+function awardSticker() {
+  const s = PURIM_STICKERS[stickerCount % PURIM_STICKERS.length];
+  stickerCount++; stickers.push(s);
+  document.getElementById('stickerCount').textContent = stickerCount;
+  const icons = document.getElementById('stickerIcons');
+  if (stickers.length <= 5) icons.textContent = stickers.slice(-5).join('');
+  else icons.textContent = stickers.slice(-3).join('') + '...';
+  const el = document.createElement('div'); el.className = 'sticker-fly'; el.textContent = s;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),1100);
+}
+function showAlbum() {
+  const grid = document.getElementById('albumGrid'); grid.innerHTML = '';
+  stickers.forEach(s => { const c=document.createElement('div');c.className='album-cell';c.textContent=s;grid.appendChild(c); });
+  for (let i=0;i<Math.max(0,40-stickers.length);i++) { const c=document.createElement('div');c.className='album-cell empty';c.textContent='❓';grid.appendChild(c); }
+  document.getElementById('albumCount').textContent = 'אספתם '+stickerCount+' מדבקות!';
+  document.getElementById('albumOverlay').classList.add('visible');
+}
+function closeAlbum() { document.getElementById('albumOverlay').classList.remove('visible'); }
+function showStageComplete(stageNum) {
+  const medals=['🥉','🥈','🥇','🏅'], names=['שלב ראשון','שלב שני','שלב שלישי','שלב רביעי'];
+  const subs=['מתחממים! 🔥','כבר בקצב! ⚡','כמעט שם! 💪','הגמר הגדול! 👑'];
+  document.getElementById('stageMedal').textContent=medals[stageNum-1]||'🏅';
+  document.getElementById('stageTitle').textContent=names[stageNum-1]+' הושלם! '+medals[stageNum-1];
+  document.getElementById('stageSub').textContent=subs[stageNum-1]||'';
+  document.getElementById('ssScore').textContent=score;
+  document.getElementById('ssCorrect').textContent=correctCount;
+  document.getElementById('ssStreak').textContent=maxStreak;
+  document.getElementById('stageOverlay').classList.add('visible');
+  earnMedal('stage'+stageNum);
+  playVictoryFanfare(); FX.emojiRain(['🎉','⭐','🏆','✨','👑'],15); FX.starSpin(5);
+  currentStage=stageNum+1;
+}
+function continueAfterStage() { document.getElementById('stageOverlay').classList.remove('visible'); showQuestion(); }
 
 // ══════════ AUDIO ENGINE ══════════
 let audioCtx = null;
@@ -806,17 +954,24 @@ function shuffle(a) { const b=[...a]; for(let i=b.length-1;i>0;i--){const j=Math
 function startQuiz() {
   shuffledQ = shuffle(QUESTIONS);
   currentQ = 0; score = 0; streak = 0; maxStreak = 0; answered = false;
+  stickerCount = 0; stickers = []; correctCount = 0; currentStage = 1; earnedMedals = new Set();
   document.getElementById('results').classList.remove('active');
   document.getElementById('questionCard').style.display = 'block';
   document.getElementById('scoreBox').textContent = '🏆 0';
   document.getElementById('streakBox').classList.remove('active');
+  document.getElementById('stickerCount').textContent = '0';
+  document.getElementById('stickerIcons').textContent = '';
+  initMedals();
   showQuestion();
 }
 
 function showQuestion() {
   const q = shuffledQ[currentQ]; answered = false;
   document.getElementById('progress').style.width = `${(currentQ/shuffledQ.length)*100}%`;
-  document.getElementById('qNum').textContent = `שאלה ${currentQ+1}/${shuffledQ.length}`;
+  const stageSize = Math.ceil(shuffledQ.length / 4);
+  const stageNum = Math.floor(currentQ / stageSize) + 1;
+  const stageNames = ['שלב א׳','שלב ב׳','שלב ג׳','שלב ד׳'];
+  document.getElementById('qNum').textContent = `${stageNames[stageNum-1]||''} | שאלה ${currentQ+1}/${shuffledQ.length}`;
   document.getElementById('qEmoji').textContent = q.emoji;
   document.getElementById('qText').textContent = q.q;
   document.getElementById('feedback').textContent = '';
@@ -852,10 +1007,11 @@ function selectAnswer(index, clickedBtn) {
 
   if (index === q.correct) {
     // ═══ CORRECT! GO ABSOLUTELY INSANE! ═══
-    streak++;
+    streak++; correctCount++;
     if (streak > maxStreak) maxStreak = streak;
     const points = 10 + (streak > 1 ? streak * 5 : 0);
     score += points;
+    awardSticker(); checkMedals();
 
     clickedBtn.classList.add('correct');
 
@@ -906,6 +1062,11 @@ function selectAnswer(index, clickedBtn) {
 
 function nextQuestion() {
   currentQ++;
+  const stageSize = Math.ceil(shuffledQ.length / 4);
+  if (currentQ > 0 && currentQ % stageSize === 0 && currentQ < shuffledQ.length) {
+    showStageComplete(Math.floor(currentQ / stageSize));
+    return;
+  }
   if (currentQ >= shuffledQ.length) showResults();
   else showQuestion();
 }
@@ -922,7 +1083,9 @@ function showResults() {
 
   document.getElementById('resEmoji').textContent = emoji;
   document.getElementById('resTitle').textContent = title;
-  document.getElementById('resScore').innerHTML = `🏆 ${score} נקודות<br>🔥 רצף שיא: ${maxStreak}<br>⭐ ${Math.round((score / (shuffledQ.length * 15)) * 100)}% הצלחה`;
+  document.getElementById('resScore').innerHTML = `🏆 ${score} נקודות<br>🔥 רצף שיא: ${maxStreak}<br>⭐ ${Math.round((score / (shuffledQ.length * 15)) * 100)}% הצלחה<br>🎭 ${stickerCount} מדבקות נאספו!`;
+  document.getElementById('resStickers').innerHTML = stickers.map(s=>'<span style="font-size:1.4rem">'+s+'</span>').join('');
+  document.getElementById('medalTray').classList.remove('visible');
   document.getElementById('resMsg').textContent = msg;
   document.getElementById('results').classList.add('active');
 
