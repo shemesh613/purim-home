@@ -487,14 +487,29 @@ const QUESTIONS = [
   { q: "כמה משתאות הכינה אסתר?", options: ["אחד", "שניים", "שלושה", "ארבעה"], correct: 1, emoji: "🍷", fact: "אסתר הזמינה את המלך והמן לשני משתאות!" }
 ];
 
+// ══ שלב מיוחד — ונהפוך הוא: מהמן לחמינאי! ══
+const WAR_QUESTIONS = [
+  { q: "מי הוא ה'המן' של הדור שלנו?", options: ["פוטין", "חמינאי — מנהיג איראן", "ארדואן", "קים ג'ונג-און"], correct: 1, emoji: "👹", fact: "חמינאי מנהיג איראן — ממש כמו המן, רצה להשמיד את ישראל!" },
+  { q: "מה הקשר בין המן לחמינאי?", options: ["אותו שם", "שניהם מפרס!", "אותה משפחה", "אין קשר"], correct: 1, emoji: "🗺️", fact: "המן היה מפרס (איראן של היום) — וחמינאי מאיראן! ונהפוך הוא!" },
+  { q: "מה שם מבצע ישראל נגד איראן?", options: ["מגן דוד", "ימי תשובה", "חרבות ברזל", "מבצע פורים"], correct: 1, emoji: "⚔️", fact: "ימי תשובה — מבצע ישראלי מרשים ומדויק!" },
+  { q: "איזה מערכת הגנה מגינה על ישראל מטילים?", options: ["חץ", "כיפת ברזל", "שריון", "מגן"], correct: 1, emoji: "🛡️", fact: "כיפת ברזל — נס טכנולוגי שמגן על מיליוני ישראלים!" },
+  { q: "מה קרה ב-7 באוקטובר?", options: ["חג", "מתקפת טרור של חמאס", "בחירות", "הסכם שלום"], correct: 1, emoji: "🕯️", fact: "יום קשה לעם ישראל — אבל קמנו חזק יותר!" },
+  { q: "מה הביטוי 'ונהפוך הוא' אומר על ישראל היום?", options: ["אנחנו חלשים", "מי שקם עלינו — נופל!", "לא רלוונטי", "רק בפורים"], correct: 1, emoji: "🔄", fact: "בכל דור קמים עלינו — ו-הקב\"ה מצילנו! ונהפוך הוא!" },
+  { q: "כמה מדינות תקפו את ישראל באפריל 2024?", options: ["רק איראן", "איראן עם שלוחים", "5 מדינות", "אף אחת"], correct: 1, emoji: "🇮🇱", fact: "איראן שיגרה מאות טילים ומל\"טים — ו-99% יורטו! נס!" },
+  { q: "מי אמר 'עם ישראל חי'?", options: ["רק בשירים", "כל עם ישראל — בכל דור!", "רק בפורים", "רק חיילים"], correct: 1, emoji: "💪", fact: "עם ישראל חי! — מהמגילה ועד היום, אנחנו פה וחזקים!" },
+];
+
+const ALL_QUESTIONS = [...QUESTIONS, ...WAR_QUESTIONS];
+
 let currentQ = 0, score = 0, streak = 0, maxStreak = 0, answered = false, shuffledQ = [];
 let stickerCount = 0, stickers = [], correctCount = 0, currentStage = 1;
 const PURIM_STICKERS = ['🎭','👑','📜','🍷','🎪','🎉','🎊','🕍','🔯','🌟','💫','🎵','🕎','🛡️','⚔️','🦁','🐴','👸','🤴','🧙','🃏','🎯','💎','🪙','🏆','🥇','🎁','🍬','🍪','🍩','🎂','🫓','🏰','📯','🪘','🎺','✡️','🫒','🕊️','🔥'];
+const WAR_STICKERS = ['🇮🇱','✈️','🛩️','🚀','🛡️','⚔️','🦅','💪','🕊️','✡️','🎖️','🏅'];
 const MEDALS = [
   {id:'first',i:'⭐',t:'תשובה ראשונה!'},{id:'s3',i:'🔥',t:'רצף 3!'},{id:'s5',i:'⚡',t:'רצף 5!'},
   {id:'s7',i:'🌟',t:'רצף 7!'},{id:'s10',i:'🏆',t:'רצף 10!'},{id:'p50',i:'💰',t:'50 נקודות'},
   {id:'p100',i:'💯',t:'100 נקודות'},{id:'p200',i:'💎',t:'200 נקודות'},{id:'p300',i:'👑',t:'300 נקודות'},
-  {id:'stage1',i:'🥉',t:'שלב 1'},{id:'stage2',i:'🥈',t:'שלב 2'},{id:'stage3',i:'🥇',t:'שלב 3'},{id:'stage4',i:'🏅',t:'שלב 4'}
+  {id:'stage1',i:'🥉',t:'שלב 1'},{id:'stage2',i:'🥈',t:'שלב 2'},{id:'stage3',i:'🥇',t:'שלב 3'},{id:'stage4',i:'🏅',t:'שלב 4'},{id:'stage5',i:'🇮🇱',t:'שלב מיוחד — ונהפוך הוא!'}
 ];
 let earnedMedals = new Set();
 const effectsEl = document.getElementById('effects');
@@ -522,7 +537,9 @@ function checkMedals() {
   if (score>=200) earnMedal('p200'); if (score>=300) earnMedal('p300');
 }
 function awardSticker() {
-  const s = PURIM_STICKERS[stickerCount % PURIM_STICKERS.length];
+  const isWarStage = currentQ >= QUESTIONS.length;
+  const pool = isWarStage ? WAR_STICKERS : PURIM_STICKERS;
+  const s = pool[stickerCount % pool.length];
   stickerCount++; stickers.push(s);
   document.getElementById('stickerCount').textContent = stickerCount;
   const icons = document.getElementById('stickerIcons');
@@ -539,19 +556,25 @@ function showAlbum() {
   document.getElementById('albumOverlay').classList.add('visible');
 }
 function closeAlbum() { document.getElementById('albumOverlay').classList.remove('visible'); }
-function showStageComplete(stageNum) {
-  const medals=['🥉','🥈','🥇','🏅'], names=['שלב ראשון','שלב שני','שלב שלישי','שלב רביעי'];
-  const subs=['מתחממים! 🔥','כבר בקצב! ⚡','כמעט שם! 💪','הגמר הגדול! 👑'];
-  document.getElementById('stageMedal').textContent=medals[stageNum-1]||'🏅';
-  document.getElementById('stageTitle').textContent=names[stageNum-1]+' הושלם! '+medals[stageNum-1];
-  document.getElementById('stageSub').textContent=subs[stageNum-1]||'';
+function showStageComplete(stageNum, isWarStage) {
+  const medals=['🥉','🥈','🥇','🏅','🇮🇱'], names=['שלב ראשון','שלב שני','שלב שלישי','שלב רביעי','שלב מיוחד — ונהפוך הוא!'];
+  const subs=['מתחממים! 🔥','כבר בקצב! ⚡','כמעט שם! 💪','עכשיו הסיפור של הדור שלנו!','עם ישראל חי! 🇮🇱💪'];
+  const idx = isWarStage ? 4 : stageNum - 1;
+  document.getElementById('stageMedal').textContent=medals[idx]||'🏅';
+  document.getElementById('stageTitle').textContent=names[idx]+' '+(isWarStage?'':'הושלם! ')+medals[idx];
+  document.getElementById('stageSub').textContent=subs[idx]||'';
   document.getElementById('ssScore').textContent=score;
   document.getElementById('ssCorrect').textContent=correctCount;
   document.getElementById('ssStreak').textContent=maxStreak;
   document.getElementById('stageOverlay').classList.add('visible');
-  earnMedal('stage'+stageNum);
-  playVictoryFanfare(); FX.emojiRain(['🎉','⭐','🏆','✨','👑'],15); FX.starSpin(5);
-  currentStage=stageNum+1;
+  earnMedal('stage'+(isWarStage?5:stageNum));
+  if (isWarStage) {
+    FX.emojiRain(['🇮🇱','✡️','🛡️','⚔️','✈️','🦅','💪','🕊️'],25); FX.starSpin(8);
+  } else {
+    FX.emojiRain(['🎉','⭐','🏆','✨','👑'],15); FX.starSpin(5);
+  }
+  playVictoryFanfare();
+  currentStage=(isWarStage?5:stageNum)+1;
 }
 function continueAfterStage() { document.getElementById('stageOverlay').classList.remove('visible'); showQuestion(); }
 
@@ -953,7 +976,7 @@ function triggerCorrectEffects(streakLevel, btnRect) {
 function shuffle(a) { const b=[...a]; for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];} return b; }
 
 function startQuiz() {
-  shuffledQ = shuffle(QUESTIONS);
+  shuffledQ = [...shuffle(QUESTIONS), ...shuffle(WAR_QUESTIONS)];
   currentQ = 0; score = 0; streak = 0; maxStreak = 0; answered = false;
   stickerCount = 0; stickers = []; correctCount = 0; currentStage = 1; earnedMedals = new Set();
   document.getElementById('results').classList.remove('active');
@@ -969,10 +992,19 @@ function startQuiz() {
 function showQuestion() {
   const q = shuffledQ[currentQ]; answered = false;
   document.getElementById('progress').style.width = `${(currentQ/shuffledQ.length)*100}%`;
-  const stageSize = Math.ceil(shuffledQ.length / 4);
-  const stageNum = Math.floor(currentQ / stageSize) + 1;
-  const stageNames = ['שלב א׳','שלב ב׳','שלב ג׳','שלב ד׳'];
-  document.getElementById('qNum').textContent = `${stageNames[stageNum-1]||''} | שאלה ${currentQ+1}/${shuffledQ.length}`;
+  const purimLen = QUESTIONS.length;
+  const warLen = WAR_QUESTIONS.length;
+  const purimStageSize = Math.ceil(purimLen / 4);
+  let stageNum, stageName;
+  if (currentQ < purimLen) {
+    stageNum = Math.floor(currentQ / purimStageSize) + 1;
+    const stageNames = ['שלב א׳','שלב ב׳','שלב ג׳','שלב ד׳'];
+    stageName = stageNames[stageNum-1] || '';
+  } else {
+    stageNum = 5;
+    stageName = '🇮🇱 שלב מיוחד — ונהפוך הוא!';
+  }
+  document.getElementById('qNum').textContent = `${stageName} | שאלה ${currentQ+1}/${shuffledQ.length}`;
   document.getElementById('qEmoji').textContent = q.emoji;
   document.getElementById('qText').textContent = q.q;
   document.getElementById('feedback').textContent = '';
@@ -1063,9 +1095,16 @@ function selectAnswer(index, clickedBtn) {
 
 function nextQuestion() {
   currentQ++;
-  const stageSize = Math.ceil(shuffledQ.length / 4);
-  if (currentQ > 0 && currentQ % stageSize === 0 && currentQ < shuffledQ.length) {
-    showStageComplete(Math.floor(currentQ / stageSize));
+  const purimLen = QUESTIONS.length;
+  const purimStageSize = Math.ceil(purimLen / 4);
+  // Check purim stage boundaries (stages 1-4)
+  if (currentQ < purimLen && currentQ > 0 && currentQ % purimStageSize === 0) {
+    showStageComplete(Math.floor(currentQ / purimStageSize));
+    return;
+  }
+  // Transition to special war stage
+  if (currentQ === purimLen) {
+    showStageComplete(4, true);
     return;
   }
   if (currentQ >= shuffledQ.length) showResults();
