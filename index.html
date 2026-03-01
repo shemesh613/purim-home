@@ -380,8 +380,8 @@
     }
     .costume-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 12px; margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px; margin-top: 20px;
     }
     .costume-item {
       border-radius: 14px; overflow: hidden;
@@ -391,10 +391,19 @@
     }
     .costume-item img {
       width: 100%; aspect-ratio: 1; object-fit: cover;
+      background: #ede9fe;
     }
     .costume-item .name {
-      padding: 6px; font-size: 0.85rem;
+      padding: 5px; font-size: 0.8rem;
       font-weight: 700; color: #4c1d95;
+    }
+    .gallery-loading {
+      text-align: center; padding: 20px; color: #7c3aed;
+      font-size: 1rem; font-weight: 700;
+    }
+    .gallery-count {
+      text-align: center; font-size: 0.8rem; color: #7c3aed;
+      margin-top: 8px; font-weight: 700;
     }
     .costume-empty {
       color: #9ca3af; font-size: 0.9rem;
@@ -1032,6 +1041,10 @@ function showGallery() {
 
 async function syncGallery() {
   if (!galleryCode) return;
+  const grid = document.getElementById('costumeGrid');
+  const empty = document.getElementById('costumeEmpty');
+  grid.innerHTML = '<div class="gallery-loading">⏳ טוען תמונות...</div>';
+  empty.style.display = 'none';
   try {
     const r = await fetch(`${FB_GAL}/${encodeURIComponent(galleryCode)}/photos.json`);
     const data = await r.json();
@@ -1152,10 +1165,14 @@ function renderGallery() {
   empty.style.display = 'none';
   grid.innerHTML = filtered.map(c => `
     <div class="costume-item">
-      <img src="${c.image}" alt="${c.name}">
+      <img src="${c.image}" alt="${c.name}" loading="lazy">
       <div class="name">${c.name}${c.cls ? ' | ' + c.cls : ''}</div>
     </div>
   `).join('');
+  // Gallery count
+  let countEl = grid.parentElement.querySelector('.gallery-count');
+  if (!countEl) { countEl = document.createElement('div'); countEl.className = 'gallery-count'; grid.after(countEl); }
+  countEl.textContent = `📸 ${filtered.length} תמונות` + (filterClass !== 'all' ? ` (מתוך ${galleryCostumes.length})` : '');
   // Show/hide gallery action buttons
   const actions = document.getElementById('galleryActions');
   if (actions) actions.style.display = filtered.length > 0 ? 'flex' : 'none';
