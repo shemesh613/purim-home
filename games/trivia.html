@@ -346,11 +346,12 @@
     .res-btn.home { background: #f3f4f6; color: #4b5563; }
 
     /* ══ Sticker Collection ══ */
-    .sticker-bar { display:flex; align-items:center; gap:6px; background:linear-gradient(135deg,#fef3c7,#fde68a); padding:6px 14px; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 8px rgba(251,191,36,0.2); }
-    .sticker-bar:hover { transform:translateY(-2px); box-shadow:0 4px 15px rgba(251,191,36,0.3); }
-    .sticker-bar .sb-label { font-size:0.8rem; font-weight:700; color:#92400e; }
-    .sticker-bar .sb-count { font-size:1.1rem; font-weight:900; color:#d97706; }
-    .sticker-bar .sb-icons { display:flex; gap:1px; font-size:0.9rem; }
+    .sticker-bar { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#fef3c7,#fde68a); padding:10px 20px; border-radius:16px; cursor:pointer; transition:all 0.3s; box-shadow:0 3px 12px rgba(251,191,36,0.3); border:2px solid rgba(251,191,36,0.4); animation:stickerPulse 3s ease-in-out infinite; }
+    .sticker-bar:hover { transform:translateY(-3px) scale(1.05); box-shadow:0 6px 20px rgba(251,191,36,0.4); }
+    @keyframes stickerPulse { 0%,100% { box-shadow:0 3px 12px rgba(251,191,36,0.3); } 50% { box-shadow:0 3px 18px rgba(251,191,36,0.5); } }
+    .sticker-bar .sb-label { font-size:1rem; font-weight:700; color:#92400e; }
+    .sticker-bar .sb-count { font-size:1.4rem; font-weight:900; color:#d97706; }
+    .sticker-bar .sb-icons { display:flex; gap:2px; font-size:1.1rem; }
     @keyframes stickerPop { 0%{transform:translate(-50%,-50%) scale(0) rotate(-180deg);opacity:1} 40%{transform:translate(-50%,-50%) scale(1.6) rotate(10deg);opacity:1} 100%{transform:translate(-50%,-50%) scale(0.3) translateY(-80px);opacity:0} }
     .sticker-fly { position:fixed; top:50%; left:50%; font-size:3.5rem; z-index:800; pointer-events:none; animation:stickerPop 1s ease-out forwards; }
 

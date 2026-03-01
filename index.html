@@ -1243,9 +1243,10 @@ function shareWA(e) {
   setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 4000);
 }
 
-// ══ Sticky Notes Feelings Wall ══
+// ══ Sticky Notes Feelings Wall — Firebase Sync ══
+const FB_NOTES = 'https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim-feelings';
 const Notes = {
-  KEY: 'purim_feelings_notes',
+  notes: [],
   defaults: [
     {n:'דניאל',c:'ירושלים',f:'אני מרגיש לחוץ בגלל המלחמה',h:'לנשום עמוק ולהתפלל',likes:5},
     {n:'שלמה',c:'תל אביב',f:'אני גם שמח שהאיראנים מפסידים וגם חושש',h:'לדבר על זה עם אמא',likes:3},
@@ -1256,41 +1257,74 @@ const Notes = {
     {n:'נועה',c:'ירושלים',f:'אני שמחה שיש לנו את הקב"ה שישמור עלינו',h:'לומר תהילים ולעשות מצוות',likes:9},
     {n:'אברהם',c:'צפת',f:'אני מאמין שהכל לטובה גם אם קשה',h:'ללמוד תורה ולעזור לאחרים',likes:5},
   ],
-  load() { return JSON.parse(localStorage.getItem(this.KEY) || 'null') || [...this.defaults]; },
-  save(notes) { localStorage.setItem(this.KEY, JSON.stringify(notes)); },
+  async init() {
+    try {
+      const res = await fetch(FB_NOTES + '.json');
+      const data = await res.json();
+      if (data && typeof data === 'object') {
+        this.notes = Object.entries(data).map(([id, v]) => ({ ...v, _id: id }));
+        this.notes.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+      }
+      // Seed defaults if empty
+      if (this.notes.length === 0) {
+        for (const d of this.defaults) {
+          await fetch(FB_NOTES + '.json', { method: 'POST', body: JSON.stringify({ ...d, ts: Date.now() }) });
+        }
+        return this.init();
+      }
+    } catch (e) {
+      console.error('Notes init error:', e);
+      this.notes = [...this.defaults];
+    }
+    this.render();
+  },
   renderWall(wallId) {
-    const notes = this.load(), wall = document.getElementById(wallId);
+    const wall = document.getElementById(wallId);
     if (!wall) return; wall.innerHTML = '';
     const colors = ['sn1','sn2','sn3','sn4','sn5','sn6','sn7'];
-    notes.forEach((note, i) => {
+    const likedSet = JSON.parse(localStorage.getItem('purim_liked') || '[]');
+    this.notes.forEach((note, i) => {
+      const isLiked = likedSet.includes(note._id || i);
       const el = document.createElement('div'); el.className = 'sticky-note ' + colors[i % colors.length];
-      el.innerHTML = '<div class="nf">' + note.f + '</div><div class="nh">💡 מה עוזר לי? ' + note.h + '</div><div class="na">— ' + note.n + (note.c ? ', ' + note.c : '') + '</div><span class="nl' + (note.liked ? ' liked' : '') + '" onclick="Notes.like(' + i + ')">' + (note.liked ? '❤️' : '🤍') + ' ' + (note.likes || 0) + '</span>';
+      el.innerHTML = '<div class="nf">' + note.f + '</div><div class="nh">💡 מה עוזר לי? ' + note.h + '</div><div class="na">— ' + note.n + (note.c ? ', ' + note.c : '') + '</div><span class="nl' + (isLiked ? ' liked' : '') + '" onclick="Notes.like(' + i + ')">' + (isLiked ? '❤️' : '🤍') + ' ' + (note.likes || 0) + '</span>';
       wall.appendChild(el);
     });
   },
   render() { this.renderWall('notesWall'); this.renderWall('notesWallHome'); },
-  addFrom(suffix) {
+  async addFrom(suffix) {
     const n = document.getElementById('nName' + suffix).value.trim();
     const c = document.getElementById('nCity' + suffix).value.trim();
     const f = document.getElementById('nFeeling' + suffix).value.trim();
     const h = document.getElementById('nHelp' + suffix).value.trim();
     if (!f) { document.getElementById('nFeeling' + suffix).style.borderColor = '#ef4444'; setTimeout(() => document.getElementById('nFeeling' + suffix).style.borderColor = '', 1500); document.getElementById('nFeeling' + suffix).focus(); return; }
-    const notes = this.load();
-    notes.unshift({ n: n || 'אנונימי', c, f, h: h || '...', likes: 0 });
-    this.save(notes); this.render();
+    const note = { n: n || 'אנונימי', c, f, h: h || '...', likes: 0, ts: Date.now() };
+    try {
+      await fetch(FB_NOTES + '.json', { method: 'POST', body: JSON.stringify(note) });
+    } catch (e) { console.error('Note save error:', e); }
     document.getElementById('nName' + suffix).value = '';
     document.getElementById('nCity' + suffix).value = '';
     document.getElementById('nFeeling' + suffix).value = '';
     document.getElementById('nHelp' + suffix).value = '';
+    this.init();
   },
   add() { this.addFrom(''); },
-  like(i) {
-    const notes = this.load();
-    if (notes[i]) { notes[i].liked = !notes[i].liked; notes[i].likes = (notes[i].likes || 0) + (notes[i].liked ? 1 : -1); this.save(notes); this.render(); }
+  async like(i) {
+    const note = this.notes[i];
+    if (!note || !note._id) return;
+    const likedSet = JSON.parse(localStorage.getItem('purim_liked') || '[]');
+    const idx = likedSet.indexOf(note._id);
+    const isLiking = idx === -1;
+    if (isLiking) likedSet.push(note._id); else likedSet.splice(idx, 1);
+    localStorage.setItem('purim_liked', JSON.stringify(likedSet));
+    const newLikes = (note.likes || 0) + (isLiking ? 1 : -1);
+    try {
+      await fetch(FB_NOTES + '/' + note._id + '/likes.json', { method: 'PUT', body: JSON.stringify(newLikes) });
+    } catch (e) { console.error('Like error:', e); }
+    note.likes = newLikes;
+    this.render();
   }
 };
-// Render notes when page loads
-Notes.render();
+Notes.init();
 </script>
 
 </body>
