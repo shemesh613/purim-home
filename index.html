@@ -589,22 +589,43 @@
 <main id="main-content">
 <div class="tab-content active" id="tab-main">
 
-  <!-- Hero Challenge Banner -->
+  <!-- Hero Challenge Banners -->
   <div class="section">
-    <a href="games/trivia.html" class="hero-challenge">
-      <div class="hero-inner">
-        <div class="hero-icon">🏆</div>
-        <div class="hero-title">🔥 האתגר המרכזי — חידון מגילת אסתר!</div>
-        <div class="hero-sub">4 שלבים, מדבקות לאיסוף, מדליות ואפקטים מטורפים — מי ישלים הכל?</div>
-        <div class="hero-features">
-          <div class="hero-feat"><span>📖</span>4 שלבים</div>
-          <div class="hero-feat"><span>🏅</span>מדליות</div>
-          <div class="hero-feat"><span>⭐</span>אלבום מדבקות</div>
-          <div class="hero-feat"><span>🎆</span>אפקטים</div>
+    <h2 class="section-title">
+      <span class="line"></span>🔥 האתגרים המרכזיים 🔥<span class="line"></span>
+    </h2>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <!-- Escape Rooms -->
+      <a href="games/stations/index.html" class="hero-challenge" style="flex:1;min-width:280px;">
+        <div class="hero-inner">
+          <div class="hero-icon">🏰</div>
+          <div class="hero-title">חדרי בריחה — משימת פורים!</div>
+          <div class="hero-sub">6 חדרים מהמגילה עם חידות, ניקוד ומדליות — תצליחו לברוח מכולם?</div>
+          <div class="hero-features">
+            <div class="hero-feat"><span>🚪</span>6 חדרים</div>
+            <div class="hero-feat"><span>🧩</span>חידות</div>
+            <div class="hero-feat"><span>🏅</span>מדליות</div>
+            <div class="hero-feat"><span>⏱️</span>זמן</div>
+          </div>
+          <div class="hero-cta">🗝️ כנסו — בואו לברוח!</div>
         </div>
-        <div class="hero-cta">🚀 !ונלחתה — וסנכ</div>
-      </div>
-    </a>
+      </a>
+      <!-- Trivia Quiz -->
+      <a href="games/trivia.html" class="hero-challenge" style="flex:1;min-width:280px;">
+        <div class="hero-inner">
+          <div class="hero-icon">🏆</div>
+          <div class="hero-title">חידון מגילת אסתר!</div>
+          <div class="hero-sub">4 שלבים, מדבקות לאיסוף, מדליות ואפקטים מטורפים — מי ישלים הכל?</div>
+          <div class="hero-features">
+            <div class="hero-feat"><span>📖</span>4 שלבים</div>
+            <div class="hero-feat"><span>🏅</span>מדליות</div>
+            <div class="hero-feat"><span>⭐</span>מדבקות</div>
+            <div class="hero-feat"><span>🎆</span>אפקטים</div>
+          </div>
+          <div class="hero-cta">🚀 כנסו — התלחנו!</div>
+        </div>
+      </a>
+    </div>
   </div>
 
   <!-- Featured Games -->
@@ -699,6 +720,15 @@
       <div class="costume-grid" id="costumeGrid"></div>
       <div class="costume-empty" id="costumeEmpty">
         🎭 עדיין אין תמונות — היו הראשונים להעלות!
+      </div>
+      <!-- Gallery Download & Share -->
+      <div id="galleryActions" style="display:none; text-align:center; margin-top:16px; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button onclick="downloadGallery()" style="font-family:'Heebo',sans-serif; padding:10px 22px; background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; border:none; border-radius:14px; font-size:0.95rem; font-weight:700; cursor:pointer; box-shadow:0 3px 12px rgba(124,58,237,0.2);">
+          📥 הורדת הגלריה כתמונה
+        </button>
+        <button onclick="shareGalleryWA()" style="font-family:'Heebo',sans-serif; padding:10px 22px; background:linear-gradient(135deg,#25d366,#128c7e); color:#fff; border:none; border-radius:14px; font-size:0.95rem; font-weight:700; cursor:pointer; box-shadow:0 3px 12px rgba(37,211,102,0.2);">
+          📲 שליחה בוואטסאפ
+        </button>
       </div>
     </div>
   </div>
@@ -868,6 +898,7 @@
   </p>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 // ══ Tabs ══
 document.getElementById('tabsNav').addEventListener('click', function(e) {
@@ -1105,6 +1136,89 @@ function renderGallery() {
       <div class="name">${c.name}${c.cls ? ' | ' + c.cls : ''}</div>
     </div>
   `).join('');
+  // Show/hide gallery action buttons
+  const actions = document.getElementById('galleryActions');
+  if (actions) actions.style.display = filtered.length > 0 ? 'flex' : 'none';
+}
+
+// ══ Gallery Download & Share ══
+async function downloadGallery() {
+  const grid = document.getElementById('costumeGrid');
+  if (!grid || !grid.children.length) return;
+  // Build a temporary container with title + grid for nice screenshot
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'background:#fff;padding:24px;border-radius:16px;direction:rtl;font-family:Heebo,sans-serif;';
+  const schoolLabel = document.getElementById('gallerySchoolLabel');
+  const classVal = document.getElementById('classSelect').value;
+  const title = document.createElement('h2');
+  title.style.cssText = 'text-align:center;color:#4c1d95;margin-bottom:16px;font-size:1.3rem;';
+  title.textContent = `📸 גלריית תחפושות — ${schoolLabel ? schoolLabel.textContent : ''}${classVal !== 'all' ? ' | כיתה ' + classVal : ''}`;
+  wrapper.appendChild(title);
+  const cloned = grid.cloneNode(true);
+  cloned.style.cssText = grid.style.cssText + ';display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;';
+  wrapper.appendChild(cloned);
+  const footer = document.createElement('p');
+  footer.style.cssText = 'text-align:center;color:#a78bfa;font-size:0.75rem;margin-top:12px;';
+  footer.textContent = '🎭 פורים בבית — shemesh613.github.io/purim-home';
+  wrapper.appendChild(footer);
+  document.body.appendChild(wrapper);
+  try {
+    const canvas = await html2canvas(wrapper, { useCORS: true, scale: 2, backgroundColor: '#fff' });
+    document.body.removeChild(wrapper);
+    const link = document.createElement('a');
+    link.download = `gallery-purim-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (err) {
+    document.body.removeChild(wrapper);
+    console.error('Gallery download error:', err);
+  }
+}
+
+async function shareGalleryWA() {
+  const grid = document.getElementById('costumeGrid');
+  if (!grid || !grid.children.length) return;
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'background:#fff;padding:24px;border-radius:16px;direction:rtl;font-family:Heebo,sans-serif;';
+  const schoolLabel = document.getElementById('gallerySchoolLabel');
+  const classVal = document.getElementById('classSelect').value;
+  const title = document.createElement('h2');
+  title.style.cssText = 'text-align:center;color:#4c1d95;margin-bottom:16px;font-size:1.3rem;';
+  title.textContent = `📸 גלריית תחפושות — ${schoolLabel ? schoolLabel.textContent : ''}${classVal !== 'all' ? ' | כיתה ' + classVal : ''}`;
+  wrapper.appendChild(title);
+  const cloned = grid.cloneNode(true);
+  cloned.style.cssText = grid.style.cssText + ';display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;';
+  wrapper.appendChild(cloned);
+  const footer = document.createElement('p');
+  footer.style.cssText = 'text-align:center;color:#a78bfa;font-size:0.75rem;margin-top:12px;';
+  footer.textContent = '🎭 פורים בבית — shemesh613.github.io/purim-home';
+  wrapper.appendChild(footer);
+  document.body.appendChild(wrapper);
+  try {
+    const canvas = await html2canvas(wrapper, { useCORS: true, scale: 2, backgroundColor: '#fff' });
+    document.body.removeChild(wrapper);
+    canvas.toBlob(async (blob) => {
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], 'gallery-purim.png', { type: 'image/png' });
+        const shareData = { title: '📸 גלריית תחפושות פורים', files: [file] };
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          return;
+        }
+      }
+      // Fallback: download + open WhatsApp with text
+      const link = document.createElement('a');
+      link.download = 'gallery-purim.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      const schoolText = schoolLabel ? schoolLabel.textContent : '';
+      const msg = `📸 *גלריית תחפושות פורים* ${schoolText}\n\n🎭 צפו בכל התחפושות באתר:\nhttps://shemesh613.github.io/purim-home/\n\nפורים שמח! 🎉`;
+      setTimeout(() => window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank'), 500);
+    }, 'image/png');
+  } catch (err) {
+    document.body.removeChild(wrapper);
+    console.error('Gallery share error:', err);
+  }
 }
 
 // Auto-enter if code saved
