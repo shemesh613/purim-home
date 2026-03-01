@@ -508,6 +508,26 @@
     .sn6 { background: #F8BBD0; --rot: 1deg; }
     .sn7 { background: #B2DFDB; --rot: -0.5deg; }
 
+    /* ══ Notes Pagination ══ */
+    .notes-pager {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin-top: 14px;
+    }
+    .notes-pager button {
+      font-family: 'Heebo', sans-serif;
+      font-size: 1.2rem; font-weight: 900;
+      width: 42px; height: 42px;
+      border-radius: 50%; border: 2px solid #c084fc;
+      background: #ede9fe; color: #7c3aed;
+      cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .notes-pager button:hover { background: #7c3aed; color: #fff; transform: scale(1.1); }
+    .notes-pager button:disabled { opacity: 0.3; cursor: default; transform: none; }
+    .notes-pager span {
+      font-size: 0.85rem; color: #7c3aed; font-weight: 700;
+    }
+
     /* ══ Footer ══ */
     .footer {
       position: relative; z-index: 10;
@@ -1292,18 +1312,34 @@ const Notes = {
     }
     this.render();
   },
+  PAGE_SIZE: 12,
+  pages: {},
   renderWall(wallId) {
     const wall = document.getElementById(wallId);
-    if (!wall) return; wall.innerHTML = '';
+    if (!wall) return;
+    const page = this.pages[wallId] || 0;
+    const start = page * this.PAGE_SIZE;
+    const pageNotes = this.notes.slice(start, start + this.PAGE_SIZE);
+    const totalPages = Math.ceil(this.notes.length / this.PAGE_SIZE);
+    wall.innerHTML = '';
     const colors = ['sn1','sn2','sn3','sn4','sn5','sn6','sn7'];
     const likedSet = JSON.parse(localStorage.getItem('purim_liked') || '[]');
-    this.notes.forEach((note, i) => {
+    pageNotes.forEach((note, idx) => {
+      const i = start + idx;
       const isLiked = likedSet.includes(note._id || i);
       const el = document.createElement('div'); el.className = 'sticky-note ' + colors[i % colors.length];
       el.innerHTML = '<div class="nf">' + note.f + '</div><div class="nh">💡 מה עוזר לי? ' + note.h + '</div><div class="na">— ' + note.n + (note.c ? ', ' + note.c : '') + '</div><span class="nl' + (isLiked ? ' liked' : '') + '" onclick="Notes.like(' + i + ')">' + (isLiked ? '❤️' : '🤍') + ' ' + (note.likes || 0) + '</span>';
       wall.appendChild(el);
     });
+    // Pager
+    let pager = wall.parentElement.querySelector('.notes-pager');
+    if (totalPages <= 1) { if (pager) pager.remove(); return; }
+    if (!pager) { pager = document.createElement('div'); pager.className = 'notes-pager'; wall.after(pager); }
+    pager.innerHTML = '<button ' + (page <= 0 ? 'disabled' : '') + ' onclick="Notes.goPage(\'' + wallId + '\',' + (page - 1) + ')">→</button>'
+      + '<span>' + (page + 1) + ' / ' + totalPages + ' (' + this.notes.length + ' פתקים)</span>'
+      + '<button ' + (page >= totalPages - 1 ? 'disabled' : '') + ' onclick="Notes.goPage(\'' + wallId + '\',' + (page + 1) + ')">←</button>';
   },
+  goPage(wallId, p) { this.pages[wallId] = p; this.renderWall(wallId); },
   render() { this.renderWall('notesWall'); this.renderWall('notesWallHome'); },
   async addFrom(suffix) {
     const n = document.getElementById('nName' + suffix).value.trim();
