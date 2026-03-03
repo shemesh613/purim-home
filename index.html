@@ -599,6 +599,7 @@
 
 <!-- ══ Header ══ -->
 <header class="header">
+  <div id="auth-status" style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.9);padding:4px 12px;border-radius:20px;font-size:0.8rem;color:#4b5563;border:1px solid #e5e7eb;cursor:pointer;z-index:20;" onclick="window.open('sticker-album/#auth','_blank')">👤 אורח</div>
   <div class="header-masks">🎭</div>
   <h1>פורים בבית!</h1>
   <div class="flag-row">✡️ 🔯 ✡️</div>
@@ -654,6 +655,21 @@
           <div class="hero-cta">🚀 כנסו — התחלנו!</div>
         </div>
       </a>
+      <!-- Sticker Album -->
+      <a href="sticker-album/" class="hero-challenge" style="flex:1;min-width:280px;">
+        <div class="hero-inner" style="background:linear-gradient(135deg,#0a0a2e,#0038b8);">
+          <div class="hero-icon">🏅</div>
+          <div class="hero-title">אלבום מדבקות — גיבורי ישראל!</div>
+          <div class="hero-sub">גרדו כרטיסים, גלו מדבקות ואספו את כולן — צבא, מנהיגים, מעשים טובים ועוד!</div>
+          <div class="hero-features">
+            <div class="hero-feat"><span>🎴</span>גירוד</div>
+            <div class="hero-feat"><span>📖</span>אלבום</div>
+            <div class="hero-feat"><span>⭐</span>24 מדבקות</div>
+            <div class="hero-feat"><span>🏆</span>אוסף</div>
+          </div>
+          <div class="hero-cta">🏅 בואו לאסוף!</div>
+        </div>
+      </a>
     </div>
   </div>
 
@@ -686,6 +702,18 @@
         <h3 class="card-title">חדרי אתגר</h3>
         <p class="card-desc">6 חדרים מהמגילה עם ניקוד ומדליות!</p>
         <span class="card-badge badge-challenge">🗝️ חדש!</span>
+      </a>
+      <a href="sticker-album/" class="game-card" style="--card-shadow: rgba(0,56,184,0.25); --card-border: #93c5fd; background:linear-gradient(135deg, #eff6ff, #dbeafe);">
+        <span class="card-emoji">🏅</span>
+        <h3 class="card-title">אלבום מדבקות</h3>
+        <p class="card-desc">גרדו כרטיסים ואספו מדבקות גיבורי ישראל!</p>
+        <span class="card-badge badge-challenge">🇮🇱 חדש!</span>
+      </a>
+      <a href="sticker-album/#quiz" class="game-card" style="--card-shadow: rgba(139,92,246,0.25); --card-border: #c4b5fd; background:linear-gradient(135deg, #faf5ff, #ede9fe);">
+        <span class="card-emoji">❓</span>
+        <h3 class="card-title">חידונים + מדבקות</h3>
+        <p class="card-desc">ענו על חידונים וקבלו מדבקות! חידון פסח 🫓</p>
+        <span class="card-badge badge-challenge">🆕 חדש!</span>
       </a>
     </div>
   </div>
@@ -1394,6 +1422,7 @@ const Notes = {
 };
 Notes.init();
 </script>
+<script src="js/auth-bridge.js"></script>
 
 </body>
 </html>
