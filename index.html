@@ -1830,13 +1830,19 @@
 <div class="gate-overlay" id="gateModal" onclick="if(event.target===this)closeGate()">
   <div class="gate-box">
     <button class="gate-close" onclick="closeGate()">✕</button>
-    <div class="gate-icon">🏅</div>
-    <div class="gate-title">אלבום מדבקות — גיבורי ישראל!</div>
-    <div class="gate-desc">כנסו עם חשבון כדי שהמדבקות ישמרו!</div>
-    <button class="gate-google-btn" onclick="gateGo('auth')">🔑 כניסה / הרשמה</button>
-    <div class="gate-divider">או</div>
-    <button class="gate-guest-btn" onclick="gateGo('guest')">👀 המשיכו כאורח</button>
-    <div class="gate-guest-note">המדבקות לא ישמרו</div>
+    <div class="gate-icon">🎒</div>
+    <div class="gate-title">כניסת תלמיד</div>
+    <div class="gate-desc">הכניסו את סיסמת הכיתה/משפחה ואת הסיסמה האישית שלכם</div>
+    <div style="text-align:right; margin-bottom:12px;">
+      <label style="display:block;font-size:0.85rem;font-weight:700;color:#4c1d95;margin-bottom:5px;">🔑 סיסמת כיתה / משפחה</label>
+      <input type="text" id="gateClassCode" placeholder="הסיסמה שקיבלתם מהמורה או ההורה" style="width:100%;font-family:'Heebo',sans-serif;padding:10px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:0.95rem;direction:rtl;outline:none;background:#faf5ff;">
+    </div>
+    <div style="text-align:right; margin-bottom:16px;">
+      <label style="display:block;font-size:0.85rem;font-weight:700;color:#4c1d95;margin-bottom:5px;">🔐 סיסמה אישית שלי</label>
+      <input type="text" id="gatePersonalCode" placeholder="המציאו סיסמה ותזכרו אותה!" style="width:100%;font-family:'Heebo',sans-serif;padding:10px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:0.95rem;direction:rtl;outline:none;background:#faf5ff;">
+      <p style="font-size:0.72rem;color:#9ca3af;margin-top:4px;">💡 זו הסיסמה האישית שלכם — תשמרו אותה טוב!</p>
+    </div>
+    <button class="gate-google-btn" onclick="gateLogin()" style="background:linear-gradient(135deg,#7c3aed,#ec4899);">🚀 כנסו!</button>
   </div>
 </div>
 
@@ -1888,18 +1894,36 @@ let gateTarget = 'sticker-album/';
 function openGate(target) {
   gateTarget = target || 'sticker-album/';
   document.getElementById('gateModal').classList.add('active');
+  // Pre-fill saved codes
+  const saved = JSON.parse(localStorage.getItem('purim_student_login') || '{}');
+  if (saved.classCode) document.getElementById('gateClassCode').value = saved.classCode;
+  if (saved.personalCode) document.getElementById('gatePersonalCode').value = saved.personalCode;
 }
 function closeGate() {
   document.getElementById('gateModal').classList.remove('active');
 }
-function gateGo(mode) {
-  closeGate();
-  if (mode === 'auth') {
-    // Navigate in same window — popup auth needs same-window context
-    window.location.href = gateTarget.replace(/#.*$/, '') + '#auth';
-  } else {
-    window.location.href = gateTarget;
+function gateLogin() {
+  const classCode = document.getElementById('gateClassCode').value.trim();
+  const personalCode = document.getElementById('gatePersonalCode').value.trim();
+  if (!classCode) {
+    document.getElementById('gateClassCode').style.borderColor = '#ef4444';
+    document.getElementById('gateClassCode').focus();
+    setTimeout(() => document.getElementById('gateClassCode').style.borderColor = '', 1500);
+    return;
   }
+  if (!personalCode) {
+    document.getElementById('gatePersonalCode').style.borderColor = '#ef4444';
+    document.getElementById('gatePersonalCode').focus();
+    setTimeout(() => document.getElementById('gatePersonalCode').style.borderColor = '', 1500);
+    return;
+  }
+  // Save for next time
+  localStorage.setItem('purim_student_login', JSON.stringify({ classCode, personalCode }));
+  closeGate();
+  // Navigate with codes as hash params
+  const hash = gateTarget.includes('#') ? gateTarget.split('#')[1] : '';
+  const base = gateTarget.replace(/#.*$/, '');
+  window.location.href = base + '#login=' + encodeURIComponent(classCode) + '&pin=' + encodeURIComponent(personalCode) + (hash ? '&view=' + hash : '');
 }
 
 // ══ Continuous Confetti ══
