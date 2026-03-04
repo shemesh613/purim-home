@@ -1779,6 +1779,18 @@
       </div>
     </div>
 
+    <!-- Quick Access: Manage Class (visible when logged in) -->
+    <div id="teacherQuickAccess" style="display:none;margin-bottom:20px;">
+      <div onclick="openTeacherPanel()" style="cursor:pointer;background:linear-gradient(135deg,#059669,#10b981);border-radius:18px;padding:20px 24px;color:#fff;display:flex;align-items:center;gap:16px;box-shadow:0 4px 20px rgba(5,150,105,0.3);transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(5,150,105,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(5,150,105,0.3)'">
+        <div style="font-size:2.2rem;">🏫</div>
+        <div style="flex:1;text-align:right;">
+          <div style="font-size:1.15rem;font-weight:800;margin-bottom:4px;">ניהול כיתה</div>
+          <div style="font-size:0.85rem;opacity:0.9;" id="teacherQuickInfo">צפייה בתלמידים, רמות ומדבקות</div>
+        </div>
+        <div style="font-size:1.5rem;">←</div>
+      </div>
+    </div>
+
     <!-- Setup Class Wizard -->
     <div class="setup-wizard" id="teacherWizard">
       <div class="sw-header">
@@ -2129,6 +2141,13 @@ async function gateLogin() {
     chip.style.background = 'rgba(124,58,237,0.1)';
     chip.style.borderColor = '#c084fc';
     chip.style.color = '#7c3aed';
+    // Show teacher quick access in teacher tab
+    const qa = document.getElementById('teacherQuickAccess');
+    if (qa) {
+      qa.style.display = 'block';
+      const info = document.getElementById('teacherQuickInfo');
+      if (info) info.textContent = 'קוד כיתה: ' + saved.classCode + ' — לחצו לצפייה';
+    }
   }
 })();
 
@@ -2857,7 +2876,10 @@ function sendWizardWA(role) {
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px;max-width:380px;margin:0 auto 16px;">
         <p style="font-size:0.8rem;color:#1e40af;margin:0;">💡 <strong>טיפ:</strong> הטיוטה שלכם שמורה — אם תחזרו לאתר, הכל פה.</p>
       </div>
-      <button onclick="switchTab('main')" style="font-family:'Heebo',sans-serif;padding:10px 28px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;">🏠 חזרה לדף הראשי</button>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button onclick="switchTab('main')" style="font-family:'Heebo',sans-serif;padding:10px 28px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;">🏠 חזרה לדף הראשי</button>
+        <button onclick="openTeacherPanel()" style="font-family:'Heebo',sans-serif;padding:10px 28px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;">🏫 ניהול כיתה</button>
+      </div>
     </div>`;
 }
 
