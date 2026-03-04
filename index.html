@@ -2565,10 +2565,60 @@ const Notes = {
 Notes.init();
 
 // ══ Setup Wizard (Teacher & Parent) ══
-const wizardData = {
+const WIZARD_STORAGE_KEY = 'purim_wizard_draft';
+const wizardData = loadWizardDraft() || {
   teacher: { step: 1, tasks: [] },
   parent: { step: 1, tasks: [] }
 };
+
+function saveWizardDraft() {
+  try {
+    const draft = {
+      teacher: { tasks: wizardData.teacher.tasks, step: wizardData.teacher.step },
+      parent: { tasks: wizardData.parent.tasks, step: wizardData.parent.step }
+    };
+    // Also save form field values
+    ['tName','tSchool','tClass','tStudents','pName','pChildren','pChildNames'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) draft['field_' + id] = el.value;
+    });
+    draft.savedAt = Date.now();
+    localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify(draft));
+  } catch (e) { /* ignore */ }
+}
+
+function loadWizardDraft() {
+  try {
+    const raw = localStorage.getItem(WIZARD_STORAGE_KEY);
+    if (!raw) return null;
+    const draft = JSON.parse(raw);
+    // Expire after 7 days
+    if (draft.savedAt && Date.now() - draft.savedAt > 7 * 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(WIZARD_STORAGE_KEY);
+      return null;
+    }
+    return {
+      teacher: { step: 1, tasks: draft.teacher?.tasks || [] },
+      parent: { step: 1, tasks: draft.parent?.tasks || [] },
+      _fields: draft
+    };
+  } catch (e) { return null; }
+}
+
+function restoreWizardFields() {
+  const draft = wizardData._fields;
+  if (!draft) return;
+  ['tName','tSchool','tClass','tStudents','pName','pChildren','pChildNames'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && draft['field_' + id]) el.value = draft['field_' + id];
+  });
+  delete wizardData._fields;
+  // Render checklists if they have tasks
+  if (wizardData.teacher.tasks.length) renderChecklist('teacher');
+  if (wizardData.parent.tasks.length) renderChecklist('parent');
+}
+// Restore fields after DOM is ready
+setTimeout(restoreWizardFields, 100);
 
 function wizardStep(role, step) {
   const prefix = role === 'teacher' ? 't' : 'p';
@@ -2595,6 +2645,7 @@ function wizardStep(role, step) {
   }
 
   data.step = step;
+  saveWizardDraft();
 
   // Update dots
   for (let i = 1; i <= 3; i++) {
@@ -2629,6 +2680,7 @@ function addTask(role) {
   nameInput.value = '';
   stickersInput.value = '1';
   renderChecklist(role);
+  saveWizardDraft();
 }
 
 function addTemplate(role, name, emoji, stickers) {
@@ -2636,11 +2688,13 @@ function addTemplate(role, name, emoji, stickers) {
   if (wizardData[role].tasks.some(t => t.name === name)) return;
   wizardData[role].tasks.push({ name, emoji, stickers });
   renderChecklist(role);
+  saveWizardDraft();
 }
 
 function removeTask(role, idx) {
   wizardData[role].tasks.splice(idx, 1);
   renderChecklist(role);
+  saveWizardDraft();
 }
 
 function renderChecklist(role) {
@@ -2717,6 +2771,7 @@ function sendWizardWA(role) {
   msg += `🏅 ${totalStickers} מדבקות | ${data.tasks.length} משימות\n\n`;
   msg += `[הוסיפ/י פידבק / רעיון לשיפור]`;
   window.open(`https://wa.me/972526953500?text=${encodeURIComponent(msg)}`, '_blank');
+  // Don't clear draft yet — clear only after password is received
 }
 
 // Allow Enter key in task name inputs
