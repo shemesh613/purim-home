@@ -10,5 +10,34 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Bridge: read #login=CODE&pin=PIN&name=NAME from parent site and auto-join
+      (function() {
+        const h = window.location.hash;
+        if (!h.includes('login=')) return;
+        const p = new URLSearchParams(h.replace('#', ''));
+        const code = p.get('login');
+        const pin = p.get('pin');
+        const name = p.get('name');
+        if (code) {
+          // Store pending join info for the app to pick up
+          localStorage.setItem('pending-class-join', JSON.stringify({ code, pin, name }));
+          // Also update display name in the Zustand store if exists
+          try {
+            const raw = localStorage.getItem('sticker-user-storage');
+            if (raw) {
+              const store = JSON.parse(raw);
+              const state = store.state || store;
+              if (name && state.displayName !== name) {
+                state.displayName = name;
+                localStorage.setItem('sticker-user-storage', JSON.stringify(store));
+              }
+            }
+          } catch(e) {}
+          // Switch to auth screen so user can join class
+          window.location.hash = 'auth';
+        }
+      })();
+    </script>
   </body>
 </html>

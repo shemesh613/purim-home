@@ -2098,7 +2098,7 @@ async function gateLogin() {
       btn.textContent = '❌ סיסמה שגויה — נסו שוב';
       btn.style.background = '#ef4444';
       document.getElementById('gateClassCode').style.borderColor = '#ef4444';
-      setTimeout(() => { btn.textContent = '🚀 כנסו!'; btn.style.background = ''; btn.disabled = false; }, 2000);
+      setTimeout(() => { btn.textContent = '🚀 כנסו!'; btn.style.background = 'linear-gradient(135deg,#7c3aed,#ec4899)'; btn.disabled = false; }, 2000);
       return;
     }
 
@@ -2118,7 +2118,7 @@ async function gateLogin() {
     setTimeout(() => {
       closeGate();
       btn.textContent = '🚀 כנסו!';
-      btn.style.background = '';
+      btn.style.background = 'linear-gradient(135deg,#7c3aed,#ec4899)';
       btn.disabled = false;
       // Navigate
       const hash = gateTarget.includes('#') ? gateTarget.split('#')[1] : '';
@@ -2128,7 +2128,7 @@ async function gateLogin() {
   } catch (e) {
     btn.textContent = '❌ שגיאת רשת — נסו שוב';
     btn.style.background = '#ef4444';
-    setTimeout(() => { btn.textContent = '🚀 כנסו!'; btn.style.background = ''; btn.disabled = false; }, 2000);
+    setTimeout(() => { btn.textContent = '🚀 כנסו!'; btn.style.background = 'linear-gradient(135deg,#7c3aed,#ec4899)'; btn.disabled = false; }, 2000);
   }
 }
 
@@ -2267,8 +2267,10 @@ const defaultClasses = ['א1','א2','ב1','ב2','ג1','ג2','ד1','ד2','ה1','�
 
 function getClasses() {
   if (!galleryCode) return defaultClasses;
-  const stored = localStorage.getItem('purim-classes-' + galleryCode);
-  return stored ? JSON.parse(stored) : defaultClasses;
+  try {
+    const stored = localStorage.getItem('purim-classes-' + galleryCode);
+    return stored ? JSON.parse(stored) : defaultClasses;
+  } catch (e) { return defaultClasses; }
 }
 
 function enterGallery() {
@@ -2532,7 +2534,7 @@ function shareWA(e) {
   const orig = btn.innerHTML;
   btn.innerHTML = '✅ נפתח בוואטסאפ — שלחו שם!';
   btn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
-  setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 4000);
+  setTimeout(() => { btn.innerHTML = orig; btn.style.background = 'linear-gradient(135deg,#7c3aed,#ec4899)'; }, 4000);
 }
 
 // ══ Sticky Notes Feelings Wall — Firebase Sync ══
@@ -2876,10 +2878,10 @@ function sendWizardWA(role) {
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px;max-width:380px;margin:0 auto 16px;">
         <p style="font-size:0.8rem;color:#1e40af;margin:0;">💡 <strong>טיפ:</strong> הטיוטה שלכם שמורה — אם תחזרו לאתר, הכל פה.</p>
       </div>
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-        <button onclick="switchTab('main')" style="font-family:'Heebo',sans-serif;padding:10px 28px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;">🏠 חזרה לדף הראשי</button>
-        <button onclick="openTeacherPanel()" style="font-family:'Heebo',sans-serif;padding:10px 28px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;">🏫 ניהול כיתה</button>
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:12px;padding:14px;max-width:380px;margin:0 auto 16px;">
+        <p style="font-size:0.85rem;color:#92400e;margin:0;">🏫 <strong>ניהול כיתה:</strong> אחרי שתקבלו את הסיסמה — כנסו כתלמיד/מורה ותוכלו לנהל את הכיתה מהלשונית "מורה".</p>
       </div>
+      <button onclick="switchTab('main')" style="font-family:'Heebo',sans-serif;padding:10px 28px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;">🏠 חזרה לדף הראשי</button>
     </div>`;
 }
 

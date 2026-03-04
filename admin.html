@@ -329,9 +329,8 @@ async function loadTeacherSpace(code) {
     // Update stats for this space only
     updateStats(1, studentCount, space.type === 'class' ? 1 : 0, space.type === 'family' ? 1 : 0);
 
-    // Hide the create form — teacher doesn't need it
-    const createSection = document.querySelector('.card');
-    if (createSection) createSection.style.display = 'none';
+    // Hide the create form and existing spaces header — teacher doesn't need them
+    document.querySelectorAll('.section-box').forEach(el => el.style.display = 'none');
 
     const list = document.getElementById('spacesList');
     const studentsHtml = space.students ? Object.entries(space.students).map(([pin, st]) => {
@@ -358,10 +357,10 @@ async function loadTeacherSpace(code) {
         <div class="space-tasks" style="margin:12px 0;">
           ${space.checklist ? space.checklist.map(t => `<span style="display:inline-block;background:#ede9fe;padding:4px 10px;border-radius:8px;margin:2px;font-size:0.85rem;">${t.emoji} ${t.name} — 🏅${t.stickers}</span>`).join(' ') : ''}
         </div>
-        <h3 style="margin:16px 0 8px;color:#4c1d95;">👨‍🎓 תלמידים</h3>
+        <h3 style="margin:16px 0 8px;color:#e9d5ff;">👨‍🎓 תלמידים</h3>
         <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
           <thead>
-            <tr style="background:#f5f3ff;text-align:right;">
+            <tr style="background:rgba(124,58,237,0.2);text-align:right;">
               <th style="padding:8px 10px;border-bottom:2px solid #e5e7eb;">שם</th>
               <th style="padding:8px 10px;border-bottom:2px solid #e5e7eb;">רמה</th>
               <th style="padding:8px 10px;border-bottom:2px solid #e5e7eb;">מדבקות</th>
