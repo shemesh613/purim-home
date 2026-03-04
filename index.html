@@ -1538,16 +1538,6 @@
           <label>👦 שמות הילדים (מופרדים בפסיק)</label>
           <input type="text" id="pChildNames" placeholder="לדוגמה: יוסי, שרה, דני">
         </div>
-        <div class="sw-row">
-          <div class="sw-field">
-            <label>🏫 בית ספר (אופציונלי)</label>
-            <input type="text" id="pSchool" placeholder="לדוגמה: רמב״ם">
-          </div>
-          <div class="sw-field">
-            <label>📚 כיתה (אופציונלי)</label>
-            <input type="text" id="pClass" placeholder="לדוגמה: ג1">
-          </div>
-        </div>
         <div class="sw-actions">
           <button class="sw-btn sw-btn-primary" onclick="wizardStep('parent', 2)">המשיכו לבניית צ'קליסט ←</button>
         </div>
@@ -1604,31 +1594,50 @@
       </div>
     </div>
 
-    <div class="parent-cards">
-      <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" class="parent-card">
-        <span class="pc-emoji">🏅</span>
-        <h3 class="pc-title">כנסו לאלבום</h3>
-        <p class="pc-desc">ראו את אוסף המדבקות, גרדו כרטיסים חדשים ואספו את כולן!</p>
-      </a>
-      <a href="https://wa.me/972526953500?text=%D7%A9%D7%9C%D7%95%D7%9D%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A7%D7%95%D7%93%20%D7%92%D7%99%D7%A9%D7%94%20%D7%9C%D7%90%D7%9C%D7%91%D7%95%D7%9D%20%D7%94%D7%9E%D7%93%D7%91%D7%A7%D7%95%D7%AA" target="_blank" rel="noopener" class="parent-card">
-        <span class="pc-emoji">🔒</span>
-        <h3 class="pc-title">קבלו קוד גישה</h3>
-        <p class="pc-desc">כתבו לשמשון בוואטסאפ וקבלו קוד שפותח גירודים יומיים לילד!</p>
-      </a>
-      <a href="#" onclick="event.preventDefault();openGate('sticker-album/#tasks')" class="parent-card">
-        <span class="pc-emoji">✅</span>
-        <h3 class="pc-title">ראו משימות</h3>
-        <p class="pc-desc">צ'קליסט משימות שהמורה הגדיר — הילד משלים ומקבל מדבקות!</p>
-      </a>
+    <!-- How to get access -->
+    <div class="teacher-info-box" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);">
+      <h3>🔑 איך מתחילים?</h3>
+      <p>מלאו את הטופס למעלה, בנו צ'קליסט משימות ושלחו הודעה — תקבלו סיסמה להקמת המשפחה!</p>
+      <div class="teacher-steps">
+        <div class="teacher-step">
+          <span>1️⃣</span>
+          מלאו פרטי משפחה
+        </div>
+        <div class="teacher-step">
+          <span>2️⃣</span>
+          בנו צ'קליסט משימות
+        </div>
+        <div class="teacher-step">
+          <span>3️⃣</span>
+          שלחו וקבלו סיסמה
+        </div>
+        <div class="teacher-step">
+          <span>4️⃣</span>
+          הילדים מתחילים לאסוף!
+        </div>
+      </div>
     </div>
-    <div class="teacher-info-box" style="margin-top:25px; background:linear-gradient(135deg,#eff6ff,#dbeafe);">
-      <h3>💡 רוצים שהילד יקבל מדבקות?</h3>
-      <p>דברו עם המורה או כתבו לשמשון — נפתח קוד גישה ונוסיף את הילד למערכת. הילדים מתקדמים, צוברים מדבקות ומשלימים אתגרים!</p>
-      <div style="margin-top:14px;">
-        <a href="https://wa.me/972526953500?text=%D7%A9%D7%9C%D7%95%D7%9D%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%9C%20%D7%90%D7%9C%D7%91%D7%95%D7%9D%20%D7%94%D7%9E%D7%93%D7%91%D7%A7%D7%95%D7%AA" target="_blank" rel="noopener"
-           style="display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;font-family:'Heebo',sans-serif;font-size:1rem;font-weight:700;border-radius:14px;text-decoration:none;box-shadow:0 4px 15px rgba(37,211,102,0.3);transition:all 0.3s;">
-          💬 כתבו לשמשון בוואטסאפ
-        </a>
+
+    <!-- What children see -->
+    <div class="teacher-info-box" style="margin-top:18px; background:linear-gradient(135deg,#faf5ff,#fce7f3);">
+      <h3>👀 מה הילדים רואים?</h3>
+      <div class="teacher-steps">
+        <div class="teacher-step">
+          <span>📋</span>
+          צ'קליסט משימות
+        </div>
+        <div class="teacher-step">
+          <span>✅</span>
+          סימון וי + אישור הורה
+        </div>
+        <div class="teacher-step">
+          <span>🏅</span>
+          איסוף מדבקות
+        </div>
+        <div class="teacher-step">
+          <span>🏆</span>
+          השלמת האוסף
+        </div>
       </div>
     </div>
   </div>
@@ -1770,26 +1779,24 @@
     <!-- How to get access -->
     <div class="teacher-info-box">
       <h3>🔑 איך מתחילים?</h3>
-      <p>רוצים להפעיל את האלבום בכיתה? פנו לשמשון וקבלו קוד גישה ייחודי לכיתה שלכם!</p>
+      <p>מלאו את הטופס למעלה, בנו צ'קליסט משימות ושלחו הודעה — תקבלו סיסמה להקמת הכיתה!</p>
       <div class="teacher-steps">
         <div class="teacher-step">
           <span>1️⃣</span>
-          כתבו לשמשון
+          מלאו פרטי כיתה
         </div>
         <div class="teacher-step">
           <span>2️⃣</span>
-          קבלו קוד כיתה
+          בנו צ'קליסט משימות
         </div>
         <div class="teacher-step">
           <span>3️⃣</span>
-          שתפו קוד עם תלמידים
+          שלחו וקבלו סיסמה
         </div>
-      </div>
-      <div style="margin-top:18px;">
-        <a href="https://wa.me/972526953500?text=%D7%A9%D7%9C%D7%95%D7%9D%2C%20%D7%90%D7%A0%D7%99%20%D7%9E%D7%95%D7%A8%D7%94%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A7%D7%95%D7%93%20%D7%92%D7%99%D7%A9%D7%94%20%D7%9C%D7%9B%D7%99%D7%AA%D7%94" target="_blank" rel="noopener"
-           style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;font-family:'Heebo',sans-serif;font-size:1.05rem;font-weight:900;border-radius:14px;text-decoration:none;box-shadow:0 4px 15px rgba(37,211,102,0.3);transition:all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          💬 כתבו לשמשון בוואטסאפ
-        </a>
+        <div class="teacher-step">
+          <span>4️⃣</span>
+          שתפו עם התלמידים
+        </div>
       </div>
     </div>
 
@@ -1798,20 +1805,20 @@
       <h3>👀 מה התלמידים רואים?</h3>
       <div class="teacher-steps">
         <div class="teacher-step">
-          <span>🎴</span>
-          גירוד כרטיסים יומי
-        </div>
-        <div class="teacher-step">
-          <span>📖</span>
-          אלבום מדבקות
-        </div>
-        <div class="teacher-step">
-          <span>❓</span>
-          חידונים + מדבקות
+          <span>📋</span>
+          צ'קליסט משימות
         </div>
         <div class="teacher-step">
           <span>✅</span>
-          צ'קליסט משימות
+          סימון וי + אישור מורה
+        </div>
+        <div class="teacher-step">
+          <span>🏅</span>
+          איסוף מדבקות
+        </div>
+        <div class="teacher-step">
+          <span>🏆</span>
+          השלמת האוסף
         </div>
       </div>
     </div>
@@ -2459,11 +2466,9 @@ function renderPreview(role) {
     const name = document.getElementById('pName').value.trim();
     const children = document.getElementById('pChildren').value;
     const childNames = document.getElementById('pChildNames').value.trim();
-    const school = document.getElementById('pSchool').value.trim();
     info = `<div class="preview-info">👤 הורה: <strong>${name}</strong></div>`;
     if (childNames) info += `<div class="preview-info">👧 ילדים: ${childNames}</div>`;
     else info += `<div class="preview-info">👧 ${children} ילדים</div>`;
-    if (school) info += `<div class="preview-info">🏫 ${school}</div>`;
   }
   const totalStickers = data.tasks.reduce((sum, t) => sum + t.stickers, 0);
   info += `<div class="preview-info" style="margin-top:8px;">📋 <strong>${data.tasks.length}</strong> משימות | 🏅 <strong>${totalStickers}</strong> מדבקות סה״כ</div>`;
@@ -2488,14 +2493,10 @@ function sendWizardWA(role) {
     const name = document.getElementById('pName').value.trim();
     const children = document.getElementById('pChildren').value;
     const childNames = document.getElementById('pChildNames').value.trim();
-    const school = document.getElementById('pSchool').value.trim();
-    const cls = document.getElementById('pClass').value.trim();
     msg = `👨‍👩‍👧 *בקשת הקמת משפחה — תוכנית מדבקות*\n\n`;
     msg += `👤 הורה: ${name}\n`;
     if (childNames) msg += `👧 ילדים: ${childNames}\n`;
     else msg += `👧 מספר ילדים: ${children}\n`;
-    if (school) msg += `🏫 בית ספר: ${school}\n`;
-    if (cls) msg += `📚 כיתה: ${cls}\n`;
   }
   msg += `\n📋 *צ'קליסט משימות:*\n`;
   data.tasks.forEach((t, i) => {
