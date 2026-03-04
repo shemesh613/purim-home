@@ -1832,7 +1832,11 @@
     <button class="gate-close" onclick="closeGate()">✕</button>
     <div class="gate-icon">🎒</div>
     <div class="gate-title">כניסת תלמיד</div>
-    <div class="gate-desc">הכניסו את סיסמת הכיתה/משפחה ואת הסיסמה האישית שלכם</div>
+    <div class="gate-desc">הכניסו את השם שלכם, סיסמת הכיתה/משפחה וסיסמה אישית</div>
+    <div style="text-align:right; margin-bottom:12px;">
+      <label style="display:block;font-size:0.85rem;font-weight:700;color:#4c1d95;margin-bottom:5px;">👤 השם שלי</label>
+      <input type="text" id="gateStudentName" placeholder="לדוגמה: יוסי" style="width:100%;font-family:'Heebo',sans-serif;padding:10px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:0.95rem;direction:rtl;outline:none;background:#faf5ff;">
+    </div>
     <div style="text-align:right; margin-bottom:12px;">
       <label style="display:block;font-size:0.85rem;font-weight:700;color:#4c1d95;margin-bottom:5px;">🔑 סיסמת כיתה / משפחה</label>
       <input type="text" id="gateClassCode" placeholder="הסיסמה שקיבלתם מהמורה או ההורה" style="width:100%;font-family:'Heebo',sans-serif;padding:10px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:0.95rem;direction:rtl;outline:none;background:#faf5ff;">
@@ -1843,6 +1847,8 @@
       <p style="font-size:0.72rem;color:#9ca3af;margin-top:4px;">💡 זו הסיסמה האישית שלכם — תשמרו אותה טוב!</p>
     </div>
     <button class="gate-google-btn" onclick="gateLogin()" style="background:linear-gradient(135deg,#7c3aed,#ec4899);">🚀 כנסו!</button>
+    <div class="gate-divider">אין לכם סיסמה?</div>
+    <a href="https://wa.me/972526953500?text=%D7%A9%D7%9C%D7%95%D7%9D%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A1%D7%99%D7%A1%D7%9E%D7%94%20%D7%9C%D7%9B%D7%99%D7%AA%D7%94%2F%D7%9E%D7%A9%D7%A4%D7%97%D7%94" target="_blank" rel="noopener" class="gate-guest-btn" style="text-decoration:none;">💬 שלחו הודעה לקבלת סיסמה</a>
   </div>
 </div>
 
@@ -1896,6 +1902,7 @@ function openGate(target) {
   document.getElementById('gateModal').classList.add('active');
   // Pre-fill saved codes
   const saved = JSON.parse(localStorage.getItem('purim_student_login') || '{}');
+  if (saved.studentName) document.getElementById('gateStudentName').value = saved.studentName;
   if (saved.classCode) document.getElementById('gateClassCode').value = saved.classCode;
   if (saved.personalCode) document.getElementById('gatePersonalCode').value = saved.personalCode;
 }
@@ -1903,8 +1910,15 @@ function closeGate() {
   document.getElementById('gateModal').classList.remove('active');
 }
 function gateLogin() {
+  const studentName = document.getElementById('gateStudentName').value.trim();
   const classCode = document.getElementById('gateClassCode').value.trim();
   const personalCode = document.getElementById('gatePersonalCode').value.trim();
+  if (!studentName) {
+    document.getElementById('gateStudentName').style.borderColor = '#ef4444';
+    document.getElementById('gateStudentName').focus();
+    setTimeout(() => document.getElementById('gateStudentName').style.borderColor = '', 1500);
+    return;
+  }
   if (!classCode) {
     document.getElementById('gateClassCode').style.borderColor = '#ef4444';
     document.getElementById('gateClassCode').focus();
@@ -1918,12 +1932,12 @@ function gateLogin() {
     return;
   }
   // Save for next time
-  localStorage.setItem('purim_student_login', JSON.stringify({ classCode, personalCode }));
+  localStorage.setItem('purim_student_login', JSON.stringify({ studentName, classCode, personalCode }));
   closeGate();
   // Navigate with codes as hash params
   const hash = gateTarget.includes('#') ? gateTarget.split('#')[1] : '';
   const base = gateTarget.replace(/#.*$/, '');
-  window.location.href = base + '#login=' + encodeURIComponent(classCode) + '&pin=' + encodeURIComponent(personalCode) + (hash ? '&view=' + hash : '');
+  window.location.href = base + '#login=' + encodeURIComponent(classCode) + '&pin=' + encodeURIComponent(personalCode) + '&name=' + encodeURIComponent(studentName) + (hash ? '&view=' + hash : '');
 }
 
 // ══ Continuous Confetti ══
