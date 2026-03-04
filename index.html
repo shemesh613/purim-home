@@ -210,6 +210,11 @@
     .badge-popular { background: #fef3c7; color: #b45309; }
     .badge-fun { background: #fce7f3; color: #be185d; }
     .badge-challenge { background: #ede9fe; color: #6d28d9; }
+
+    /* Pesach tab */
+    #tab-pesach { background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 50%, #fff7ed 100%); border-radius: 24px; padding: 20px; }
+    .pesach-card { background: linear-gradient(135deg, #fffbeb, #fef9e7) !important; }
+    .pesach-card:hover { border-color: #d97706 !important; }
     .badge-new { background: #d1fae5; color: #065f46; }
     .badge-special { background: #fef3c7; color: #92400e; }
 
@@ -1160,7 +1165,8 @@
 
 <!-- ══ Tabs ══ -->
 <nav class="tabs" id="tabsNav" role="tablist" aria-label="תפריט ראשי">
-  <button class="tab-btn active" data-tab="main" role="tab" aria-selected="true">🏠 ראשי</button>
+  <button class="tab-btn active" data-tab="main" role="tab" aria-selected="true">🎭 פורים</button>
+  <button class="tab-btn" data-tab="pesach" role="tab" aria-selected="false">🫓 פסח</button>
   <button class="tab-btn" data-tab="games" role="tab" aria-selected="false">🎮 משחקים</button>
   <button class="tab-btn" data-tab="videos" role="tab" aria-selected="false">🎬 סרטונים</button>
   <button class="tab-btn" data-tab="feelings" role="tab" aria-selected="false">💛 קיר הרגשות</button>
@@ -1277,11 +1283,11 @@
         <p class="card-desc">גרדו כרטיסים ואספו מדבקות גיבורי ישראל!</p>
         <span class="card-badge badge-challenge">🇮🇱 חדש!</span>
       </a>
-      <a href="#" onclick="event.preventDefault();openGate('sticker-album/#quiz')" class="game-card" style="--card-shadow: rgba(139,92,246,0.25); --card-border: #c4b5fd; background:linear-gradient(135deg, #faf5ff, #ede9fe);">
-        <span class="card-emoji">❓</span>
-        <h3 class="card-title">חידונים + מדבקות</h3>
-        <p class="card-desc">ענו על חידונים וקבלו מדבקות! חידון פסח 🫓</p>
-        <span class="card-badge badge-challenge">🆕 חדש!</span>
+      <a href="#" onclick="event.preventDefault();switchTab('pesach')" class="game-card" style="--card-shadow: rgba(180,83,9,0.25); --card-border: #fbbf24; background:linear-gradient(135deg, #fffbeb, #fef3c7);">
+        <span class="card-emoji">🫓</span>
+        <h3 class="card-title">פעילויות פסח</h3>
+        <p class="card-desc">חידונים, משחקים ואתגרים לקראת ליל הסדר!</p>
+        <span class="card-badge" style="background:#92400e;color:#fef3c7;">🫓 חדש!</span>
       </a>
     </div>
   </div>
@@ -1358,26 +1364,102 @@
     </div>
   </div>
 
-  <!-- Feelings Wall on Home Page -->
+  <!-- Purim Password Gate -->
   <div class="section" style="text-align:center;">
-    <h2 class="section-title">
-      <span class="line"></span>💛 קיר הרגשות 💛<span class="line"></span>
-    </h2>
-    <p style="color:#6b7280;max-width:450px;margin:0 auto 18px;line-height:1.7;font-size:0.95rem;">
-      כאן אפשר לכתוב מה אתם מרגישים — כל רגש לגיטימי! 🤗<br>
-      תקראו מה ילדים אחרים כתבו ותדעו שאתם לא לבד.
-    </p>
-    <div class="note-form">
-      <h3 style="color:#7c3aed;font-size:1.1rem;margin-bottom:10px;">✏️ הוסיפו פתק משלכם</h3>
-      <div style="display:flex;gap:8px;margin-bottom:8px;">
-        <input class="note-input" id="nNameHome" placeholder="השם שלי" style="flex:1">
-        <input class="note-input" id="nCityHome" placeholder="מאיפה אני" style="flex:1">
+    <div style="background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:20px;padding:24px 20px;max-width:420px;margin:0 auto;">
+      <div style="font-size:2rem;margin-bottom:8px;">🔑</div>
+      <h3 style="color:#fff;font-size:1.15rem;margin-bottom:6px;">כניסה עם סיסמת כיתה / משפחה</h3>
+      <p style="color:rgba(255,255,255,0.8);font-size:0.85rem;margin-bottom:14px;">הכניסו את הסיסמה שקיבלתם מהמורה או ההורה</p>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <input type="text" id="purimGateCode" placeholder="לדוגמה: שמשון-1234" style="font-family:'Heebo',sans-serif;padding:10px 16px;border:2px solid rgba(255,255,255,0.3);border-radius:12px;font-size:1rem;text-align:center;direction:rtl;outline:none;width:200px;background:rgba(255,255,255,0.15);color:#fff;" onfocus="this.style.borderColor='#fbbf24'" onblur="this.style.borderColor='rgba(255,255,255,0.3)'">
+        <button onclick="enterPurimSpace()" style="font-family:'Heebo',sans-serif;padding:10px 24px;background:#fbbf24;color:#1e1b4b;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;">🏅 כנסו!</button>
       </div>
-      <textarea class="note-input" id="nFeelingHome" placeholder="אני מרגיש/ה..." style="min-height:60px;resize:vertical;margin-bottom:8px;"></textarea>
-      <textarea class="note-input" id="nHelpHome" placeholder="מה עוזר לי?" style="min-height:50px;resize:vertical;margin-bottom:10px;"></textarea>
-      <button class="note-submit" onclick="Notes.addFrom('Home')">📌 הדביקו את הפתק!</button>
+      <p style="color:rgba(255,255,255,0.6);font-size:0.75rem;margin-top:10px;">אין סיסמה? <a href="#" onclick="event.preventDefault();switchTab('teacher')" style="color:#fbbf24;text-decoration:underline;">הקימו כיתה</a> או <a href="#" onclick="event.preventDefault();switchTab('parent')" style="color:#fbbf24;text-decoration:underline;">הקימו משפחה</a></p>
     </div>
-    <div class="notes-wall" id="notesWallHome"></div>
+  </div>
+
+</div>
+
+<!-- ══ Tab: Pesach ══ -->
+<div class="tab-content" id="tab-pesach">
+  <div class="pesach-section" style="padding:0;">
+
+    <!-- Pesach Hero -->
+    <div style="background:linear-gradient(135deg,#92400e,#b45309);border-radius:20px;padding:30px 20px;text-align:center;margin-bottom:24px;">
+      <div style="font-size:3rem;margin-bottom:8px;">🫓🍷</div>
+      <h2 style="color:#fff;font-family:'Frank Ruhl Libre',serif;font-size:1.8rem;margin-bottom:8px;">פסח — חג החירות!</h2>
+      <p style="color:rgba(255,255,255,0.85);font-size:0.95rem;max-width:400px;margin:0 auto;">פעילויות, אתגרים וחידונים לקראת ליל הסדר — להכין את הילדים בכיף!</p>
+    </div>
+
+    <!-- Pesach Password Gate -->
+    <div class="section" style="text-align:center;">
+      <div style="background:linear-gradient(135deg,#92400e,#d97706);border-radius:20px;padding:24px 20px;max-width:420px;margin:0 auto;">
+        <div style="font-size:2rem;margin-bottom:8px;">🔑</div>
+        <h3 style="color:#fff;font-size:1.15rem;margin-bottom:6px;">כניסה עם סיסמת כיתה / משפחה</h3>
+        <p style="color:rgba(255,255,255,0.8);font-size:0.85rem;margin-bottom:14px;">הכניסו את הסיסמה שקיבלתם מהמורה או ההורה</p>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <input type="text" id="pesachGateCode" placeholder="לדוגמה: שמשון-1234" style="font-family:'Heebo',sans-serif;padding:10px 16px;border:2px solid rgba(255,255,255,0.3);border-radius:12px;font-size:1rem;text-align:center;direction:rtl;outline:none;width:200px;background:rgba(255,255,255,0.15);color:#fff;" onfocus="this.style.borderColor='#fbbf24'" onblur="this.style.borderColor='rgba(255,255,255,0.3)'">
+          <button onclick="enterPesachSpace()" style="font-family:'Heebo',sans-serif;padding:10px 24px;background:#fbbf24;color:#1e1b4b;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;">🏅 כנסו!</button>
+        </div>
+        <p style="color:rgba(255,255,255,0.6);font-size:0.75rem;margin-top:10px;">אין סיסמה? <a href="#" onclick="event.preventDefault();switchTab('teacher')" style="color:#fbbf24;text-decoration:underline;">הקימו כיתה</a> או <a href="#" onclick="event.preventDefault();switchTab('parent')" style="color:#fbbf24;text-decoration:underline;">הקימו משפחה</a></p>
+      </div>
+    </div>
+
+    <!-- Pesach Activities Grid -->
+    <div class="section">
+      <h2 class="section-title">
+        <span class="line"></span>🫓 פעילויות פסח 🫓<span class="line"></span>
+      </h2>
+      <div class="games-grid">
+        <a href="#" onclick="event.preventDefault();openGate('sticker-album/#quiz')" class="game-card pesach-card" style="--card-shadow: rgba(139,69,19,0.2); --card-border: #deb887;">
+          <span class="card-emoji">❓</span>
+          <h3 class="card-title">חידון פסח</h3>
+          <p class="card-desc">שאלות על יציאת מצרים, ליל הסדר והאגדתא — עם מדבקות!</p>
+          <span class="card-badge" style="background:#92400e;color:#fef3c7;">🫓 פסח</span>
+        </a>
+        <div class="game-card pesach-card" style="--card-shadow: rgba(139,69,19,0.2); --card-border: #deb887; cursor:default;">
+          <span class="card-emoji">🍽️</span>
+          <h3 class="card-title">קערת הסדר</h3>
+          <p class="card-desc">למדו את ששת הסימנים בקערת הסדר — בצורה אינטראקטיבית!</p>
+          <span class="card-badge" style="background:#b45309;color:#fef3c7;">🔜 בקרוב</span>
+        </div>
+        <div class="game-card pesach-card" style="--card-shadow: rgba(139,69,19,0.2); --card-border: #deb887; cursor:default;">
+          <span class="card-emoji">🎤</span>
+          <h3 class="card-title">מה נשתנה</h3>
+          <p class="card-desc">תרגלו את ארבע הקושיות — הקלטה, טקסט ומשחק התאמה!</p>
+          <span class="card-badge" style="background:#b45309;color:#fef3c7;">🔜 בקרוב</span>
+        </div>
+        <div class="game-card pesach-card" style="--card-shadow: rgba(139,69,19,0.2); --card-border: #deb887; cursor:default;">
+          <span class="card-emoji">🐸</span>
+          <h3 class="card-title">עשר המכות</h3>
+          <p class="card-desc">משחק זיכרון עם עשר המכות — סדרו, התאימו ולמדו!</p>
+          <span class="card-badge" style="background:#b45309;color:#fef3c7;">🔜 בקרוב</span>
+        </div>
+        <div class="game-card pesach-card" style="--card-shadow: rgba(139,69,19,0.2); --card-border: #deb887; cursor:default;">
+          <span class="card-emoji">🔦</span>
+          <h3 class="card-title">בדיקת חמץ</h3>
+          <p class="card-desc">חפשו את החמץ המוסתר ברחבי הבית הווירטואלי!</p>
+          <span class="card-badge" style="background:#b45309;color:#fef3c7;">🔜 בקרוב</span>
+        </div>
+        <div class="game-card pesach-card" style="--card-shadow: rgba(139,69,19,0.2); --card-border: #deb887; cursor:default;">
+          <span class="card-emoji">📜</span>
+          <h3 class="card-title">אתגר ההגדה</h3>
+          <p class="card-desc">כמה חלקים מההגדה אתם מכירים? סדרו את הסדר!</p>
+          <span class="card-badge" style="background:#b45309;color:#fef3c7;">🔜 בקרוב</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pesach Sticker Album -->
+    <div class="section" style="text-align:center;">
+      <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" style="display:block;background:linear-gradient(135deg,#78350f,#92400e);border-radius:20px;padding:24px;text-decoration:none;max-width:500px;margin:0 auto;">
+        <div style="font-size:2.5rem;margin-bottom:8px;">🏅</div>
+        <div style="color:#fef3c7;font-family:'Frank Ruhl Libre',serif;font-size:1.3rem;font-weight:700;margin-bottom:6px;">אלבום מדבקות — יציאת מצרים!</div>
+        <div style="color:rgba(254,243,199,0.8);font-size:0.85rem;">אספו מדבקות על פסח, עשר המכות, ליל הסדר ועוד!</div>
+        <div style="margin-top:12px;background:#fbbf24;color:#78350f;display:inline-block;padding:8px 20px;border-radius:12px;font-weight:700;font-size:0.95rem;">🏅 בואו לאסוף!</div>
+      </a>
+    </div>
+
   </div>
 </div>
 
@@ -1890,7 +1972,7 @@
     </a>
   </div>
   <p class="footer-text">
-    ✡️ פורים שמח תשפ״ו | נבנה ע״י <a href="https://shemesh613.github.io/shimshon-cv/" target="_blank" rel="noopener" style="color:#c084fc;text-decoration:none;"><strong>שמשון ג'יקוב</strong> | AI</a>
+    ✡️ מפורים עד פסח תשפ״ו | נבנה ע״י <a href="https://shemesh613.github.io/shimshon-cv/" target="_blank" rel="noopener" style="color:#c084fc;text-decoration:none;"><strong>שמשון ג'יקוב</strong> | AI</a>
   </p>
 </footer>
 
@@ -1998,6 +2080,30 @@ async function gateLogin() {
     btn.style.background = '#ef4444';
     setTimeout(() => { btn.textContent = '🚀 כנסו!'; btn.style.background = ''; btn.disabled = false; }, 2000);
   }
+}
+
+// ══ Purim / Pesach Space Entry ══
+async function enterPurimSpace() {
+  const code = document.getElementById('purimGateCode').value.trim();
+  if (!code) { document.getElementById('purimGateCode').style.borderColor='#ef4444'; setTimeout(()=>document.getElementById('purimGateCode').style.borderColor='',1500); return; }
+  try {
+    const res = await fetch(`${FB_SPACES}/${encodeURIComponent(code)}.json`);
+    const space = await res.json();
+    if (!space) { alert('סיסמה שגויה — נסו שוב'); return; }
+    localStorage.setItem('purim_student_space', JSON.stringify(space));
+    openGate('sticker-album/');
+  } catch(e) { alert('שגיאת רשת — נסו שוב'); }
+}
+async function enterPesachSpace() {
+  const code = document.getElementById('pesachGateCode').value.trim();
+  if (!code) { document.getElementById('pesachGateCode').style.borderColor='#ef4444'; setTimeout(()=>document.getElementById('pesachGateCode').style.borderColor='',1500); return; }
+  try {
+    const res = await fetch(`${FB_SPACES}/${encodeURIComponent(code)}.json`);
+    const space = await res.json();
+    if (!space) { alert('סיסמה שגויה — נסו שוב'); return; }
+    localStorage.setItem('purim_student_space', JSON.stringify(space));
+    openGate('sticker-album/#quiz');
+  } catch(e) { alert('שגיאת רשת — נסו שוב'); }
 }
 
 // ══ Continuous Confetti ══
