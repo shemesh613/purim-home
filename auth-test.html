@@ -26,7 +26,7 @@ button { padding: 10px 20px; font-size: 16px; margin: 5px; border: none; border-
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
-import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+import { initializeAuth, browserLocalPersistence, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
 import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js';
 
 const log = document.getElementById('log');
@@ -58,10 +58,10 @@ try {
 }
 
 try {
-  auth = getAuth(app);
-  addLog('3️⃣ getAuth — OK ✅', 'ok');
+  auth = initializeAuth(app, { persistence: [browserLocalPersistence] });
+  addLog('3️⃣ initializeAuth (localStorage) — OK ✅', 'ok');
 } catch(e) {
-  addLog('3️⃣ getAuth — FAIL ❌ ' + e.message, 'fail');
+  addLog('3️⃣ initializeAuth — FAIL ❌ ' + e.message, 'fail');
 }
 
 try {
