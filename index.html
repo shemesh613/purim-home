@@ -716,6 +716,228 @@
       .tab-btn { font-size: 0.8rem; padding: 6px 12px; }
       .corner-logo { width: 65px; height: 65px; top: 10px; left: 10px; }
     }
+
+    /* ══ Role Sidebar ══ */
+    .role-sidebar {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 6px;
+      background: linear-gradient(180deg, #1e1b4b, #4c1d95, #7c3aed);
+      border-radius: 0 16px 16px 0;
+      box-shadow: 4px 0 20px rgba(124,58,237,0.3);
+    }
+    .role-sidebar a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 10px 8px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.7rem;
+      font-weight: 700;
+      transition: all 0.3s;
+      position: relative;
+      white-space: nowrap;
+    }
+    .role-sidebar a:hover {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      transform: scale(1.05);
+    }
+    .role-sidebar a .role-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+    .role-sidebar a .role-label {
+      font-size: 0.65rem;
+    }
+    @media (max-width: 600px) {
+      .role-sidebar {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        transform: none;
+        flex-direction: row;
+        justify-content: center;
+        border-radius: 16px 16px 0 0;
+        padding: 6px 12px;
+        gap: 0;
+      }
+      .role-sidebar a {
+        flex: 1;
+        padding: 6px 4px;
+        font-size: 0.65rem;
+      }
+      .role-sidebar a .role-icon { font-size: 1.3rem; }
+      .role-sidebar a .role-label { font-size: 0.6rem; }
+      body { padding-bottom: 60px; }
+    }
+
+    /* ══ Gate Modal ══ */
+    .gate-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .gate-overlay.active { display: flex; }
+    .gate-box {
+      background: #fff;
+      border-radius: 24px;
+      padding: 32px 28px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: gateIn 0.3s ease-out;
+    }
+    @keyframes gateIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .gate-close {
+      position: absolute;
+      top: 12px; left: 12px;
+      background: none; border: none;
+      font-size: 1.5rem; cursor: pointer;
+      color: #9ca3af;
+      transition: color 0.2s;
+    }
+    .gate-close:hover { color: #1e1b4b; }
+    .gate-box .gate-icon { font-size: 3rem; margin-bottom: 8px; }
+    .gate-box .gate-title {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.4rem; color: #1e1b4b;
+      margin-bottom: 6px; font-weight: 900;
+    }
+    .gate-box .gate-desc {
+      font-size: 0.9rem; color: #6b7280;
+      margin-bottom: 20px; line-height: 1.6;
+    }
+    .gate-google-btn {
+      display: inline-flex;
+      align-items: center; gap: 10px;
+      padding: 12px 28px;
+      background: #4285f4;
+      color: #fff;
+      font-family: 'Heebo', sans-serif;
+      font-size: 1.05rem; font-weight: 700;
+      border: none; border-radius: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(66,133,244,0.3);
+      transition: all 0.3s;
+      width: 100%;
+      justify-content: center;
+    }
+    .gate-google-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(66,133,244,0.4); }
+    .gate-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 16px 0;
+      color: #9ca3af; font-size: 0.85rem;
+    }
+    .gate-divider::before, .gate-divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: #e5e7eb;
+    }
+    .gate-guest-btn {
+      display: inline-flex;
+      align-items: center; gap: 8px;
+      padding: 10px 24px;
+      background: #f3f4f6;
+      color: #4b5563;
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.95rem; font-weight: 600;
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      width: 100%;
+      justify-content: center;
+    }
+    .gate-guest-btn:hover { background: #e5e7eb; border-color: #d1d5db; }
+    .gate-guest-note {
+      font-size: 0.75rem; color: #9ca3af;
+      margin-top: 6px;
+    }
+
+    /* ══ Parent Tab ══ */
+    .parent-hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 40%, #3b82f6 100%);
+      border-radius: 24px;
+      padding: 35px 25px;
+      text-align: center;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(30,64,175,0.3);
+      margin-bottom: 25px;
+    }
+    .parent-hero::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle at 30% 50%, rgba(59,130,246,0.3) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 50%, rgba(251,191,36,0.2) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .parent-hero .ph-inner { position: relative; z-index: 1; }
+    .parent-hero .ph-icon { font-size: 3.5rem; margin-bottom: 8px; }
+    .parent-hero .ph-title {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 2rem; font-weight: 900;
+      background: linear-gradient(135deg, #fbbf24, #f97316, #fbbf24);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .parent-hero .ph-sub {
+      font-size: 1rem; color: rgba(255,255,255,0.85);
+      max-width: 500px; margin: 0 auto 16px; line-height: 1.6;
+    }
+    .parent-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .parent-card {
+      background: #fff;
+      border: 2px solid rgba(0,0,0,0.06);
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      text-decoration: none;
+      color: inherit; display: block;
+    }
+    .parent-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(59,130,246,0.15);
+      border-color: #93c5fd;
+    }
+    .parent-card .pc-emoji { font-size: 2.5rem; margin-bottom: 8px; display: block; }
+    .parent-card .pc-title {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.1rem; color: #1e1b4b; margin-bottom: 4px; font-weight: 700;
+    }
+    .parent-card .pc-desc { font-size: 0.82rem; color: #6b7280; line-height: 1.5; }
+    @media (max-width: 600px) {
+      .parent-hero .ph-title { font-size: 1.5rem; }
+      .parent-hero { padding: 22px 16px; }
+      .parent-cards { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -740,7 +962,22 @@
   <button class="tab-btn" data-tab="games" role="tab" aria-selected="false">🎮 משחקים</button>
   <button class="tab-btn" data-tab="videos" role="tab" aria-selected="false">🎬 סרטונים</button>
   <button class="tab-btn" data-tab="feelings" role="tab" aria-selected="false">💛 קיר הרגשות</button>
-  <button class="tab-btn" data-tab="teacher" role="tab" aria-selected="false" style="background:linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.1));border-color:rgba(124,58,237,0.3);">👨‍🏫 למורים</button>
+</nav>
+
+<!-- ══ Role Sidebar ══ -->
+<nav class="role-sidebar" aria-label="כניסה לפי תפקיד">
+  <a href="#" onclick="event.preventDefault();switchTab('teacher')" title="מורה">
+    <span class="role-icon">🏫</span>
+    <span class="role-label">מורה</span>
+  </a>
+  <a href="#" onclick="event.preventDefault();switchTab('parent')" title="הורה">
+    <span class="role-icon">👨‍👩‍👧</span>
+    <span class="role-label">הורה</span>
+  </a>
+  <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" title="תלמיד">
+    <span class="role-icon">🎒</span>
+    <span class="role-label">תלמיד</span>
+  </a>
 </nav>
 
 <!-- ══ Tab: Main ══ -->
@@ -784,7 +1021,7 @@
         </div>
       </a>
       <!-- Sticker Album -->
-      <a href="sticker-album/" class="hero-challenge" style="flex:1;min-width:280px;">
+      <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" class="hero-challenge" style="flex:1;min-width:280px;">
         <div class="hero-inner" style="background:linear-gradient(135deg,#0a0a2e,#0038b8);">
           <div class="hero-icon">🏅</div>
           <div class="hero-title">אלבום מדבקות — גיבורי ישראל!</div>
@@ -831,13 +1068,13 @@
         <p class="card-desc">6 חדרים מהמגילה עם ניקוד ומדליות!</p>
         <span class="card-badge badge-challenge">🗝️ חדש!</span>
       </a>
-      <a href="sticker-album/" class="game-card" style="--card-shadow: rgba(0,56,184,0.25); --card-border: #93c5fd; background:linear-gradient(135deg, #eff6ff, #dbeafe);">
+      <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" class="game-card" style="--card-shadow: rgba(0,56,184,0.25); --card-border: #93c5fd; background:linear-gradient(135deg, #eff6ff, #dbeafe);">
         <span class="card-emoji">🏅</span>
         <h3 class="card-title">אלבום מדבקות</h3>
         <p class="card-desc">גרדו כרטיסים ואספו מדבקות גיבורי ישראל!</p>
         <span class="card-badge badge-challenge">🇮🇱 חדש!</span>
       </a>
-      <a href="sticker-album/#quiz" class="game-card" style="--card-shadow: rgba(139,92,246,0.25); --card-border: #c4b5fd; background:linear-gradient(135deg, #faf5ff, #ede9fe);">
+      <a href="#" onclick="event.preventDefault();openGate('sticker-album/#quiz')" class="game-card" style="--card-shadow: rgba(139,92,246,0.25); --card-border: #c4b5fd; background:linear-gradient(135deg, #faf5ff, #ede9fe);">
         <span class="card-emoji">❓</span>
         <h3 class="card-title">חידונים + מדבקות</h3>
         <p class="card-desc">ענו על חידונים וקבלו מדבקות! חידון פסח 🫓</p>
@@ -1066,6 +1303,46 @@
   </div>
 </div>
 
+<!-- ══ Tab: Parent Info ══ -->
+<div class="tab-content" id="tab-parent">
+  <div class="section">
+    <div class="parent-hero">
+      <div class="ph-inner">
+        <div class="ph-icon">👨‍👩‍👧</div>
+        <div class="ph-title">להורים — מה הילד שלכם עושה?</div>
+        <div class="ph-sub">הילדים אוספים מדבקות, פותרים חידונים ומשלימים משימות — הכל בסביבה בטוחה וחינוכית!</div>
+      </div>
+    </div>
+    <div class="parent-cards">
+      <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" class="parent-card">
+        <span class="pc-emoji">🏅</span>
+        <h3 class="pc-title">כנסו לאלבום</h3>
+        <p class="pc-desc">ראו את אוסף המדבקות, גרדו כרטיסים חדשים ואספו את כולן!</p>
+      </a>
+      <a href="https://wa.me/972526953500?text=%D7%A9%D7%9C%D7%95%D7%9D%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A7%D7%95%D7%93%20%D7%92%D7%99%D7%A9%D7%94%20%D7%9C%D7%90%D7%9C%D7%91%D7%95%D7%9D%20%D7%94%D7%9E%D7%93%D7%91%D7%A7%D7%95%D7%AA" target="_blank" rel="noopener" class="parent-card">
+        <span class="pc-emoji">🔒</span>
+        <h3 class="pc-title">קבלו קוד גישה</h3>
+        <p class="pc-desc">כתבו לשמשון בוואטסאפ וקבלו קוד שפותח גירודים יומיים לילד!</p>
+      </a>
+      <a href="#" onclick="event.preventDefault();openGate('sticker-album/#tasks')" class="parent-card">
+        <span class="pc-emoji">✅</span>
+        <h3 class="pc-title">ראו משימות</h3>
+        <p class="pc-desc">צ'קליסט משימות שהמורה הגדיר — הילד משלים ומקבל מדבקות!</p>
+      </a>
+    </div>
+    <div class="teacher-info-box" style="margin-top:25px; background:linear-gradient(135deg,#eff6ff,#dbeafe);">
+      <h3>💡 רוצים שהילד יקבל מדבקות?</h3>
+      <p>דברו עם המורה או כתבו לשמשון — נפתח קוד גישה ונוסיף את הילד למערכת. הילדים מתקדמים, צוברים מדבקות ומשלימים אתגרים!</p>
+      <div style="margin-top:14px;">
+        <a href="https://wa.me/972526953500?text=%D7%A9%D7%9C%D7%95%D7%9D%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%9C%20%D7%90%D7%9C%D7%91%D7%95%D7%9D%20%D7%94%D7%9E%D7%93%D7%91%D7%A7%D7%95%D7%AA" target="_blank" rel="noopener"
+           style="display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;font-family:'Heebo',sans-serif;font-size:1rem;font-weight:700;border-radius:14px;text-decoration:none;box-shadow:0 4px 15px rgba(37,211,102,0.3);transition:all 0.3s;">
+          💬 כתבו לשמשון בוואטסאפ
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ Tab: Teacher Tools ══ -->
 <div class="tab-content" id="tab-teacher">
   <div class="section">
@@ -1073,8 +1350,8 @@
     <div class="teacher-hero">
       <div class="th-inner">
         <div class="th-icon">🏫</div>
-        <div class="th-title">לוח מורה — ניהול כיתה</div>
-        <div class="th-sub">נהלו את הכיתה בקלות: צ'קליסט משימות, קריטריונים למדבקות, מעקב תלמידים וסטטיסטיקות!</div>
+        <div class="th-title">למורים — ניהול כיתה ומדבקות</div>
+        <div class="th-sub">נהלו את הכיתה בקלות: צ'קליסט משימות, קריטריונים למדבקות, מעקב תלמידים וסטטיסטיקות!<br>שתפו קוד כיתה עם תלמידים — הם מזינים אותו באלבום ומתחילים לצבור.</div>
         <a href="sticker-album/#dashboard" class="th-cta">🚀 היכנסו ללוח המורה</a>
       </div>
     </div>
@@ -1113,7 +1390,7 @@
     <!-- How it Works -->
     <div class="teacher-info-box">
       <h3>🔑 איך מתחילים?</h3>
-      <p>כניסה קלה בשלושה צעדים — תוך דקה אתם בפנים!</p>
+      <p>כניסה קלה בשלושה צעדים — תוך דקה אתם בפנים!<br>הקוד מוצג רק בלוח המורה שלכם — התלמידים מזינים אותו באלבום.</p>
       <div class="teacher-steps">
         <div class="teacher-step">
           <span>1️⃣</span>
@@ -1161,6 +1438,20 @@
 </div>
 
 </main>
+<!-- ══ Gate Modal ══ -->
+<div class="gate-overlay" id="gateModal" onclick="if(event.target===this)closeGate()">
+  <div class="gate-box">
+    <button class="gate-close" onclick="closeGate()">✕</button>
+    <div class="gate-icon">🏅</div>
+    <div class="gate-title">אלבום מדבקות — גיבורי ישראל!</div>
+    <div class="gate-desc">כנסו עם חשבון כדי שהמדבקות ישמרו בחשבונכם!</div>
+    <button class="gate-google-btn" onclick="gateGo('auth')">🔵 כניסה עם Google</button>
+    <div class="gate-divider">או</div>
+    <button class="gate-guest-btn" onclick="gateGo('guest')">👀 המשיכו כאורח</button>
+    <div class="gate-guest-note">המדבקות לא ישמרו</div>
+  </div>
+</div>
+
 <!-- ══ Footer ══ -->
 <footer class="footer">
   <a class="share-btn" href="#" onclick="shareWA(event)">
@@ -1194,10 +1485,34 @@ document.getElementById('tabsNav').addEventListener('click', function(e) {
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
-  document.getElementById('tab-' + id).classList.add('active');
+  const tabEl = document.getElementById('tab-' + id);
+  if (tabEl) tabEl.classList.add('active');
   const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`);
-  btn.classList.add('active');
-  btn.setAttribute('aria-selected','true');
+  if (btn) {
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected','true');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ══ Gate Modal ══
+let gateTarget = 'sticker-album/';
+function openGate(target) {
+  gateTarget = target || 'sticker-album/';
+  document.getElementById('gateModal').classList.add('active');
+}
+function closeGate() {
+  document.getElementById('gateModal').classList.remove('active');
+}
+function gateGo(mode) {
+  closeGate();
+  if (mode === 'auth') {
+    // Navigate to album with auth hash
+    const base = gateTarget.replace(/#.*$/, '');
+    window.open(base + '#auth', '_blank');
+  } else {
+    window.open(gateTarget, '_blank');
+  }
 }
 
 // ══ Continuous Confetti ══
