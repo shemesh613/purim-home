@@ -721,7 +721,7 @@
     .role-sidebar {
       position: fixed;
       top: 50%;
-      left: 0;
+      right: 0;
       transform: translateY(-50%);
       z-index: 40;
       display: flex;
@@ -729,8 +729,13 @@
       gap: 4px;
       padding: 8px 6px;
       background: linear-gradient(180deg, #1e1b4b, #4c1d95, #7c3aed);
-      border-radius: 0 16px 16px 0;
-      box-shadow: 4px 0 20px rgba(124,58,237,0.3);
+      border-radius: 16px 0 0 16px;
+      box-shadow: -4px 0 20px rgba(124,58,237,0.3);
+    }
+    .role-sidebar .role-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.2);
+      margin: 2px 4px;
     }
     .role-sidebar a {
       display: flex;
@@ -763,14 +768,18 @@
       .role-sidebar {
         top: auto;
         bottom: 0;
-        left: 0;
         right: 0;
+        left: 0;
         transform: none;
         flex-direction: row;
         justify-content: center;
         border-radius: 16px 16px 0 0;
         padding: 6px 12px;
         gap: 0;
+      }
+      .role-sidebar .role-divider {
+        width: 1px; height: auto;
+        margin: 4px 2px;
       }
       .role-sidebar a {
         flex: 1;
@@ -966,17 +975,18 @@
 
 <!-- ══ Role Sidebar ══ -->
 <nav class="role-sidebar" aria-label="כניסה לפי תפקיד">
-  <a href="#" onclick="event.preventDefault();switchTab('teacher')" title="מורה">
+  <a href="#" onclick="event.preventDefault();switchTab('teacher')" title="מורה — מידע וניהול כיתה">
     <span class="role-icon">🏫</span>
     <span class="role-label">מורה</span>
   </a>
-  <a href="#" onclick="event.preventDefault();switchTab('parent')" title="הורה">
+  <a href="#" onclick="event.preventDefault();switchTab('parent')" title="הורה — מידע להורים">
     <span class="role-icon">👨‍👩‍👧</span>
     <span class="role-label">הורה</span>
   </a>
-  <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" title="תלמיד">
+  <div class="role-divider"></div>
+  <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" title="תלמיד — כניסה לאלבום מדבקות">
     <span class="role-icon">🎒</span>
-    <span class="role-label">תלמיד</span>
+    <span class="role-label">אלבום</span>
   </a>
 </nav>
 
