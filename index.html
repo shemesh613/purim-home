@@ -664,6 +664,199 @@
       .teacher-step { min-width: 100px; padding: 10px 12px; font-size: 0.8rem; }
     }
 
+    /* ══ Setup Wizard ══ */
+    .setup-wizard {
+      background: #fff;
+      border-radius: 24px;
+      padding: 28px 24px;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.08);
+      border: 2px solid rgba(124,58,237,0.15);
+      margin-bottom: 24px;
+      max-width: 600px;
+      margin-left: auto; margin-right: auto;
+    }
+    .setup-wizard .sw-header {
+      text-align: center; margin-bottom: 20px;
+    }
+    .setup-wizard .sw-header .sw-icon { font-size: 2.5rem; margin-bottom: 6px; }
+    .setup-wizard .sw-header h3 {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.3rem; color: #4c1d95; font-weight: 900;
+    }
+    .setup-wizard .sw-header p {
+      font-size: 0.85rem; color: #6b7280; margin-top: 4px;
+    }
+    .sw-steps {
+      display: flex; justify-content: center; gap: 8px;
+      margin-bottom: 20px;
+    }
+    .sw-step-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 900;
+      border: 2px solid #e5e7eb;
+      color: #9ca3af; background: #f9fafb;
+      transition: all 0.3s;
+    }
+    .sw-step-dot.active {
+      border-color: #7c3aed; color: #fff;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      box-shadow: 0 2px 10px rgba(124,58,237,0.3);
+    }
+    .sw-step-dot.done {
+      border-color: #22c55e; color: #fff;
+      background: #22c55e;
+    }
+    .sw-panel { display: none; }
+    .sw-panel.active { display: block; }
+    .sw-field {
+      margin-bottom: 14px;
+    }
+    .sw-field label {
+      display: block; font-size: 0.9rem; font-weight: 700;
+      color: #4c1d95; margin-bottom: 5px;
+    }
+    .sw-field input, .sw-field select {
+      width: 100%;
+      font-family: 'Heebo', sans-serif;
+      padding: 10px 14px;
+      border: 2px solid rgba(124,58,237,0.2);
+      border-radius: 12px;
+      font-size: 0.95rem;
+      outline: none; direction: rtl;
+      background: #faf5ff; color: #1e1b4b;
+      transition: border-color 0.3s;
+    }
+    .sw-field input:focus, .sw-field select:focus { border-color: #7c3aed; }
+    .sw-field input[type="number"] { width: 120px; text-align: center; }
+    .sw-row {
+      display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .sw-row .sw-field { flex: 1; min-width: 140px; }
+    .sw-btn {
+      font-family: 'Heebo', sans-serif;
+      padding: 10px 28px;
+      border: none; border-radius: 14px;
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .sw-btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(124,58,237,0.3);
+    }
+    .sw-btn-primary:hover { transform: translateY(-2px); }
+    .sw-btn-secondary {
+      background: #f3f4f6; color: #4b5563;
+      border: 2px solid #e5e7eb;
+    }
+    .sw-btn-secondary:hover { background: #e5e7eb; }
+    .sw-btn-wa {
+      background: linear-gradient(135deg, #25d366, #128c7e);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(37,211,102,0.3);
+      font-size: 1.1rem; padding: 14px 32px;
+      width: 100%;
+    }
+    .sw-btn-wa:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,211,102,0.4); }
+    .sw-actions {
+      display: flex; gap: 10px; justify-content: center;
+      margin-top: 18px; flex-wrap: wrap;
+    }
+    /* Checklist builder */
+    .cl-list {
+      list-style: none; padding: 0; margin: 0 0 14px;
+    }
+    .cl-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: #faf5ff;
+      border: 1px solid #e9d5ff;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+    .cl-item:hover { border-color: #c084fc; }
+    .cl-item .cl-emoji { font-size: 1.3rem; }
+    .cl-item .cl-text {
+      flex: 1; font-size: 0.9rem; font-weight: 600; color: #1e1b4b;
+    }
+    .cl-item .cl-stickers {
+      font-size: 0.75rem; color: #7c3aed; font-weight: 700;
+      background: #ede9fe; padding: 2px 8px; border-radius: 8px;
+    }
+    .cl-item .cl-remove {
+      background: none; border: none; cursor: pointer;
+      font-size: 1rem; color: #ef4444; opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .cl-item .cl-remove:hover { opacity: 1; }
+    .cl-add-row {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    }
+    .cl-add-row input, .cl-add-row select {
+      font-family: 'Heebo', sans-serif;
+      padding: 8px 12px;
+      border: 2px solid rgba(124,58,237,0.2);
+      border-radius: 10px;
+      font-size: 0.85rem;
+      outline: none; direction: rtl;
+    }
+    .cl-add-row input:focus, .cl-add-row select:focus { border-color: #7c3aed; }
+    .cl-add-btn {
+      font-family: 'Heebo', sans-serif;
+      padding: 8px 16px;
+      background: #ede9fe; color: #7c3aed;
+      border: 2px solid rgba(124,58,237,0.2);
+      border-radius: 10px; cursor: pointer;
+      font-size: 0.85rem; font-weight: 700;
+      transition: all 0.2s;
+    }
+    .cl-add-btn:hover { background: #7c3aed; color: #fff; }
+    .cl-templates {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .cl-tmpl-btn {
+      font-family: 'Heebo', sans-serif;
+      padding: 5px 12px;
+      background: #fff; color: #6b7280;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px; cursor: pointer;
+      font-size: 0.75rem; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .cl-tmpl-btn:hover { background: #faf5ff; border-color: #c084fc; color: #7c3aed; }
+    /* Preview */
+    .sw-preview {
+      background: linear-gradient(135deg, #faf5ff, #eff6ff);
+      border: 2px solid #e9d5ff;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+    }
+    .sw-preview h4 {
+      font-family: 'Frank Ruhl Libre', serif;
+      color: #4c1d95; font-size: 1.1rem; margin-bottom: 12px;
+    }
+    .sw-preview .preview-info {
+      font-size: 0.85rem; color: #6b7280; margin-bottom: 8px;
+    }
+    .sw-preview .preview-checklist {
+      text-align: right; padding: 0; list-style: none;
+      max-width: 400px; margin: 0 auto 16px;
+    }
+    .sw-preview .preview-checklist li {
+      padding: 6px 0;
+      border-bottom: 1px solid #e9d5ff;
+      font-size: 0.85rem; color: #1e1b4b;
+    }
+    .sw-note {
+      font-size: 0.8rem; color: #9ca3af;
+      margin-top: 10px; line-height: 1.5;
+    }
+
     /* ══ Footer ══ */
     .footer {
       position: relative; z-index: 10;
@@ -1317,6 +1510,100 @@
         <div class="ph-sub">הילדים אוספים מדבקות, פותרים חידונים ומשלימים משימות — הכל בסביבה בטוחה וחינוכית!</div>
       </div>
     </div>
+    <!-- Setup Family Wizard -->
+    <div class="setup-wizard" id="parentWizard" style="border-color:rgba(59,130,246,0.2);">
+      <div class="sw-header">
+        <div class="sw-icon">👨‍👩‍👧</div>
+        <h3>הקימו משפחה — תוכנית מדבקות!</h3>
+        <p>הגדירו את המשפחה ובנו צ'קליסט — הילדים יאספו מדבקות!</p>
+      </div>
+      <div class="sw-steps">
+        <div class="sw-step-dot active" id="pStep1">1</div>
+        <div class="sw-step-dot" id="pStep2">2</div>
+        <div class="sw-step-dot" id="pStep3">3</div>
+      </div>
+      <!-- Step 1: Basic Info -->
+      <div class="sw-panel active" id="pPanel1">
+        <div class="sw-row">
+          <div class="sw-field">
+            <label>👤 שם ההורה</label>
+            <input type="text" id="pName" placeholder="לדוגמה: דוד לוי">
+          </div>
+          <div class="sw-field">
+            <label>👧 מספר ילדים</label>
+            <input type="number" id="pChildren" min="1" max="15" value="3">
+          </div>
+        </div>
+        <div class="sw-field">
+          <label>👦 שמות הילדים (מופרדים בפסיק)</label>
+          <input type="text" id="pChildNames" placeholder="לדוגמה: יוסי, שרה, דני">
+        </div>
+        <div class="sw-row">
+          <div class="sw-field">
+            <label>🏫 בית ספר (אופציונלי)</label>
+            <input type="text" id="pSchool" placeholder="לדוגמה: רמב״ם">
+          </div>
+          <div class="sw-field">
+            <label>📚 כיתה (אופציונלי)</label>
+            <input type="text" id="pClass" placeholder="לדוגמה: ג1">
+          </div>
+        </div>
+        <div class="sw-actions">
+          <button class="sw-btn sw-btn-primary" onclick="wizardStep('parent', 2)">המשיכו לבניית צ'קליסט ←</button>
+        </div>
+      </div>
+      <!-- Step 2: Checklist Builder -->
+      <div class="sw-panel" id="pPanel2">
+        <h4 style="text-align:center;color:#1e40af;margin-bottom:6px;">📋 בנו צ'קליסט משימות</h4>
+        <p style="text-align:center;color:#6b7280;font-size:0.82rem;margin-bottom:14px;">הוסיפו משימות — כשהילד ישלים ותאשרו, יקבל מדבקות!</p>
+        <p style="text-align:center;color:#9ca3af;font-size:0.75rem;margin-bottom:10px;">💡 תבניות מוכנות:</p>
+        <div class="cl-templates" id="pTemplates">
+          <button class="cl-tmpl-btn" onclick="addTemplate('parent','📖 קריאת מגילה','📖',2)">📖 קריאת מגילה</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('parent','🎁 משלוח מנות','🎁',2)">🎁 משלוח מנות</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('parent','🍽️ סעודת פורים','🍽️',1)">🍽️ סעודת פורים</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('parent','💰 מתנות לאביונים','💰',2)">💰 מתנות לאביונים</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('parent','🎭 תחפושת','🎭',1)">🎭 תחפושת</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('parent','❓ חידון מגילה','❓',3)">❓ חידון מגילה</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('parent','🏰 חדר בריחה','🏰',3)">🏰 חדר בריחה</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('parent','📚 קריאת ספר','📚',2)">📚 קריאת ספר</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('parent','🧹 עזרה בבית','🧹',1)">🧹 עזרה בבית</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('parent','🤝 מעשה טוב','🤝',2)">🤝 מעשה טוב</button>
+        </div>
+        <ul class="cl-list" id="pChecklist"></ul>
+        <div class="cl-add-row">
+          <input type="text" id="pTaskName" placeholder="שם המשימה" style="flex:2;min-width:140px;">
+          <select id="pTaskEmoji" style="width:60px;">
+            <option value="⭐">⭐</option>
+            <option value="📖">📖</option>
+            <option value="🎨">🎨</option>
+            <option value="🏆">🏆</option>
+            <option value="🎭">🎭</option>
+            <option value="💪">💪</option>
+            <option value="🤝">🤝</option>
+            <option value="📝">📝</option>
+          </select>
+          <input type="number" id="pTaskStickers" min="1" max="5" value="1" style="width:60px;text-align:center;" title="מדבקות">
+          <button class="cl-add-btn" onclick="addTask('parent')">+ הוסיפו</button>
+        </div>
+        <div class="sw-actions">
+          <button class="sw-btn sw-btn-secondary" onclick="wizardStep('parent', 1)">→ חזרה</button>
+          <button class="sw-btn sw-btn-primary" onclick="wizardStep('parent', 3)">תצוגה מקדימה ←</button>
+        </div>
+      </div>
+      <!-- Step 3: Preview + WhatsApp -->
+      <div class="sw-panel" id="pPanel3">
+        <div class="sw-preview">
+          <h4>🎉 המשפחה שלכם מוכנה!</h4>
+          <div id="pPreviewContent"></div>
+        </div>
+        <p class="sw-note">📌 לחצו על הכפתור למטה לשליחת הפרטים לשמשון ג'יקוב AI — תקבלו קוד גישה למשפחה!</p>
+        <div class="sw-actions" style="flex-direction:column;">
+          <button class="sw-btn sw-btn-wa" onclick="sendWizardWA('parent')">💬 שלחו לשמשון ג'יקוב AI בוואטסאפ — לקבלת הקוד!</button>
+          <button class="sw-btn sw-btn-secondary" onclick="wizardStep('parent', 2)" style="width:100%;">→ חזרה לעריכה</button>
+        </div>
+      </div>
+    </div>
+
     <div class="parent-cards">
       <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" class="parent-card">
         <span class="pc-emoji">🏅</span>
@@ -1356,6 +1643,96 @@
         <div class="th-icon">🏫</div>
         <div class="th-title">למורים — מידע על הפרויקט</div>
         <div class="th-sub">פרויקט לימודי אינטראקטיבי — משחקים, חידונים, חדרי בריחה ואלבום מדבקות לכיתה!</div>
+      </div>
+    </div>
+
+    <!-- Setup Class Wizard -->
+    <div class="setup-wizard" id="teacherWizard">
+      <div class="sw-header">
+        <div class="sw-icon">🏫</div>
+        <h3>הקימו כיתה — תוכנית מדבקות!</h3>
+        <p>הגדירו כיתה ובנו צ'קליסט משימות — התלמידים יאספו מדבקות!</p>
+      </div>
+      <div class="sw-steps">
+        <div class="sw-step-dot active" id="tStep1">1</div>
+        <div class="sw-step-dot" id="tStep2">2</div>
+        <div class="sw-step-dot" id="tStep3">3</div>
+      </div>
+      <!-- Step 1: Basic Info -->
+      <div class="sw-panel active" id="tPanel1">
+        <div class="sw-row">
+          <div class="sw-field">
+            <label>👤 שם המורה</label>
+            <input type="text" id="tName" placeholder="לדוגמה: שרה כהן">
+          </div>
+          <div class="sw-field">
+            <label>🏫 שם בית הספר</label>
+            <input type="text" id="tSchool" placeholder="לדוגמה: רמב״ם ירושלים">
+          </div>
+        </div>
+        <div class="sw-row">
+          <div class="sw-field">
+            <label>📚 כיתה</label>
+            <input type="text" id="tClass" placeholder="לדוגמה: ד2">
+          </div>
+          <div class="sw-field">
+            <label>👨‍🎓 מספר תלמידים</label>
+            <input type="number" id="tStudents" min="1" max="50" value="30">
+          </div>
+        </div>
+        <div class="sw-actions">
+          <button class="sw-btn sw-btn-primary" onclick="wizardStep('teacher', 2)">המשיכו לבניית צ'קליסט ←</button>
+        </div>
+      </div>
+      <!-- Step 2: Checklist Builder -->
+      <div class="sw-panel" id="tPanel2">
+        <h4 style="text-align:center;color:#4c1d95;margin-bottom:6px;">📋 בנו צ'קליסט משימות</h4>
+        <p style="text-align:center;color:#6b7280;font-size:0.82rem;margin-bottom:14px;">הוסיפו משימות — כשתלמיד ישלים משימה ותאשרו, יקבל מדבקות!</p>
+        <p style="text-align:center;color:#9ca3af;font-size:0.75rem;margin-bottom:10px;">💡 תבניות מוכנות — לחצו להוספה מהירה:</p>
+        <div class="cl-templates" id="tTemplates">
+          <button class="cl-tmpl-btn" onclick="addTemplate('teacher','📖 קריאת מגילה','📖',2)">📖 קריאת מגילה</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('teacher','🎁 משלוח מנות','🎁',2)">🎁 משלוח מנות</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('teacher','🍽️ סעודת פורים','🍽️',1)">🍽️ סעודת פורים</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('teacher','💰 מתנות לאביונים','💰',2)">💰 מתנות לאביונים</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('teacher','🎭 תחפושת','🎭',1)">🎭 תחפושת</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('teacher','❓ חידון מגילה','❓',3)">❓ חידון מגילה</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('teacher','🏰 חדר בריחה','🏰',3)">🏰 חדר בריחה</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('teacher','🎨 ציור דמות מהמגילה','🎨',1)">🎨 ציור דמות</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('teacher','📝 כתיבת סיפור פורים','📝',2)">📝 כתיבת סיפור</button>
+          <button class="cl-tmpl-btn" onclick="addTemplate('teacher','🤝 מעשה טוב','🤝',2)">🤝 מעשה טוב</button>
+        </div>
+        <ul class="cl-list" id="tChecklist"></ul>
+        <div class="cl-add-row">
+          <input type="text" id="tTaskName" placeholder="שם המשימה" style="flex:2;min-width:140px;">
+          <select id="tTaskEmoji" style="width:60px;">
+            <option value="⭐">⭐</option>
+            <option value="📖">📖</option>
+            <option value="🎨">🎨</option>
+            <option value="🏆">🏆</option>
+            <option value="🎭">🎭</option>
+            <option value="💪">💪</option>
+            <option value="🤝">🤝</option>
+            <option value="📝">📝</option>
+          </select>
+          <input type="number" id="tTaskStickers" min="1" max="5" value="1" style="width:60px;text-align:center;" title="מדבקות">
+          <button class="cl-add-btn" onclick="addTask('teacher')">+ הוסיפו</button>
+        </div>
+        <div class="sw-actions">
+          <button class="sw-btn sw-btn-secondary" onclick="wizardStep('teacher', 1)">→ חזרה</button>
+          <button class="sw-btn sw-btn-primary" onclick="wizardStep('teacher', 3)">תצוגה מקדימה ←</button>
+        </div>
+      </div>
+      <!-- Step 3: Preview + WhatsApp -->
+      <div class="sw-panel" id="tPanel3">
+        <div class="sw-preview">
+          <h4>🎉 הכיתה שלכם מוכנה!</h4>
+          <div id="tPreviewContent"></div>
+        </div>
+        <p class="sw-note">📌 לחצו על הכפתור למטה לשליחת הפרטים לשמשון ג'יקוב AI — תקבלו קוד גישה ייחודי לכיתה שלכם!</p>
+        <div class="sw-actions" style="flex-direction:column;">
+          <button class="sw-btn sw-btn-wa" onclick="sendWizardWA('teacher')">💬 שלחו לשמשון ג'יקוב AI בוואטסאפ — לקבלת הקוד!</button>
+          <button class="sw-btn sw-btn-secondary" onclick="wizardStep('teacher', 2)" style="width:100%;">→ חזרה לעריכה</button>
+        </div>
       </div>
     </div>
 
@@ -1967,6 +2344,176 @@ const Notes = {
   }
 };
 Notes.init();
+
+// ══ Setup Wizard (Teacher & Parent) ══
+const wizardData = {
+  teacher: { step: 1, tasks: [] },
+  parent: { step: 1, tasks: [] }
+};
+
+function wizardStep(role, step) {
+  const prefix = role === 'teacher' ? 't' : 'p';
+  const data = wizardData[role];
+
+  // Validation
+  if (step === 2 && data.step === 1) {
+    const name = document.getElementById(prefix + 'Name').value.trim();
+    if (!name) {
+      document.getElementById(prefix + 'Name').style.borderColor = '#ef4444';
+      document.getElementById(prefix + 'Name').focus();
+      setTimeout(() => document.getElementById(prefix + 'Name').style.borderColor = '', 1500);
+      return;
+    }
+  }
+  if (step === 3 && data.tasks.length === 0) {
+    const list = document.getElementById(prefix + 'Checklist');
+    list.style.border = '2px solid #ef4444';
+    list.style.borderRadius = '12px';
+    list.style.padding = '10px';
+    list.innerHTML = '<li style="color:#ef4444;text-align:center;padding:8px;">⚠️ הוסיפו לפחות משימה אחת!</li>';
+    setTimeout(() => { list.style.border = ''; list.style.padding = ''; list.innerHTML = ''; }, 2000);
+    return;
+  }
+
+  data.step = step;
+
+  // Update dots
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById(prefix + 'Step' + i);
+    dot.className = 'sw-step-dot';
+    if (i < step) dot.classList.add('done');
+    if (i === step) dot.classList.add('active');
+  }
+
+  // Show panel
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById(prefix + 'Panel' + i).classList.remove('active');
+  }
+  document.getElementById(prefix + 'Panel' + step).classList.add('active');
+
+  // Render preview on step 3
+  if (step === 3) renderPreview(role);
+}
+
+function addTask(role) {
+  const prefix = role === 'teacher' ? 't' : 'p';
+  const nameInput = document.getElementById(prefix + 'TaskName');
+  const emojiSelect = document.getElementById(prefix + 'TaskEmoji');
+  const stickersInput = document.getElementById(prefix + 'TaskStickers');
+  const name = nameInput.value.trim();
+  if (!name) { nameInput.style.borderColor = '#ef4444'; nameInput.focus(); setTimeout(() => nameInput.style.borderColor = '', 1500); return; }
+  wizardData[role].tasks.push({
+    name,
+    emoji: emojiSelect.value,
+    stickers: parseInt(stickersInput.value) || 1
+  });
+  nameInput.value = '';
+  stickersInput.value = '1';
+  renderChecklist(role);
+}
+
+function addTemplate(role, name, emoji, stickers) {
+  // Avoid duplicates
+  if (wizardData[role].tasks.some(t => t.name === name)) return;
+  wizardData[role].tasks.push({ name, emoji, stickers });
+  renderChecklist(role);
+}
+
+function removeTask(role, idx) {
+  wizardData[role].tasks.splice(idx, 1);
+  renderChecklist(role);
+}
+
+function renderChecklist(role) {
+  const prefix = role === 'teacher' ? 't' : 'p';
+  const list = document.getElementById(prefix + 'Checklist');
+  const tasks = wizardData[role].tasks;
+  if (tasks.length === 0) {
+    list.innerHTML = '';
+    return;
+  }
+  list.innerHTML = tasks.map((t, i) => `
+    <li class="cl-item">
+      <span class="cl-emoji">${t.emoji}</span>
+      <span class="cl-text">${t.name}</span>
+      <span class="cl-stickers">🏅 ${t.stickers} מדבקות</span>
+      <button class="cl-remove" onclick="removeTask('${role}',${i})" title="הסרה">✕</button>
+    </li>
+  `).join('');
+}
+
+function renderPreview(role) {
+  const prefix = role === 'teacher' ? 't' : 'p';
+  const data = wizardData[role];
+  const content = document.getElementById(prefix + 'PreviewContent');
+  let info = '';
+  if (role === 'teacher') {
+    const name = document.getElementById('tName').value.trim();
+    const school = document.getElementById('tSchool').value.trim();
+    const cls = document.getElementById('tClass').value.trim();
+    const students = document.getElementById('tStudents').value;
+    info = `<div class="preview-info">👤 מורה: <strong>${name}</strong></div>`;
+    if (school) info += `<div class="preview-info">🏫 ${school}${cls ? ' | כיתה ' + cls : ''}</div>`;
+    info += `<div class="preview-info">👨‍🎓 ${students} תלמידים</div>`;
+  } else {
+    const name = document.getElementById('pName').value.trim();
+    const children = document.getElementById('pChildren').value;
+    const childNames = document.getElementById('pChildNames').value.trim();
+    const school = document.getElementById('pSchool').value.trim();
+    info = `<div class="preview-info">👤 הורה: <strong>${name}</strong></div>`;
+    if (childNames) info += `<div class="preview-info">👧 ילדים: ${childNames}</div>`;
+    else info += `<div class="preview-info">👧 ${children} ילדים</div>`;
+    if (school) info += `<div class="preview-info">🏫 ${school}</div>`;
+  }
+  const totalStickers = data.tasks.reduce((sum, t) => sum + t.stickers, 0);
+  info += `<div class="preview-info" style="margin-top:8px;">📋 <strong>${data.tasks.length}</strong> משימות | 🏅 <strong>${totalStickers}</strong> מדבקות סה״כ</div>`;
+  const checklist = data.tasks.map(t => `<li>${t.emoji} ${t.name} — <span style="color:#7c3aed;font-weight:700;">🏅 ${t.stickers}</span></li>`).join('');
+  content.innerHTML = info + `<ul class="preview-checklist">${checklist}</ul>`;
+}
+
+function sendWizardWA(role) {
+  const data = wizardData[role];
+  let msg = '';
+  if (role === 'teacher') {
+    const name = document.getElementById('tName').value.trim();
+    const school = document.getElementById('tSchool').value.trim();
+    const cls = document.getElementById('tClass').value.trim();
+    const students = document.getElementById('tStudents').value;
+    msg = `🏫 *בקשת הקמת כיתה — תוכנית מדבקות*\n\n`;
+    msg += `👤 מורה: ${name}\n`;
+    if (school) msg += `🏫 בית ספר: ${school}\n`;
+    if (cls) msg += `📚 כיתה: ${cls}\n`;
+    msg += `👨‍🎓 תלמידים: ${students}\n`;
+  } else {
+    const name = document.getElementById('pName').value.trim();
+    const children = document.getElementById('pChildren').value;
+    const childNames = document.getElementById('pChildNames').value.trim();
+    const school = document.getElementById('pSchool').value.trim();
+    const cls = document.getElementById('pClass').value.trim();
+    msg = `👨‍👩‍👧 *בקשת הקמת משפחה — תוכנית מדבקות*\n\n`;
+    msg += `👤 הורה: ${name}\n`;
+    if (childNames) msg += `👧 ילדים: ${childNames}\n`;
+    else msg += `👧 מספר ילדים: ${children}\n`;
+    if (school) msg += `🏫 בית ספר: ${school}\n`;
+    if (cls) msg += `📚 כיתה: ${cls}\n`;
+  }
+  msg += `\n📋 *צ'קליסט משימות:*\n`;
+  data.tasks.forEach((t, i) => {
+    msg += `${i + 1}. ${t.emoji} ${t.name} — 🏅 ${t.stickers} מדבקות\n`;
+  });
+  const totalStickers = data.tasks.reduce((sum, t) => sum + t.stickers, 0);
+  msg += `\n🏅 סה״כ: ${totalStickers} מדבקות | ${data.tasks.length} משימות`;
+  msg += `\n\n🙏 אשמח לקבל קוד גישה!`;
+  window.open(`https://wa.me/972526953500?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// Allow Enter key in task name inputs
+['tTaskName', 'pTaskName'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); addTask(id.startsWith('t') ? 'teacher' : 'parent'); }
+  });
+});
 </script>
 <script src="js/auth-bridge.js"></script>
 
