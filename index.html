@@ -986,7 +986,7 @@
   <div class="role-divider"></div>
   <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" title="תלמיד — כניסה לאלבום מדבקות">
     <span class="role-icon">🎒</span>
-    <span class="role-label">אלבום</span>
+    <span class="role-label">תלמיד</span>
   </a>
 </nav>
 
@@ -1089,12 +1089,6 @@
         <h3 class="card-title">חידונים + מדבקות</h3>
         <p class="card-desc">ענו על חידונים וקבלו מדבקות! חידון פסח 🫓</p>
         <span class="card-badge badge-challenge">🆕 חדש!</span>
-      </a>
-      <a href="#" onclick="event.preventDefault();switchTab('teacher')" class="game-card" style="--card-shadow: rgba(124,58,237,0.25); --card-border: #a78bfa; background:linear-gradient(135deg, #1e1b4b, #312e81); color:#fff;">
-        <span class="card-emoji">🏫</span>
-        <h3 class="card-title" style="color:#fbbf24;">לוח מורה</h3>
-        <p class="card-desc" style="color:rgba(255,255,255,0.7);">ניהול כיתה, צ'קליסט, קריטריונים וסטטיסטיקות</p>
-        <span class="card-badge" style="background:linear-gradient(135deg,#fbbf24,#f97316);color:#1e1b4b;">📋 ניהול</span>
       </a>
     </div>
   </div>
@@ -1360,55 +1354,54 @@
     <div class="teacher-hero">
       <div class="th-inner">
         <div class="th-icon">🏫</div>
-        <div class="th-title">למורים — ניהול כיתה ומדבקות</div>
-        <div class="th-sub">נהלו את הכיתה בקלות: צ'קליסט משימות, קריטריונים למדבקות, מעקב תלמידים וסטטיסטיקות!<br>שתפו קוד כיתה עם תלמידים — הם מזינים אותו באלבום ומתחילים לצבור.</div>
-        <a href="sticker-album/#dashboard" class="th-cta">🚀 היכנסו ללוח המורה</a>
+        <div class="th-title">למורים — מידע על הפרויקט</div>
+        <div class="th-sub">פרויקט לימודי אינטראקטיבי — משחקים, חידונים, חדרי בריחה ואלבום מדבקות לכיתה!</div>
       </div>
     </div>
 
-    <!-- Management Tools -->
+    <!-- What's Available -->
     <h2 class="section-title" style="margin-top:30px;">
-      <span class="line"></span>📋 ניהול כיתה 📋<span class="line"></span>
+      <span class="line"></span>📋 מה כולל הפרויקט? 📋<span class="line"></span>
     </h2>
     <div class="tools-grid">
-      <a href="sticker-album/#dashboard" onclick="localStorage.setItem('teacher-tab','checklist')" class="tool-card" style="--tool-accent: linear-gradient(90deg, #22c55e, #16a34a); --tool-shadow: rgba(34,197,94,0.15); --tool-border: #86efac;">
+      <div class="tool-card" style="--tool-accent: linear-gradient(90deg, #22c55e, #16a34a); --tool-shadow: rgba(34,197,94,0.15); --tool-border: #86efac; cursor:default;">
+        <span class="tool-emoji">🎮</span>
+        <h3 class="tool-name">משחקים ואתגרים</h3>
+        <p class="tool-desc">חידון מגילה, זיכרון, רעשן דיגיטלי, חדרי בריחה עם ניקוד ומדליות — הכל חינם!</p>
+        <span class="tool-tag tag-manage">🆓 חינם</span>
+      </div>
+      <div class="tool-card" style="--tool-accent: linear-gradient(90deg, #3b82f6, #6366f1); --tool-shadow: rgba(59,130,246,0.15); --tool-border: #93c5fd; cursor:default;">
+        <span class="tool-emoji">🏅</span>
+        <h3 class="tool-name">אלבום מדבקות</h3>
+        <p class="tool-desc">התלמידים אוספים מדבקות של גיבורי ישראל, פותרים חידונים ומשלימים משימות.</p>
+        <span class="tool-tag tag-track">🎴 גירוד</span>
+      </div>
+      <div class="tool-card" style="--tool-accent: linear-gradient(90deg, #f97316, #fbbf24); --tool-shadow: rgba(249,115,22,0.15); --tool-border: #fdba74; cursor:default;">
         <span class="tool-emoji">✅</span>
         <h3 class="tool-name">צ'קליסט משימות</h3>
-        <p class="tool-desc">צרו רשימות משימות לתלמידים — הם מסמנים ביצוע, אתם מאשרים ← מדבקות אוטומטית!</p>
+        <p class="tool-desc">הגדירו משימות לתלמידים — כשמשלימים, מקבלים מדבקות אוטומטית!</p>
         <span class="tool-tag tag-manage">📋 ניהול</span>
-      </a>
-      <a href="sticker-album/#dashboard" onclick="localStorage.setItem('teacher-tab','students')" class="tool-card" style="--tool-accent: linear-gradient(90deg, #3b82f6, #6366f1); --tool-shadow: rgba(59,130,246,0.15); --tool-border: #93c5fd;">
-        <span class="tool-emoji">👥</span>
-        <h3 class="tool-name">ניהול תלמידים</h3>
-        <p class="tool-desc">צפו ברשימת התלמידים, מעקב התקדמות, ניקוד ומדבקות — כל הנתונים במקום אחד!</p>
-        <span class="tool-tag tag-track">📊 מעקב</span>
-      </a>
-      <a href="sticker-album/#dashboard" onclick="localStorage.setItem('teacher-tab','criteria')" class="tool-card" style="--tool-accent: linear-gradient(90deg, #f97316, #fbbf24); --tool-shadow: rgba(249,115,22,0.15); --tool-border: #fdba74;">
-        <span class="tool-emoji">🏅</span>
-        <h3 class="tool-name">קריטריונים</h3>
-        <p class="tool-desc">הגדירו קריטריונים למתן מדבקות אוטומטי — בהתאם להתקדמות, השתתפות ומעשים טובים!</p>
-        <span class="tool-tag tag-manage">⚙️ הגדרות</span>
-      </a>
-      <a href="sticker-album/#dashboard" onclick="localStorage.setItem('teacher-tab','stats')" class="tool-card" style="--tool-accent: linear-gradient(90deg, #8b5cf6, #a855f7); --tool-shadow: rgba(139,92,246,0.15); --tool-border: #c4b5fd;">
-        <span class="tool-emoji">📊</span>
-        <h3 class="tool-name">סטטיסטיקות</h3>
-        <p class="tool-desc">ממוצע ניקוד, טבלת מובילים, התקדמות כיתתית — כל הנתונים בגרפים ברורים!</p>
-        <span class="tool-tag tag-track">📈 נתונים</span>
-      </a>
+      </div>
+      <div class="tool-card" style="--tool-accent: linear-gradient(90deg, #8b5cf6, #a855f7); --tool-shadow: rgba(139,92,246,0.15); --tool-border: #c4b5fd; cursor:default;">
+        <span class="tool-emoji">🔒</span>
+        <h3 class="tool-name">קודי גישה</h3>
+        <p class="tool-desc">כל כיתה מקבלת קוד גישה ייחודי — הקוד מופק רק ע״י שמשון ומועבר למורה.</p>
+        <span class="tool-tag tag-track">🔐 מאובטח</span>
+      </div>
     </div>
 
-    <!-- How it Works -->
+    <!-- How to get access -->
     <div class="teacher-info-box">
       <h3>🔑 איך מתחילים?</h3>
-      <p>כניסה קלה בשלושה צעדים — תוך דקה אתם בפנים!<br>הקוד מוצג רק בלוח המורה שלכם — התלמידים מזינים אותו באלבום.</p>
+      <p>רוצים להפעיל את האלבום בכיתה? פנו לשמשון וקבלו קוד גישה ייחודי לכיתה שלכם!</p>
       <div class="teacher-steps">
         <div class="teacher-step">
           <span>1️⃣</span>
-          היכנסו ללוח המורה
+          כתבו לשמשון
         </div>
         <div class="teacher-step">
           <span>2️⃣</span>
-          צרו כיתה + קוד
+          קבלו קוד כיתה
         </div>
         <div class="teacher-step">
           <span>3️⃣</span>
@@ -1416,31 +1409,32 @@
         </div>
       </div>
       <div style="margin-top:18px;">
-        <a href="sticker-album/#dashboard" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-family:'Heebo',sans-serif;font-size:1.05rem;font-weight:900;border-radius:14px;text-decoration:none;box-shadow:0 4px 15px rgba(124,58,237,0.3);transition:all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          🚀 התחילו עכשיו — חינם!
+        <a href="https://wa.me/972526953500?text=%D7%A9%D7%9C%D7%95%D7%9D%2C%20%D7%90%D7%A0%D7%99%20%D7%9E%D7%95%D7%A8%D7%94%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A7%D7%95%D7%93%20%D7%92%D7%99%D7%A9%D7%94%20%D7%9C%D7%9B%D7%99%D7%AA%D7%94" target="_blank" rel="noopener"
+           style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;font-family:'Heebo',sans-serif;font-size:1.05rem;font-weight:900;border-radius:14px;text-decoration:none;box-shadow:0 4px 15px rgba(37,211,102,0.3);transition:all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          💬 כתבו לשמשון בוואטסאפ
         </a>
       </div>
     </div>
 
-    <!-- Sticker Album Features -->
+    <!-- What students see -->
     <div class="teacher-info-box" style="margin-top:18px; background:linear-gradient(135deg,#eff6ff,#dbeafe);">
-      <h3>🏅 מה חדש באלבום המדבקות?</h3>
+      <h3>👀 מה התלמידים רואים?</h3>
       <div class="teacher-steps">
         <div class="teacher-step">
-          <span>🔒</span>
-          נעילת כרטיסים עם קודי גישה
+          <span>🎴</span>
+          גירוד כרטיסים יומי
         </div>
         <div class="teacher-step">
-          <span>🔄</span>
-          מערכת החלפות עם הודעות
+          <span>📖</span>
+          אלבום מדבקות
+        </div>
+        <div class="teacher-step">
+          <span>❓</span>
+          חידונים + מדבקות
         </div>
         <div class="teacher-step">
           <span>✅</span>
-          צ'קליסט → מדבקות
-        </div>
-        <div class="teacher-step">
-          <span>🏫</span>
-          לוח מורה מלא
+          צ'קליסט משימות
         </div>
       </div>
     </div>
@@ -1517,11 +1511,10 @@ function closeGate() {
 function gateGo(mode) {
   closeGate();
   if (mode === 'auth') {
-    // Navigate to album with auth hash
-    const base = gateTarget.replace(/#.*$/, '');
-    window.open(base + '#auth', '_blank');
+    // Navigate in same window — popup auth needs same-window context
+    window.location.href = gateTarget.replace(/#.*$/, '') + '#auth';
   } else {
-    window.open(gateTarget, '_blank');
+    window.location.href = gateTarget;
   }
 }
 
