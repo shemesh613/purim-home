@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔧 ניהול מרחבים — שמשון ג'יקוב AI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: #0f0a1e;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .admin-header {
+      text-align: center;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .admin-header h1 {
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #fbbf24, #f97316, #ec4899);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .admin-header p { color: #94a3b8; font-size: 0.9rem; margin-top: 4px; }
+    .admin-login {
+      max-width: 400px; margin: 60px auto;
+      background: #1e1b3a; border-radius: 20px; padding: 30px;
+      border: 1px solid rgba(124,58,237,0.3);
+      text-align: center;
+    }
+    .admin-login h2 { color: #c084fc; margin-bottom: 16px; }
+    .admin-login input {
+      width: 100%; padding: 12px 16px;
+      background: #0f0a1e; border: 2px solid rgba(124,58,237,0.3);
+      border-radius: 12px; color: #e2e8f0;
+      font-family: 'Heebo', sans-serif; font-size: 1rem;
+      text-align: center; direction: rtl; outline: none;
+      margin-bottom: 12px;
+    }
+    .admin-login input:focus { border-color: #7c3aed; }
+    .admin-login button {
+      width: 100%; padding: 12px;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: #fff; border: none; border-radius: 12px;
+      font-family: 'Heebo', sans-serif; font-size: 1rem; font-weight: 700;
+      cursor: pointer;
+    }
+    .admin-panel { display: none; max-width: 900px; margin: 0 auto; }
+    .admin-panel.active { display: block; }
+    .section-box {
+      background: #1e1b3a; border-radius: 20px; padding: 24px;
+      border: 1px solid rgba(124,58,237,0.2);
+      margin-bottom: 20px;
+    }
+    .section-box h3 {
+      color: #c084fc; font-size: 1.2rem; margin-bottom: 16px;
+      border-bottom: 1px solid rgba(124,58,237,0.2);
+      padding-bottom: 8px;
+    }
+    .form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+    .form-field { flex: 1; min-width: 150px; }
+    .form-field label {
+      display: block; font-size: 0.82rem; color: #94a3b8;
+      margin-bottom: 4px; font-weight: 700;
+    }
+    .form-field input, .form-field select {
+      width: 100%; padding: 10px 14px;
+      background: #0f0a1e; border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 10px; color: #e2e8f0;
+      font-family: 'Heebo', sans-serif; font-size: 0.9rem;
+      direction: rtl; outline: none;
+    }
+    .form-field input:focus, .form-field select:focus { border-color: #7c3aed; }
+    .btn {
+      font-family: 'Heebo', sans-serif;
+      padding: 10px 24px; border: none; border-radius: 12px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: #fff;
+    }
+    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+    .checklist-edit { margin: 12px 0; }
+    .cl-edit-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; background: rgba(124,58,237,0.1);
+      border-radius: 10px; margin-bottom: 6px;
+    }
+    .cl-edit-item span { flex: 1; }
+    .cl-edit-item .stickers { color: #fbbf24; font-weight: 700; font-size: 0.8rem; }
+    .cl-edit-item button { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1rem; }
+    .add-task-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .add-task-row input { flex: 2; min-width: 120px; }
+    .add-task-row select, .add-task-row input[type="number"] { width: 60px; flex: none; }
+    .generated-code {
+      background: linear-gradient(135deg, #065f46, #047857);
+      border-radius: 14px; padding: 16px; text-align: center;
+      margin-top: 16px;
+    }
+    .generated-code .code {
+      font-size: 1.8rem; font-weight: 900; color: #34d399;
+      letter-spacing: 3px; margin: 8px 0;
+      user-select: all;
+    }
+    .generated-code p { color: #a7f3d0; font-size: 0.85rem; }
+    /* Spaces list */
+    .space-card {
+      background: rgba(124,58,237,0.08);
+      border: 1px solid rgba(124,58,237,0.2);
+      border-radius: 14px; padding: 16px;
+      margin-bottom: 12px;
+    }
+    .space-card .space-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px;
+    }
+    .space-card .space-title { font-weight: 700; color: #c084fc; font-size: 1rem; }
+    .space-card .space-code {
+      background: #065f46; color: #34d399; padding: 2px 10px;
+      border-radius: 8px; font-weight: 700; font-size: 0.85rem;
+    }
+    .space-card .space-meta { font-size: 0.8rem; color: #94a3b8; }
+    .space-card .space-tasks {
+      margin-top: 8px; font-size: 0.82rem; color: #cbd5e1;
+    }
+    .space-card .space-students { margin-top: 8px; font-size: 0.8rem; color: #94a3b8; }
+    .empty-state {
+      text-align: center; padding: 30px; color: #64748b;
+      font-size: 0.95rem;
+    }
+    .stats-row {
+      display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .stat-card {
+      flex: 1; min-width: 120px;
+      background: rgba(124,58,237,0.1);
+      border: 1px solid rgba(124,58,237,0.2);
+      border-radius: 14px; padding: 16px;
+      text-align: center;
+    }
+    .stat-card .stat-num { font-size: 2rem; font-weight: 900; color: #c084fc; }
+    .stat-card .stat-label { font-size: 0.8rem; color: #94a3b8; }
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #22c55e; color: #fff; padding: 12px 28px;
+      border-radius: 14px; font-weight: 700; font-size: 0.95rem;
+      box-shadow: 0 4px 20px rgba(34,197,94,0.4);
+      z-index: 100; display: none;
+    }
+    .toast.active { display: block; animation: toastIn 0.3s ease-out; }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } }
+  </style>
+</head>
+<body>
+
+<div class="admin-header">
+  <h1>🔧 ניהול מרחבים — תוכנית מדבקות</h1>
+  <p>שמשון ג'יקוב AI | יצירת מרחבים לכיתות ומשפחות</p>
+</div>
+
+<!-- Admin Login -->
+<div class="admin-login" id="loginBox">
+  <h2>🔐 כניסת מנהל</h2>
+  <input type="password" id="adminPass" placeholder="סיסמת מנהל" onkeydown="if(event.key==='Enter')adminLogin()">
+  <button onclick="adminLogin()">🚀 כנסו</button>
+</div>
+
+<!-- Admin Panel -->
+<div class="admin-panel" id="adminPanel">
+  <!-- Stats -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card"><div class="stat-num" id="statSpaces">0</div><div class="stat-label">מרחבים</div></div>
+    <div class="stat-card"><div class="stat-num" id="statStudents">0</div><div class="stat-label">תלמידים</div></div>
+    <div class="stat-card"><div class="stat-num" id="statClasses">0</div><div class="stat-label">כיתות</div></div>
+    <div class="stat-card"><div class="stat-num" id="statFamilies">0</div><div class="stat-label">משפחות</div></div>
+  </div>
+
+  <!-- Create Space -->
+  <div class="section-box">
+    <h3>➕ יצירת מרחב חדש</h3>
+    <div class="form-row">
+      <div class="form-field">
+        <label>סוג</label>
+        <select id="newType">
+          <option value="class">🏫 כיתה</option>
+          <option value="family">👨‍👩‍👧 משפחה</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>שם (מורה / הורה)</label>
+        <input type="text" id="newName" placeholder="שרה כהן">
+      </div>
+      <div class="form-field">
+        <label>בית ספר / כיתה</label>
+        <input type="text" id="newSchool" placeholder="רמב״ם ד2">
+      </div>
+    </div>
+
+    <h4 style="color:#94a3b8;font-size:0.9rem;margin:12px 0 8px;">📋 צ'קליסט משימות</h4>
+    <div id="adminChecklist"></div>
+    <div class="add-task-row">
+      <input type="text" id="adminTaskName" placeholder="שם המשימה" style="background:#0f0a1e;border:1px solid rgba(124,58,237,0.3);border-radius:10px;color:#e2e8f0;font-family:'Heebo',sans-serif;padding:8px 12px;font-size:0.85rem;direction:rtl;outline:none;">
+      <select id="adminTaskEmoji" style="background:#0f0a1e;border:1px solid rgba(124,58,237,0.3);border-radius:10px;color:#e2e8f0;font-family:'Heebo',sans-serif;padding:8px;font-size:0.85rem;outline:none;">
+        <option value="📖">📖</option><option value="🙏">🙏</option><option value="📜">📜</option>
+        <option value="🧹">🧹</option><option value="🤝">🤝</option><option value="📝">📝</option>
+        <option value="💪">💪</option><option value="📚">📚</option><option value="🌟">🌟</option>
+        <option value="🎨">🎨</option><option value="⭐">⭐</option><option value="🏆">🏆</option>
+      </select>
+      <input type="number" id="adminTaskStickers" min="1" max="5" value="1" style="width:50px;background:#0f0a1e;border:1px solid rgba(124,58,237,0.3);border-radius:10px;color:#e2e8f0;font-family:'Heebo',sans-serif;padding:8px;font-size:0.85rem;text-align:center;outline:none;">
+      <button class="btn btn-sm btn-primary" onclick="adminAddTask()">+ הוסיפו</button>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+      <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('📖 לימוד 10 דקות עם חברותא','📖',2)">📖 חברותא</button>
+      <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('🙏 תפילה','🙏',2)">🙏 תפילה</button>
+      <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('📜 10 פרקי תהילים','📜',3)">📜 תהילים</button>
+      <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('🧹 עזרה בבית','🧹',1)">🧹 עזרה</button>
+      <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('🤝 מעשה טוב','🤝',2)">🤝 מעשה טוב</button>
+      <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('📝 הכנת שיעורי בית','📝',1)">📝 ש״ב</button>
+      <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('📚 קריאת ספר 15 דקות','📚',2)">📚 קריאה</button>
+      <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('🌟 דבר תורה למשפחה','🌟',2)">🌟 דבר תורה</button>
+    </div>
+
+    <div style="margin-top:16px;text-align:center;">
+      <button class="btn btn-primary" onclick="createSpace()" style="padding:12px 40px;font-size:1.05rem;">🚀 צרו מרחב + סיסמה</button>
+    </div>
+
+    <div id="createdResult"></div>
+  </div>
+
+  <!-- Existing Spaces -->
+  <div class="section-box">
+    <h3>📋 מרחבים קיימים</h3>
+    <div id="spacesList"><div class="empty-state">⏳ טוען...</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const FB = 'https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim-spaces';
+const ADMIN_PASS = 'shimshon613';
+let adminTasks = [];
+
+function adminLogin() {
+  const pass = document.getElementById('adminPass').value;
+  if (pass === ADMIN_PASS) {
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('adminPanel').classList.add('active');
+    localStorage.setItem('purim_admin', 'true');
+    loadSpaces();
+  } else {
+    document.getElementById('adminPass').style.borderColor = '#ef4444';
+    setTimeout(() => document.getElementById('adminPass').style.borderColor = '', 1500);
+  }
+}
+
+// Auto-login
+if (localStorage.getItem('purim_admin') === 'true') {
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('adminPanel').classList.add('active');
+  loadSpaces();
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('active');
+  setTimeout(() => t.classList.remove('active'), 3000);
+}
+
+function generateCode() {
+  const num = Math.floor(1000 + Math.random() * 9000);
+  return 'שמשון-' + num;
+}
+
+// Admin checklist
+function adminAddTask() {
+  const name = document.getElementById('adminTaskName').value.trim();
+  if (!name) return;
+  const emoji = document.getElementById('adminTaskEmoji').value;
+  const stickers = parseInt(document.getElementById('adminTaskStickers').value) || 1;
+  adminTasks.push({ name, emoji, stickers });
+  document.getElementById('adminTaskName').value = '';
+  renderAdminChecklist();
+}
+
+function adminQuickAdd(name, emoji, stickers) {
+  if (adminTasks.some(t => t.name === name)) return;
+  adminTasks.push({ name, emoji, stickers });
+  renderAdminChecklist();
+}
+
+function adminRemoveTask(i) {
+  adminTasks.splice(i, 1);
+  renderAdminChecklist();
+}
+
+function renderAdminChecklist() {
+  const el = document.getElementById('adminChecklist');
+  if (!adminTasks.length) { el.innerHTML = ''; return; }
+  el.innerHTML = adminTasks.map((t, i) => `
+    <div class="cl-edit-item">
+      <span>${t.emoji} ${t.name}</span>
+      <span class="stickers">🏅 ${t.stickers}</span>
+      <button onclick="adminRemoveTask(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+async function createSpace() {
+  const type = document.getElementById('newType').value;
+  const name = document.getElementById('newName').value.trim();
+  const school = document.getElementById('newSchool').value.trim();
+  if (!name) { document.getElementById('newName').style.borderColor = '#ef4444'; setTimeout(() => document.getElementById('newName').style.borderColor = '', 1500); return; }
+  if (!adminTasks.length) { toast('⚠️ הוסיפו לפחות משימה אחת!'); return; }
+
+  const code = generateCode();
+  const space = {
+    type,
+    name,
+    school: school || '',
+    password: code,
+    checklist: adminTasks,
+    created: Date.now(),
+    students: {}
+  };
+
+  try {
+    await fetch(`${FB}/${encodeURIComponent(code)}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(space)
+    });
+
+    const resultEl = document.getElementById('createdResult');
+    resultEl.innerHTML = `
+      <div class="generated-code">
+        <p>✅ המרחב נוצר בהצלחה!</p>
+        <div class="code">${code}</div>
+        <p>העתיקו את הסיסמה ושלחו ל${type === 'class' ? 'מורה' : 'הורה'}</p>
+        <button class="btn btn-sm" style="background:#34d399;color:#065f46;margin-top:8px;" onclick="navigator.clipboard.writeText('${code}');toast('✅ הועתק!')">📋 העתיקו</button>
+      </div>
+    `;
+
+    // Reset form
+    document.getElementById('newName').value = '';
+    document.getElementById('newSchool').value = '';
+    adminTasks = [];
+    renderAdminChecklist();
+    loadSpaces();
+    toast('✅ מרחב נוצר: ' + code);
+  } catch (e) {
+    toast('❌ שגיאה: ' + e.message);
+  }
+}
+
+async function loadSpaces() {
+  try {
+    const res = await fetch(FB + '.json');
+    const data = await res.json();
+    const list = document.getElementById('spacesList');
+
+    if (!data) {
+      list.innerHTML = '<div class="empty-state">🏗️ עדיין אין מרחבים — צרו את הראשון!</div>';
+      updateStats(0, 0, 0, 0);
+      return;
+    }
+
+    const spaces = Object.entries(data);
+    let totalStudents = 0, classes = 0, families = 0;
+
+    list.innerHTML = spaces.map(([code, s]) => {
+      const studentCount = s.students ? Object.keys(s.students).length : 0;
+      totalStudents += studentCount;
+      if (s.type === 'class') classes++;
+      else families++;
+      const taskCount = s.checklist ? s.checklist.length : 0;
+      const totalStickers = s.checklist ? s.checklist.reduce((sum, t) => sum + (t.stickers || 0), 0) : 0;
+      const typeLabel = s.type === 'class' ? '🏫 כיתה' : '👨‍👩‍👧 משפחה';
+
+      return `
+        <div class="space-card">
+          <div class="space-header">
+            <span class="space-title">${typeLabel} | ${s.name}${s.school ? ' — ' + s.school : ''}</span>
+            <span class="space-code">${code}</span>
+          </div>
+          <div class="space-meta">
+            📋 ${taskCount} משימות | 🏅 ${totalStickers} מדבקות | 👨‍🎓 ${studentCount} תלמידים
+          </div>
+          <div class="space-tasks">
+            ${s.checklist ? s.checklist.map(t => `${t.emoji} ${t.name}`).join(' · ') : 'אין משימות'}
+          </div>
+          ${studentCount > 0 ? `<div class="space-students">תלמידים: ${Object.values(s.students).map(st => st.name || '?').join(', ')}</div>` : ''}
+          <div style="margin-top:8px;">
+            <button class="btn btn-sm btn-danger" onclick="deleteSpace('${code}')">🗑️ מחיקה</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateStats(spaces.length, totalStudents, classes, families);
+  } catch (e) {
+    document.getElementById('spacesList').innerHTML = '<div class="empty-state">❌ שגיאה בטעינה</div>';
+  }
+}
+
+function updateStats(spaces, students, classes, families) {
+  document.getElementById('statSpaces').textContent = spaces;
+  document.getElementById('statStudents').textContent = students;
+  document.getElementById('statClasses').textContent = classes;
+  document.getElementById('statFamilies').textContent = families;
+}
+
+async function deleteSpace(code) {
+  if (!confirm('למחוק את המרחב ' + code + '?')) return;
+  try {
+    await fetch(`${FB}/${encodeURIComponent(code)}.json`, { method: 'DELETE' });
+    toast('🗑️ נמחק: ' + code);
+    loadSpaces();
+  } catch (e) {
+    toast('❌ שגיאה');
+  }
+}
+
+// Enter key for task input
+document.getElementById('adminTaskName').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); adminAddTask(); }
+});
+</script>
+</body>
+</html>

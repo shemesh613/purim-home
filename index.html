@@ -1909,10 +1909,14 @@ function openGate(target) {
 function closeGate() {
   document.getElementById('gateModal').classList.remove('active');
 }
-function gateLogin() {
+const FB_SPACES = 'https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim-spaces';
+
+async function gateLogin() {
   const studentName = document.getElementById('gateStudentName').value.trim();
   const classCode = document.getElementById('gateClassCode').value.trim();
   const personalCode = document.getElementById('gatePersonalCode').value.trim();
+  const btn = document.querySelector('#gateModal .gate-google-btn');
+
   if (!studentName) {
     document.getElementById('gateStudentName').style.borderColor = '#ef4444';
     document.getElementById('gateStudentName').focus();
@@ -1931,13 +1935,49 @@ function gateLogin() {
     setTimeout(() => document.getElementById('gatePersonalCode').style.borderColor = '', 1500);
     return;
   }
-  // Save for next time
-  localStorage.setItem('purim_student_login', JSON.stringify({ studentName, classCode, personalCode }));
-  closeGate();
-  // Navigate with codes as hash params
-  const hash = gateTarget.includes('#') ? gateTarget.split('#')[1] : '';
-  const base = gateTarget.replace(/#.*$/, '');
-  window.location.href = base + '#login=' + encodeURIComponent(classCode) + '&pin=' + encodeURIComponent(personalCode) + '&name=' + encodeURIComponent(studentName) + (hash ? '&view=' + hash : '');
+
+  // Validate against Firebase
+  btn.textContent = '⏳ בודק סיסמה...';
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${FB_SPACES}/${encodeURIComponent(classCode)}.json`);
+    const space = await res.json();
+    if (!space) {
+      btn.textContent = '❌ סיסמה שגויה — נסו שוב';
+      btn.style.background = '#ef4444';
+      document.getElementById('gateClassCode').style.borderColor = '#ef4444';
+      setTimeout(() => { btn.textContent = '🚀 כנסו!'; btn.style.background = ''; btn.disabled = false; }, 2000);
+      return;
+    }
+
+    // Register student in Firebase
+    await fetch(`${FB_SPACES}/${encodeURIComponent(classCode)}/students/${encodeURIComponent(personalCode)}.json`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: studentName, lastLogin: Date.now() })
+    });
+
+    // Save for next time
+    localStorage.setItem('purim_student_login', JSON.stringify({ studentName, classCode, personalCode }));
+    localStorage.setItem('purim_student_space', JSON.stringify(space));
+
+    btn.textContent = '✅ נכנסים!';
+    btn.style.background = '#22c55e';
+    setTimeout(() => {
+      closeGate();
+      btn.textContent = '🚀 כנסו!';
+      btn.style.background = '';
+      btn.disabled = false;
+      // Navigate
+      const hash = gateTarget.includes('#') ? gateTarget.split('#')[1] : '';
+      const base = gateTarget.replace(/#.*$/, '');
+      window.location.href = base + '#login=' + encodeURIComponent(classCode) + '&pin=' + encodeURIComponent(personalCode) + '&name=' + encodeURIComponent(studentName) + (hash ? '&view=' + hash : '');
+    }, 600);
+  } catch (e) {
+    btn.textContent = '❌ שגיאת רשת — נסו שוב';
+    btn.style.background = '#ef4444';
+    setTimeout(() => { btn.textContent = '🚀 כנסו!'; btn.style.background = ''; btn.disabled = false; }, 2000);
+  }
 }
 
 // ══ Continuous Confetti ══
