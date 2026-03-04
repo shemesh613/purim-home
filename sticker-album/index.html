@@ -5,7 +5,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏅</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <title>🏅 אלבום מדבקות — גיבורי ישראל!</title>
-    <script type="module" crossorigin src="/purim-home/sticker-album/assets/index-D9sq4F5q.js"></script>
+    <script type="module" crossorigin src="/purim-home/sticker-album/assets/index-BjEhkTVF.js"></script>
     <link rel="stylesheet" crossorigin href="/purim-home/sticker-album/assets/index-RjD0D9qA.css">
   </head>
   <body>
@@ -13,28 +13,24 @@
     <script>
       // Bridge: read #login=CODE&pin=PIN&name=NAME from parent site and auto-join
       (function() {
-        const h = window.location.hash;
+        var h = window.location.hash;
         if (!h.includes('login=')) return;
-        const p = new URLSearchParams(h.replace('#', ''));
-        const code = p.get('login');
-        const pin = p.get('pin');
-        const name = p.get('name');
+        var p = new URLSearchParams(h.replace('#', ''));
+        var code = p.get('login');
+        var name = p.get('name');
         if (code) {
-          // Store pending join info for the app to pick up
-          localStorage.setItem('pending-class-join', JSON.stringify({ code, pin, name }));
-          // Also update display name in the Zustand store if exists
+          localStorage.setItem('pending-class-join', JSON.stringify({ code: code, name: name }));
           try {
-            const raw = localStorage.getItem('sticker-user-storage');
+            var raw = localStorage.getItem('sticker-user-storage');
             if (raw) {
-              const store = JSON.parse(raw);
-              const state = store.state || store;
+              var store = JSON.parse(raw);
+              var state = store.state || store;
               if (name && state.displayName !== name) {
                 state.displayName = name;
                 localStorage.setItem('sticker-user-storage', JSON.stringify(store));
               }
             }
           } catch(e) {}
-          // Switch to auth screen so user can join class
           window.location.hash = 'auth';
         }
       })();

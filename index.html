@@ -2141,13 +2141,9 @@ async function gateLogin() {
     chip.style.background = 'rgba(124,58,237,0.1)';
     chip.style.borderColor = '#c084fc';
     chip.style.color = '#7c3aed';
-    // Show teacher quick access in teacher tab
+    // Show teacher quick access in teacher tab (only if logged in)
     const qa = document.getElementById('teacherQuickAccess');
-    if (qa) {
-      qa.style.display = 'block';
-      const info = document.getElementById('teacherQuickInfo');
-      if (info) info.textContent = 'קוד כיתה: ' + saved.classCode + ' — לחצו לצפייה';
-    }
+    if (qa) qa.style.display = 'block';
   }
 })();
 
