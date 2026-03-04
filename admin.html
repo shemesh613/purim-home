@@ -217,7 +217,8 @@
       <button class="btn btn-sm btn-primary" onclick="adminAddTask()">+ הוסיפו</button>
     </div>
 
-    <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+    <p style="font-size:0.75rem;color:#94a3b8;margin-top:8px;">📚 לימודים:</p>
+    <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
       <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('📖 לימוד 10 דקות עם חברותא','📖',2)">📖 חברותא</button>
       <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('🙏 תפילה','🙏',2)">🙏 תפילה</button>
       <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('📜 10 פרקי תהילים','📜',3)">📜 תהילים</button>
@@ -226,6 +227,16 @@
       <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('📝 הכנת שיעורי בית','📝',1)">📝 ש״ב</button>
       <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('📚 קריאת ספר 15 דקות','📚',2)">📚 קריאה</button>
       <button class="btn btn-sm" style="background:rgba(124,58,237,0.15);color:#c084fc;border:1px solid rgba(124,58,237,0.3);" onclick="adminQuickAdd('🌟 דבר תורה למשפחה','🌟',2)">🌟 דבר תורה</button>
+    </div>
+    <p style="font-size:0.75rem;color:#94a3b8;margin-top:8px;">🫓 פסח:</p>
+    <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+      <button class="btn btn-sm" style="background:rgba(192,132,252,0.15);color:#e9d5ff;border:1px solid rgba(192,132,252,0.3);" onclick="adminQuickAdd('🫓 הכנת מצות','🫓',2)">🫓 מצות</button>
+      <button class="btn btn-sm" style="background:rgba(192,132,252,0.15);color:#e9d5ff;border:1px solid rgba(192,132,252,0.3);" onclick="adminQuickAdd('📖 קריאת ההגדה','📖',3)">📖 הגדה</button>
+      <button class="btn btn-sm" style="background:rgba(192,132,252,0.15);color:#e9d5ff;border:1px solid rgba(192,132,252,0.3);" onclick="adminQuickAdd('🔦 בדיקת חמץ','🔦',2)">🔦 בדיקת חמץ</button>
+      <button class="btn btn-sm" style="background:rgba(192,132,252,0.15);color:#e9d5ff;border:1px solid rgba(192,132,252,0.3);" onclick="adminQuickAdd('🍷 הכנת שולחן סדר','🍷',2)">🍷 שולחן סדר</button>
+      <button class="btn btn-sm" style="background:rgba(192,132,252,0.15);color:#e9d5ff;border:1px solid rgba(192,132,252,0.3);" onclick="adminQuickAdd('❓ חידון פסח','❓',3)">❓ חידון פסח</button>
+      <button class="btn btn-sm" style="background:rgba(192,132,252,0.15);color:#e9d5ff;border:1px solid rgba(192,132,252,0.3);" onclick="adminQuickAdd('📝 סיפור יציאת מצרים','📝',2)">📝 יציאת מצרים</button>
+      <button class="btn btn-sm" style="background:rgba(192,132,252,0.15);color:#e9d5ff;border:1px solid rgba(192,132,252,0.3);" onclick="adminQuickAdd('🌾 ספירת העומר','🌾',1)">🌾 ספירת העומר</button>
     </div>
 
     <div style="margin-top:16px;text-align:center;">
@@ -248,6 +259,31 @@
 const FB = 'https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim-spaces';
 const ADMIN_PASS = 'shimshon613';
 let adminTasks = [];
+
+// ══ Levels & Categories ══
+const LEVELS = [
+  { name: 'ארד', icon: '🥉', min: 0, max: 24, color: '#cd7f32', category: 'פורים — דמויות המגילה' },
+  { name: 'כסף', icon: '🥈', min: 25, max: 48, color: '#c0c0c0', category: 'פסח — יציאת מצרים' },
+  { name: 'זהב', icon: '🥇', min: 49, max: 72, color: '#ffd700', category: 'גיבורי ישראל — מוזהב' },
+  { name: 'יהלום', icon: '💎', min: 73, max: 96, color: '#b9f2ff', category: 'מדבקות נדירות + כתר' }
+];
+
+function getLevel(stickers) {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (stickers >= LEVELS[i].min) return LEVELS[i];
+  }
+  return LEVELS[0];
+}
+
+function getLevelBar(stickers) {
+  const level = getLevel(stickers);
+  const levelIdx = LEVELS.indexOf(level);
+  const nextLevel = LEVELS[levelIdx + 1];
+  const progress = nextLevel
+    ? Math.round(((stickers - level.min) / (nextLevel.min - level.min)) * 100)
+    : 100;
+  return `${level.icon} ${level.name} (${stickers}/96) — ${progress}%`;
+}
 
 function adminLogin() {
   const pass = document.getElementById('adminPass').value;
@@ -398,7 +434,11 @@ async function loadSpaces() {
           <div class="space-tasks">
             ${s.checklist ? s.checklist.map(t => `${t.emoji} ${t.name}`).join(' · ') : 'אין משימות'}
           </div>
-          ${studentCount > 0 ? `<div class="space-students">תלמידים: ${Object.values(s.students).map(st => st.name || '?').join(', ')}</div>` : ''}
+          ${studentCount > 0 ? `<div class="space-students">תלמידים: ${Object.values(s.students).map(st => {
+            const stk = st.stickers || 0;
+            const lvl = getLevel(stk);
+            return (st.name || '?') + ' ' + lvl.icon + stk;
+          }).join(' · ')}</div>` : ''}
           <div style="margin-top:8px;">
             <button class="btn btn-sm btn-danger" onclick="deleteSpace('${code}')">🗑️ מחיקה</button>
           </div>
