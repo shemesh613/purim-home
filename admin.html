@@ -298,11 +298,86 @@ function adminLogin() {
   }
 }
 
-// Auto-login
-if (localStorage.getItem('purim_admin') === 'true') {
+// Auto-login (admin or teacher via #space=CODE)
+const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
+const teacherSpaceCode = hashParams.get('space');
+
+if (teacherSpaceCode) {
+  // Teacher mode — show only their space, no admin password needed
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('adminPanel').classList.add('active');
+  loadTeacherSpace(teacherSpaceCode);
+} else if (localStorage.getItem('purim_admin') === 'true') {
   document.getElementById('loginBox').style.display = 'none';
   document.getElementById('adminPanel').classList.add('active');
   loadSpaces();
+}
+
+async function loadTeacherSpace(code) {
+  try {
+    const res = await fetch(`${FB}/${encodeURIComponent(code)}.json`);
+    const space = await res.json();
+    if (!space) {
+      document.getElementById('spacesList').innerHTML = '<div class="empty-state">❌ מרחב לא נמצא</div>';
+      return;
+    }
+    const studentCount = space.students ? Object.keys(space.students).length : 0;
+    const taskCount = space.checklist ? space.checklist.length : 0;
+    const totalStickers = space.checklist ? space.checklist.reduce((sum, t) => sum + (t.stickers || 0), 0) : 0;
+    const typeLabel = space.type === 'class' ? '🏫 כיתה' : '👨‍👩‍👧 משפחה';
+
+    // Update stats for this space only
+    updateStats(1, studentCount, space.type === 'class' ? 1 : 0, space.type === 'family' ? 1 : 0);
+
+    // Hide the create form — teacher doesn't need it
+    const createSection = document.querySelector('.card');
+    if (createSection) createSection.style.display = 'none';
+
+    const list = document.getElementById('spacesList');
+    const studentsHtml = space.students ? Object.entries(space.students).map(([pin, st]) => {
+      const stk = st.stickers || 0;
+      const lvl = getLevel(stk);
+      const lastLogin = st.lastLogin ? new Date(st.lastLogin).toLocaleDateString('he-IL') : '—';
+      return `<tr>
+        <td>${st.name || '?'}</td>
+        <td>${lvl.icon} ${lvl.name}</td>
+        <td>${stk}</td>
+        <td>${lastLogin}</td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="4" style="text-align:center;color:#9ca3af;">עדיין אין תלמידים — שתפו את הסיסמה!</td></tr>';
+
+    list.innerHTML = `
+      <div class="space-card" style="border:2px solid #7c3aed;">
+        <div class="space-header">
+          <span class="space-title">${typeLabel} | ${space.name}${space.school ? ' — ' + space.school : ''}</span>
+          <span class="space-code" style="font-size:1.1rem;">${code}</span>
+        </div>
+        <div class="space-meta" style="font-size:1rem;">
+          📋 ${taskCount} משימות | 🏅 ${totalStickers} מדבקות | 👨‍🎓 ${studentCount} תלמידים
+        </div>
+        <div class="space-tasks" style="margin:12px 0;">
+          ${space.checklist ? space.checklist.map(t => `<span style="display:inline-block;background:#ede9fe;padding:4px 10px;border-radius:8px;margin:2px;font-size:0.85rem;">${t.emoji} ${t.name} — 🏅${t.stickers}</span>`).join(' ') : ''}
+        </div>
+        <h3 style="margin:16px 0 8px;color:#4c1d95;">👨‍🎓 תלמידים</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+          <thead>
+            <tr style="background:#f5f3ff;text-align:right;">
+              <th style="padding:8px 10px;border-bottom:2px solid #e5e7eb;">שם</th>
+              <th style="padding:8px 10px;border-bottom:2px solid #e5e7eb;">רמה</th>
+              <th style="padding:8px 10px;border-bottom:2px solid #e5e7eb;">מדבקות</th>
+              <th style="padding:8px 10px;border-bottom:2px solid #e5e7eb;">כניסה אחרונה</th>
+            </tr>
+          </thead>
+          <tbody>${studentsHtml}</tbody>
+        </table>
+        <div style="margin-top:16px;padding:12px;background:#ecfdf5;border-radius:12px;text-align:center;">
+          <p style="font-size:0.9rem;color:#065f46;margin-bottom:8px;">📤 <strong>שתפו את הסיסמה עם ה${space.type === 'class' ? 'תלמידים' : 'ילדים'}:</strong></p>
+          <div style="font-size:1.3rem;font-weight:900;color:#7c3aed;background:#fff;display:inline-block;padding:8px 24px;border-radius:12px;border:2px dashed #c084fc;letter-spacing:2px;">${code}</div>
+        </div>
+      </div>`;
+  } catch (e) {
+    document.getElementById('spacesList').innerHTML = '<div class="empty-state">❌ שגיאה: ' + e.message + '</div>';
+  }
 }
 
 function toast(msg) {
