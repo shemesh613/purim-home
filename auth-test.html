@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firebase Auth Test</title>
+<style>
+body { font-family: sans-serif; background: #1a1a2e; color: #fff; padding: 20px; direction: rtl; }
+.test { margin: 10px 0; padding: 12px; border-radius: 8px; background: #16213e; }
+.ok { border-left: 4px solid #0f0; }
+.fail { border-left: 4px solid #f00; }
+.wait { border-left: 4px solid #ff0; }
+button { padding: 10px 20px; font-size: 16px; margin: 5px; border: none; border-radius: 8px; cursor: pointer; }
+.btn-primary { background: #4285f4; color: #fff; }
+.btn-secondary { background: #555; color: #fff; }
+#log { white-space: pre-wrap; font-family: monospace; font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>🔧 בדיקת Firebase Auth</h1>
+<div id="log"></div>
+<hr>
+<button class="btn-primary" onclick="testGoogle()">🔵 בדוק Google Login</button>
+<button class="btn-secondary" onclick="testEmail()">📧 בדוק Email Login</button>
+<button class="btn-secondary" onclick="clearAll()">🗑️ נקה cache ונסה שוב</button>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js';
+
+const log = document.getElementById('log');
+function addLog(msg, status) {
+  const div = document.createElement('div');
+  div.className = 'test ' + status;
+  div.textContent = msg;
+  log.appendChild(div);
+}
+
+const config = {
+  apiKey: 'AIzaSyAiX5hNA0nHE5Ose3XoHY84n3y99pdL4F8',
+  authDomain: 'aid-connect-2059d.firebaseapp.com',
+  databaseURL: 'https://purim-stickers-il-default-rtdb.europe-west1.firebasedatabase.app',
+  projectId: 'aid-connect-2059d',
+  storageBucket: 'aid-connect-2059d.firebasestorage.app',
+  messagingSenderId: '214156347220',
+  appId: '1:214156347220:web:bbde9a71c36119b1db6ac1',
+};
+
+addLog('1️⃣ Firebase config: projectId=' + config.projectId + ', apiKey=' + config.apiKey.slice(0,15) + '...', 'wait');
+
+let app, auth, db;
+try {
+  app = initializeApp(config);
+  addLog('2️⃣ initializeApp — OK ✅', 'ok');
+} catch(e) {
+  addLog('2️⃣ initializeApp — FAIL ❌ ' + e.message, 'fail');
+}
+
+try {
+  auth = getAuth(app);
+  addLog('3️⃣ getAuth — OK ✅', 'ok');
+} catch(e) {
+  addLog('3️⃣ getAuth — FAIL ❌ ' + e.message, 'fail');
+}
+
+try {
+  db = getDatabase(app);
+  addLog('4️⃣ getDatabase — OK ✅', 'ok');
+} catch(e) {
+  addLog('4️⃣ getDatabase — FAIL ❌ ' + e.message, 'fail');
+}
+
+// Check redirect result first
+try {
+  addLog('5️⃣ Checking redirect result...', 'wait');
+  const redirectResult = await getRedirectResult(auth);
+  if (redirectResult && redirectResult.user) {
+    addLog('5️⃣ Redirect result — USER FOUND ✅ uid=' + redirectResult.user.uid + ' email=' + redirectResult.user.email, 'ok');
+  } else {
+    addLog('5️⃣ Redirect result — null (no redirect pending)', 'ok');
+  }
+} catch(e) {
+  addLog('5️⃣ Redirect result — ERROR ⚠️ ' + e.code + ': ' + e.message, 'fail');
+}
+
+// Listen for auth state
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    addLog('👤 Auth State: uid=' + user.uid + ' anon=' + user.isAnonymous + ' email=' + user.email, 'ok');
+  } else {
+    addLog('👤 Auth State: NO USER', 'wait');
+  }
+});
+
+// Anonymous sign in
+try {
+  addLog('6️⃣ Trying signInAnonymously...', 'wait');
+  const cred = await signInAnonymously(auth);
+  addLog('6️⃣ signInAnonymously — OK ✅ uid=' + cred.user.uid, 'ok');
+
+  // Test RTDB
+  try {
+    addLog('7️⃣ Testing RTDB write...', 'wait');
+    await set(ref(db, 'auth-test/' + cred.user.uid), { timestamp: Date.now(), test: true });
+    addLog('7️⃣ RTDB write — OK ✅', 'ok');
+
+    const snap = await get(ref(db, 'auth-test/' + cred.user.uid));
+    addLog('8️⃣ RTDB read — OK ✅ data=' + JSON.stringify(snap.val()), 'ok');
+  } catch(e) {
+    addLog('7️⃣ RTDB — FAIL ❌ ' + e.message, 'fail');
+  }
+
+  // Test access codes read
+  try {
+    const codesSnap = await get(ref(db, 'access-codes'));
+    const codes = codesSnap.val();
+    addLog('9️⃣ Access codes — OK ✅ codes=' + Object.keys(codes || {}).join(', '), 'ok');
+  } catch(e) {
+    addLog('9️⃣ Access codes — FAIL ❌ ' + e.message, 'fail');
+  }
+
+} catch(e) {
+  addLog('6️⃣ signInAnonymously — FAIL ❌ ' + e.code + ': ' + e.message, 'fail');
+}
+
+addLog('🏁 Done! All tests complete.', 'ok');
+
+// Expose functions to window
+window.testGoogle = async function() {
+  try {
+    addLog('🔵 Trying Google signInWithPopup...', 'wait');
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    addLog('🔵 Google — OK ✅ email=' + result.user.email, 'ok');
+  } catch(e) {
+    addLog('🔵 Google Popup — FAIL ❌ ' + e.code + ': ' + e.message, 'fail');
+    addLog('🔵 Trying Google signInWithRedirect...', 'wait');
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithRedirect(auth, provider);
+    } catch(e2) {
+      addLog('🔵 Google Redirect — FAIL ❌ ' + e2.code + ': ' + e2.message, 'fail');
+    }
+  }
+};
+
+window.testEmail = async function() {
+  addLog('📧 Email login requires existing account — use the Google button first', 'wait');
+};
+
+window.clearAll = function() {
+  localStorage.clear();
+  indexedDB.databases().then(dbs => {
+    dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+  });
+  addLog('🗑️ Cache cleared! Reloading...', 'ok');
+  setTimeout(() => location.reload(), 1000);
+};
+</script>
+</body>
+</html>
