@@ -1558,7 +1558,7 @@ function adminRegister() {
   });
 }
 
-function adminLogin() {
+async function adminLogin() {
   const name = document.getElementById('adminName').value.trim();
   const password = document.getElementById('adminPassword').value.trim();
 
@@ -1574,6 +1574,31 @@ function adminLogin() {
     if (s.admin && s.admin.name === name && s.admin.password === password) {
       matches.push({ code, state: s });
     }
+  }
+
+  // If no local match, try cloud lookup by scanning master index
+  if (matches.length === 0) {
+    showToast('🔍 מחפש בענן...', 'info');
+    try {
+      const master = await cloudLoad(MASTER_ID);
+      if (master && master.codes) {
+        for (const [code, blobId] of Object.entries(master.codes)) {
+          if (globalState.mySpaces.includes(code)) continue; // already checked
+          const cloudData = await cloudLoad(blobId);
+          if (cloudData && cloudData.admin && cloudData.admin.name === name && cloudData.admin.password === password) {
+            // Found in cloud — restore locally
+            const s = defaultState();
+            s.seenWelcome = true;
+            Object.assign(s, cloudData);
+            s.admin.binId = blobId;
+            localStorage.setItem(spaceKey(code), JSON.stringify(s));
+            if (!globalState.mySpaces.includes(code)) globalState.mySpaces.push(code);
+            saveGlobal();
+            matches.push({ code, state: s });
+          }
+        }
+      }
+    } catch(e) { console.warn('Cloud search failed:', e); }
   }
 
   if (matches.length === 0) {
