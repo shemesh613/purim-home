@@ -914,9 +914,24 @@ setInterval(() => {
 
 // Sync when tab regains focus (user switches back to this tab)
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && globalState.activeSpace && state.admin) {
-    console.log('Tab visible — syncing...');
+  if (document.hidden) return;
+  // Teacher: push local data to cloud
+  if (globalState.activeSpace && state.admin && !state.student) {
+    console.log('Tab visible (teacher) — pushing to cloud...');
     cloudSaveSpace(globalState.activeSpace, getSharedData());
+  }
+  // Student: pull latest tasks from cloud
+  if (state.student?.joinCode) {
+    console.log('Tab visible (student) — pulling from cloud...');
+    cloudLoadSpace(state.student.joinCode).then(cloud => {
+      if (cloud?.admin?.tasks) {
+        state.admin.tasks = cloud.admin.tasks;
+        if (cloud.admin.members) state.admin.members = cloud.admin.members;
+        if (cloud.taskCompletions) state.taskCompletions = {...state.taskCompletions, ...cloud.taskCompletions};
+        saveState();
+        renderStudentTasks();
+      }
+    }).catch(e => console.warn('Student visibility sync failed:', e));
   }
 });
 
@@ -2109,11 +2124,27 @@ async function studentLogin() {
   showToast(`👋 !${name} ,ברוכים השבים`, 'success');
 }
 
-function showStudentView() {
+async function showStudentView() {
   document.getElementById('adminAuth').style.display = 'none';
   document.getElementById('adminDashboard').style.display = 'none';
   document.getElementById('studentView').style.display = 'block';
   document.getElementById('studentNameDisplay').textContent = state.student.name;
+
+  // Always fetch latest tasks from cloud (teacher may have added new ones)
+  if (state.student?.joinCode) {
+    try {
+      const cloud = await cloudLoadSpace(state.student.joinCode);
+      if (cloud?.admin?.tasks) {
+        state.admin.tasks = cloud.admin.tasks;
+        // Also update members list & taskCompletions from cloud
+        if (cloud.admin.members) state.admin.members = cloud.admin.members;
+        if (cloud.taskCompletions) state.taskCompletions = {...state.taskCompletions, ...cloud.taskCompletions};
+        saveState();
+        console.log('Student synced tasks from cloud ✅', state.admin.tasks.length, 'tasks');
+      }
+    } catch(e) { console.warn('Student cloud sync failed:', e); }
+  }
+
   resetDailyTasks();
   renderStudentTasks();
   renderMyStickers();
