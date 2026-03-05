@@ -878,9 +878,12 @@ async function cloudLoad(blobId) {
 }
 
 async function saveMasterIndex(joinCode, blobId) {
-  const master = await cloudLoad(MASTER_ID) || {codes:{}};
-  master.codes[joinCode] = blobId;
-  await cloudSave(MASTER_ID, master);
+  try {
+    const master = await cloudLoad(MASTER_ID) || {codes:{}};
+    master.codes[joinCode] = blobId;
+    await cloudSave(MASTER_ID, master);
+    console.log('Master index saved:', joinCode, '→', blobId);
+  } catch(e) { console.error('saveMasterIndex failed:', e); }
 }
 
 async function lookupBinId(joinCode) {
@@ -1984,14 +1987,23 @@ async function studentLogin() {
   }
 
   if (!spaceData.admin || spaceData.admin.joinCode !== code) {
-    showStudentError('קוד כיתה/משפחה שגוי');
+    showStudentError('קוד כיתה/משפחה שגוי — בדקו את הקוד ונסו שוב');
     return;
   }
 
-  const member = (spaceData.admin.members || []).find(m => m.name === name && m.pin === pin);
-  if (!member) {
-    showStudentError('שם או קוד אישי שגויים');
-    return;
+  if (!spaceData.admin.members) spaceData.admin.members = [];
+  let member = spaceData.admin.members.find(m => m.name === name);
+
+  if (member) {
+    // Existing member — verify pin
+    if (member.pin !== pin) {
+      showStudentError('הקוד האישי שגוי — נסו שוב');
+      return;
+    }
+  } else {
+    // New member — auto-register into the space
+    member = { name, pin, stickers: [], completedTasks: [], teacherGifts: [] };
+    spaceData.admin.members.push(member);
   }
 
   // Switch to this space and restore student state
