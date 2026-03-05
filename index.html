@@ -1151,7 +1151,7 @@
     <div style="margin-top:20px;">
       <h3 style="text-align:center;color:#7c3aed;font-family:'Frank Ruhl Libre',serif;font-size:1.2rem;margin-bottom:12px;">📸 גלריית תחפושות</h3>
       <div id="galleryGate" style="text-align:center; padding:12px;">
-        <p style="font-size:0.85rem; color:#6b7280; margin-bottom:10px;">הכניסו קוד בית ספר לפתיחת הגלריה</p>
+        <p style="font-size:0.85rem; color:#6b7280; margin-bottom:10px;">הכניסו קוד בית ספר לפתיחת הגלריה 🏫<br><span style="font-size:0.75rem;color:#9ca3af;">לא יודעים? שאלו את המורה!</span></p>
         <div style="display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap;">
           <input type="text" id="galleryCodeInput" placeholder="לדוגמה: רמבם-ירושלים" style="font-family:'Heebo',sans-serif; padding:10px 16px; border:2px solid #c084fc; border-radius:12px; font-size:1rem; text-align:center; direction:rtl; outline:none; width:200px;">
           <button onclick="enterGallery()" style="font-family:'Heebo',sans-serif; padding:10px 24px; background:linear-gradient(135deg,#7c3aed,#ec4899); color:#fff; border:none; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer;">📸 כנסו!</button>
@@ -2314,13 +2314,7 @@ Notes.init();
 
 // Wizard functions removed — direct access only
 
-// Allow Enter key in task name inputs
-['tTaskName', 'pTaskName'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); addTask(id.startsWith('t') ? 'teacher' : 'parent'); }
-  });
-});
+// Wizard Enter key handlers removed
 </script>
 <script src="js/auth-bridge.js"></script>
 
