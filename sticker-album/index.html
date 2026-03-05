@@ -869,27 +869,48 @@ async function cloudLoadSpace(joinCode, retries=2) {
   return null;
 }
 
+// Teacher cloud save — writes ONLY teacher-owned data (tasks, name, password, role)
+// NEVER overwrites admin/members (student-owned)
 async function cloudSaveSpace(joinCode, data, retries=2) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const body = JSON.stringify(data);
-      console.log(`Cloud saving (attempt ${attempt+1})...`, joinCode, body.length, 'bytes');
-      const res = await fetch(`${FIREBASE_URL}/spaces/${joinCode}.json`, {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body
+      console.log(`Cloud saving (attempt ${attempt+1})...`, joinCode);
+      // Write teacher-owned fields separately — never touch members
+      const adminBase = {
+        joinCode: data.admin.joinCode,
+        name: data.admin.name,
+        password: data.admin.password,
+        role: data.admin.role
+      };
+      const tasks = data.admin.tasks || [];
+
+      const [r1, r2] = await Promise.all([
+        fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/joinCode.json`, {
+          method: 'PUT', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(adminBase.joinCode)
+        }),
+        fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/tasks.json`, {
+          method: 'PUT', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(tasks)
+        })
+      ]);
+      // Also save name/password/role
+      await fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin.json`, {
+        method: 'PATCH', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(adminBase)
       });
-      if (!res.ok) {
-        console.error('Cloud save error:', res.status, await res.text());
-        if (attempt === retries) showToast('⚠️ שמירה לענן נכשלה ('+res.status+')', 'error');
+
+      if (!r1.ok || !r2.ok) {
+        console.error('Cloud save error:', r1.status, r2.status);
+        if (attempt === retries) showToast('⚠️ שמירה לענן נכשלה', 'error');
         else await new Promise(r => setTimeout(r, 1000));
         continue;
       }
-      // Verify the save actually worked
+      // Verify
       const verify = await fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/joinCode.json`);
       const saved = await verify.json();
       if (saved === joinCode) {
-        console.log('Cloud saved & verified ✅', joinCode);
+        console.log('Cloud saved & verified ✅', joinCode, '(tasks:', tasks.length, ')');
         return true;
       } else {
         console.warn('Cloud save verification failed, retrying...', saved);
@@ -906,6 +927,19 @@ async function cloudSaveSpace(joinCode, data, retries=2) {
     }
   }
   return false;
+}
+
+// Full PUT — only used for initial space creation (no members exist yet)
+async function cloudCreateSpace(joinCode, data) {
+  try {
+    const res = await fetch(`${FIREBASE_URL}/spaces/${joinCode}.json`, {
+      method: 'PUT', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    if (res.ok) { console.log('Space created in cloud ✅', joinCode); return true; }
+    console.error('Space creation failed:', res.status);
+    return false;
+  } catch(e) { console.error('Space creation error:', e); return false; }
 }
 
 // Debounced cloud save (teacher only — full space data)
@@ -1691,14 +1725,13 @@ async function adminRegister() {
   // Save locally
   localStorage.setItem(spaceKey(joinCode), JSON.stringify(state));
   saveGlobal();
-  // Save to cloud (Firebase) with verification
-  const cloudOk = await cloudSaveSpace(joinCode, getSharedData());
+  // Create in cloud (full PUT — safe because no members exist yet)
+  const cloudOk = await cloudCreateSpace(joinCode, getSharedData());
   if (cloudOk) {
     showToast('✅ נרשמתם בהצלחה! קוד כניסה: ' + joinCode + ' (מסונכרן לענן ☁️)', 'success');
   } else {
     showToast('⚠️ נרשמתם מקומית (קוד: ' + joinCode + ') — סנכרון ענן נכשל, ננסה שוב', 'error');
-    // Retry cloud save in background after 5 seconds
-    setTimeout(() => cloudSaveSpace(joinCode, getSharedData()), 5000);
+    setTimeout(() => cloudCreateSpace(joinCode, getSharedData()), 5000);
   }
   showAdminDashboard();
 }
