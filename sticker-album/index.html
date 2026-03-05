@@ -848,13 +848,25 @@ const STICKERS = {
 // ===== CLOUD SYNC — Firebase Realtime Database =====
 const FIREBASE_URL = 'https://album-bea15-default-rtdb.firebaseio.com';
 
-async function cloudLoadSpace(joinCode) {
-  try {
-    const res = await fetch(`${FIREBASE_URL}/spaces/${joinCode}.json`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data;
-  } catch(e) { console.warn('Cloud load failed:', e); return null; }
+async function cloudLoadSpace(joinCode, retries=2) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(`${FIREBASE_URL}/spaces/${joinCode}.json`);
+      if (!res.ok) {
+        console.warn(`Cloud load HTTP ${res.status} (attempt ${attempt+1})`);
+        if (attempt < retries) { await new Promise(r => setTimeout(r, 800)); continue; }
+        return null;
+      }
+      const data = await res.json();
+      if (data) return data;
+      // null means space doesn't exist — no point retrying
+      return null;
+    } catch(e) {
+      console.warn(`Cloud load failed (attempt ${attempt+1}):`, e.message);
+      if (attempt < retries) await new Promise(r => setTimeout(r, 800));
+    }
+  }
+  return null;
 }
 
 async function cloudSaveSpace(joinCode, data, retries=2) {
@@ -1878,10 +1890,11 @@ function addFromTemplate(name) {
   if (state.admin.tasks.some(t => t.name === name)) return;
   state.admin.tasks.push({id: 't' + Date.now(), name, reward: 1});
   saveState();
+  if (globalState.activeSpace) cloudSaveSpace(globalState.activeSpace, getSharedData());
   renderTaskManager();
   renderTemplates();
   renderAllChecklists();
-  showToast('✅ משימה נוספה', 'success');
+  showToast('✅ משימה נוספה ומסונכרנת לענן', 'success');
 }
 
 function renderTaskManager() {
@@ -1925,15 +1938,18 @@ function addTask() {
   state.admin.tasks.push({id: 't' + Date.now(), name, reward: 1});
   document.getElementById('newTaskName').value = '';
   saveState();
+  // Immediate cloud save (don't wait for debounce — tasks are critical)
+  if (globalState.activeSpace) cloudSaveSpace(globalState.activeSpace, getSharedData());
   renderTaskManager();
   renderTemplates();
   renderAllChecklists();
-  showToast('✅ משימה נוספה', 'success');
+  showToast('✅ משימה נוספה ומסונכרנת לענן', 'success');
 }
 
 function removeTask(index) {
   state.admin.tasks.splice(index, 1);
   saveState();
+  if (globalState.activeSpace) cloudSaveSpace(globalState.activeSpace, getSharedData());
   renderTaskManager();
   renderTemplates();
   renderAllChecklists();
