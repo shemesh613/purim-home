@@ -658,6 +658,10 @@ a{color:inherit;text-decoration:none}
           הוסיפו משימות — כשתלמיד/ילד משלים משימה ותאשרו, הוא יקבל מדבקה!
         </p>
         <div id="taskManager"></div>
+        <div id="taskPreview" style="display:none;margin-top:12px;padding:12px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1.5px solid rgba(5,150,105,0.15);border-radius:12px">
+          <div style="font-size:.75rem;color:#059669;font-weight:700;margin-bottom:8px">👁️ תצוגה מקדימה — כך התלמידים רואים:</div>
+          <ul class="checklist-items" id="taskPreviewList" style="background:#fff;border-radius:8px;border:1px solid rgba(0,0,0,0.06)"></ul>
+        </div>
         <div style="margin-top:12px">
           <div style="font-size:.8rem;color:#7c3aed;font-weight:700;margin-bottom:6px">⚡ הוספה מהירה מתבניות:</div>
           <div id="taskTemplates" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
@@ -1753,6 +1757,25 @@ function renderTaskManager() {
       <button class="btn-danger" onclick="removeTask(${i})">✕</button>
     </div>
   `).join('');
+
+  // Preview
+  const preview = document.getElementById('taskPreview');
+  const previewList = document.getElementById('taskPreviewList');
+  if (tasks.length === 0) {
+    preview.style.display = 'none';
+  } else {
+    preview.style.display = 'block';
+    previewList.innerHTML = tasks.map(t => `
+      <li class="checklist-item">
+        <div class="check-circle" style="cursor:default"></div>
+        <div class="check-info">
+          <div class="check-name">${t.name}</div>
+          <div class="check-desc" style="color:#8a8aaa;font-size:.75rem">לחצו לסמן כהושלם</div>
+        </div>
+        <div class="check-reward">🏅</div>
+      </li>
+    `).join('');
+  }
 }
 
 function addTask() {
