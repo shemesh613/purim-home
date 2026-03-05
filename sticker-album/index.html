@@ -1519,7 +1519,7 @@ function selectRole(role) {
   document.getElementById('studentAuthForm').style.display = (role === 'student') ? 'block' : 'none';
 }
 
-function adminRegister() {
+async function adminRegister() {
   const name = document.getElementById('adminName').value.trim();
   const password = document.getElementById('adminPassword').value.trim();
 
@@ -1544,9 +1544,18 @@ function adminRegister() {
   state.admin = { name, password, role: selectedRole, joinCode, tasks: [], members: [] };
   globalState.activeSpace = joinCode;
   if (!globalState.mySpaces.includes(joinCode)) globalState.mySpaces.push(joinCode);
-  saveState(); // saves locally + syncs to cloud
+  // Save locally
+  localStorage.setItem(spaceKey(joinCode), JSON.stringify(state));
+  saveGlobal();
+  // Save to cloud with explicit await
+  try {
+    await cloudSaveSpace(joinCode, getSharedData());
+    showToast('✅ נרשמתם בהצלחה! קוד כניסה: ' + joinCode, 'success');
+  } catch(e) {
+    console.error('Cloud save failed:', e);
+    showToast('✅ נרשמתם! (שמירה מקומית בלבד)', 'info');
+  }
   showAdminDashboard();
-  showToast('✅ נרשמתם בהצלחה! קוד כניסה: ' + joinCode, 'success');
 }
 
 async function adminLogin() {
