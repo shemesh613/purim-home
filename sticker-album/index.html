@@ -1544,15 +1544,17 @@ function adminRegister() {
   showToast('⏳ יוצר מרחב...', 'info');
   const joinCode = generateCode(); // short code for display
   const tempAdmin = { name, password, role: selectedRole, joinCode, tasks: [], members: [] };
-  cloudCreate({ admin: tempAdmin, taskCompletions: {}, members: [] }).then(binId => {
+  cloudCreate({ admin: tempAdmin, taskCompletions: {}, members: [] }).then(async (binId) => {
     state = defaultState();
     state.seenWelcome = true;
     state.admin = { name, password, role: selectedRole, joinCode, binId: binId || null, tasks: [], members: [] };
     globalState.activeSpace = joinCode;
     if (!globalState.mySpaces.includes(joinCode)) globalState.mySpaces.push(joinCode);
-    // Save binId mapping to cloud master index
-    if (binId) saveMasterIndex(joinCode, binId);
     saveState();
+    // Save binId mapping to cloud master index (await to ensure it completes)
+    if (binId) {
+      try { await saveMasterIndex(joinCode, binId); } catch(e) { console.warn('Master index save failed:', e); }
+    }
     showAdminDashboard();
     showToast('✅ נרשמתם בהצלחה! קוד כניסה: ' + joinCode, 'success');
   });
@@ -1569,10 +1571,14 @@ async function adminLogin() {
 
   // Search local spaces for matching admin
   const matches = [];
+  let foundName = false;
   for (const code of globalState.mySpaces) {
     const s = loadSpace(code);
-    if (s.admin && s.admin.name === name && s.admin.password === password) {
-      matches.push({ code, state: s });
+    if (s.admin && s.admin.name === name) {
+      foundName = true;
+      if (s.admin.password === password) {
+        matches.push({ code, state: s });
+      }
     }
   }
 
@@ -1602,7 +1608,11 @@ async function adminLogin() {
   }
 
   if (matches.length === 0) {
-    showAdminError('שם או סיסמה שגויים');
+    if (foundName) {
+      showAdminError('הסיסמה שגויה. נסו שוב או צרו מרחב חדש.');
+    } else {
+      showAdminError('לא נמצא מרחב בשם הזה. בדקו את השם או צרו מרחב חדש (הרשמה).');
+    }
     return;
   }
 
