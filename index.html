@@ -161,16 +161,20 @@
     }
     .section-title {
       font-family: 'Frank Ruhl Libre', serif;
-      font-size: 1.6rem;
+      font-size: clamp(1.5rem, 4vw, 2rem);
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       color: #4c1d95;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
+      display: flex; align-items: center; justify-content: center; gap: 14px;
+      font-weight: 900;
+      letter-spacing: -0.3px;
+      position: relative;
+      padding: 12px 0;
     }
     .section-title .line {
-      flex: 1; max-width: 80px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(124,58,237,0.3), transparent);
+      flex: 1; max-width: 100px;
+      height: 3px; border-radius: 3px;
+      background: linear-gradient(90deg, transparent, rgba(124,58,237,0.4), transparent);
     }
 
     /* ══ Games Grid ══ */
@@ -255,23 +259,61 @@
     }
     .album-hero-banner:hover .album-hero-cta { transform: scale(1.05); box-shadow: 0 6px 24px rgba(251,191,36,0.5); }
 
-    /* ══ Zone Headers (Purim / Pesach) ══ */
+    /* ══ Zone Headers — PREMIUM RUBRICS ══ */
     .zone-header {
-      display: flex; align-items: center; gap: 16px;
-      padding: 20px 24px; border-radius: 20px; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 20px;
+      padding: 28px 32px; border-radius: 24px; margin-bottom: 24px;
+      position: relative; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
     }
-    .zone-icon { font-size: 2.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
+    .zone-header::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 10% 50%, rgba(255,255,255,0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .zone-header::after {
+      content: ''; position: absolute; bottom: 0; left: 5%; right: 5%;
+      height: 3px; border-radius: 3px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    }
+    .zone-icon {
+      font-size: 3.5rem;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+      animation: zoneFloat 3s ease-in-out infinite;
+    }
+    @keyframes zoneFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
     .zone-title {
-      font-family: 'Frank Ruhl Libre', serif; font-size: 1.5rem; font-weight: 900;
-      margin-bottom: 2px;
+      font-family: 'Frank Ruhl Libre', serif; font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 900;
+      margin-bottom: 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      letter-spacing: -0.5px;
     }
-    .zone-sub { font-size: 0.9rem; opacity: 0.85; }
+    .zone-sub { font-size: 0.95rem; opacity: 0.9; font-weight: 300; }
+    .zone-badge {
+      position: absolute; top: 12px; left: 12px;
+      background: rgba(255,255,255,0.2); backdrop-filter: blur(8px);
+      padding: 4px 14px; border-radius: 20px; font-size: 0.75rem;
+      font-weight: 700; color: rgba(255,255,255,0.95); border: 1px solid rgba(255,255,255,0.3);
+    }
 
-    .purim-zone { border: 2px solid rgba(124,58,237,0.15); border-radius: 24px; padding: 24px 20px; background: linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%); }
-    .purim-header { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; }
+    .purim-zone {
+      border: 2px solid rgba(124,58,237,0.12); border-radius: 28px; padding: 28px 22px;
+      background: linear-gradient(180deg, #faf5ff 0%, #f5f3ff 50%, #ede9fe 100%);
+      box-shadow: 0 4px 20px rgba(124,58,237,0.08);
+    }
+    .purim-header {
+      background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 40%, #a855f7 80%, #c084fc 100%);
+      color: #fff;
+    }
 
-    .pesach-zone { border: 2px solid rgba(217,119,6,0.15); border-radius: 24px; padding: 24px 20px; background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%); }
-    .pesach-header { background: linear-gradient(135deg, #92400e, #d97706); color: #fff; }
+    .pesach-zone {
+      border: 2px solid rgba(217,119,6,0.12); border-radius: 28px; padding: 28px 22px;
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 50%, #fde68a33 100%);
+      box-shadow: 0 4px 20px rgba(217,119,6,0.08);
+    }
+    .pesach-header {
+      background: linear-gradient(135deg, #78350f 0%, #92400e 30%, #b45309 60%, #d97706 100%);
+      color: #fff;
+    }
     .pesach-card { background: linear-gradient(135deg, #fffbeb, #fef9e7) !important; }
     .pesach-card:hover { border-color: #d97706 !important; }
 
@@ -1094,96 +1136,7 @@
       body { padding-bottom: 60px; }
     }
 
-    /* ══ Gate Modal ══ */
-    .gate-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(4px);
-      z-index: 100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .gate-overlay.active { display: flex; }
-    .gate-box {
-      background: #fff;
-      border-radius: 24px;
-      padding: 32px 28px;
-      max-width: 420px;
-      width: 100%;
-      text-align: center;
-      position: relative;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      animation: gateIn 0.3s ease-out;
-    }
-    @keyframes gateIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .gate-close {
-      position: absolute;
-      top: 12px; left: 12px;
-      background: none; border: none;
-      font-size: 1.5rem; cursor: pointer;
-      color: #9ca3af;
-      transition: color 0.2s;
-    }
-    .gate-close:hover { color: #1e1b4b; }
-    .gate-box .gate-icon { font-size: 3rem; margin-bottom: 8px; }
-    .gate-box .gate-title {
-      font-family: 'Frank Ruhl Libre', serif;
-      font-size: 1.4rem; color: #1e1b4b;
-      margin-bottom: 6px; font-weight: 900;
-    }
-    .gate-box .gate-desc {
-      font-size: 0.9rem; color: #6b7280;
-      margin-bottom: 20px; line-height: 1.6;
-    }
-    .gate-google-btn {
-      display: inline-flex;
-      align-items: center; gap: 10px;
-      padding: 14px 28px;
-      background: linear-gradient(135deg,#7c3aed,#ec4899);
-      color: #fff;
-      font-family: 'Heebo', sans-serif;
-      font-size: 1.1rem; font-weight: 700;
-      border: none; border-radius: 14px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(124,58,237,0.3);
-      transition: all 0.3s;
-      width: 100%;
-      justify-content: center;
-    }
-    .gate-google-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
-    .gate-divider {
-      display: flex; align-items: center; gap: 12px;
-      margin: 16px 0;
-      color: #9ca3af; font-size: 0.85rem;
-    }
-    .gate-divider::before, .gate-divider::after {
-      content: ''; flex: 1; height: 1px;
-      background: #e5e7eb;
-    }
-    .gate-guest-btn {
-      display: inline-flex;
-      align-items: center; gap: 8px;
-      padding: 10px 24px;
-      background: #f3f4f6;
-      color: #4b5563;
-      font-family: 'Heebo', sans-serif;
-      font-size: 0.95rem; font-weight: 600;
-      border: 2px solid #e5e7eb;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: all 0.3s;
-      width: 100%;
-      justify-content: center;
-    }
-    .gate-guest-btn:hover { background: #e5e7eb; border-color: #d1d5db; }
-    .gate-guest-note {
-      font-size: 0.75rem; color: #9ca3af;
-      margin-top: 6px;
-    }
+    /* Gate CSS removed — direct access */
 
     /* ══ Parent Tab ══ */
     .parent-hero {
@@ -1287,7 +1240,7 @@
     <span class="role-label">הורה</span>
   </a>
   <div class="role-divider"></div>
-  <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" title="תלמיד — כניסה לאלבום מדבקות">
+  <a href="sticker-album/" title="תלמיד — כניסה לאלבום מדבקות">
     <span class="role-icon">🎒</span>
     <span class="role-label">תלמיד</span>
   </a>
@@ -1301,7 +1254,7 @@
   <!-- ══  STICKER ALBUM — CENTRAL HERO BANNER  ══ -->
   <!-- ══════════════════════════════════════════════ -->
   <div class="section">
-    <a href="#" onclick="event.preventDefault();openGate('sticker-album/')" class="album-hero-banner">
+    <a href="sticker-album/" class="album-hero-banner">
       <div class="album-hero-bg">
         <div class="album-hero-content">
           <div class="album-hero-badges">
@@ -1330,6 +1283,7 @@
   <!-- ══════════════════════════════ -->
   <div class="section purim-zone">
     <div class="zone-header purim-header">
+      <div class="zone-badge">🎭 פורים תשפ״ו</div>
       <div class="zone-icon">🎭</div>
       <div>
         <h2 class="zone-title">פורים — מגילת אסתר</h2>
@@ -1361,6 +1315,18 @@
         <h3 class="card-title">רעשן דיגיטלי</h3>
         <p class="card-desc">נערו את הטלפון — רעשן פורים!</p>
         <span class="card-badge badge-fun">🎉 כיפי</span>
+      </a>
+      <a href="sticker-album/#quiz" class="game-card" style="--card-shadow: rgba(124,58,237,0.2); --card-border: #c084fc; background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+        <span class="card-emoji">🏅</span>
+        <h3 class="card-title">חידון + מדבקות</h3>
+        <p class="card-desc">ענו על שאלות ואספו מדבקות נדירות!</p>
+        <span class="card-badge" style="background:#7c3aed;color:#fff;">💎 מדבקות</span>
+      </a>
+      <a href="sticker-album/#trade" class="game-card" style="--card-shadow: rgba(236,72,153,0.2); --card-border: #f9a8d4; background:linear-gradient(135deg,#fdf2f8,#fce7f3);">
+        <span class="card-emoji">🔄</span>
+        <h3 class="card-title">החלפת מדבקות</h3>
+        <p class="card-desc">יש לכם כפולות? החליפו עם חברים!</p>
+        <span class="card-badge badge-new">✨ חדש</span>
       </a>
     </div>
 
@@ -1416,6 +1382,7 @@
   <!-- ══════════════════════════════════ -->
   <div class="section pesach-zone">
     <div class="zone-header pesach-header">
+      <div class="zone-badge">🫓 פסח תשפ״ו</div>
       <div class="zone-icon">🫓</div>
       <div>
         <h2 class="zone-title">פסח — חג החירות</h2>
@@ -1424,7 +1391,7 @@
     </div>
 
     <div class="games-grid">
-      <a href="#" onclick="event.preventDefault();openGate('sticker-album/#quiz')" class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b;">
+      <a href="sticker-album/#quiz" class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b;">
         <span class="card-emoji">❓</span>
         <h3 class="card-title">חידון פסח</h3>
         <p class="card-desc">שאלות על יציאת מצרים, ליל הסדר והאגדתא — עם מדבקות!</p>
@@ -1976,27 +1943,7 @@
 </div>
 
 </main>
-<!-- ══ Gate Modal ══ -->
-<div class="gate-overlay" id="gateModal" onclick="if(event.target===this)closeGate()">
-  <div class="gate-box">
-    <button class="gate-close" onclick="closeGate()">✕</button>
-    <div class="gate-icon">🎒</div>
-    <div class="gate-title">כניסה לאלבום</div>
-    <div class="gate-desc">הכניסו את השם שלכם וסיסמת הכיתה</div>
-    <div style="text-align:right; margin-bottom:12px;">
-      <label style="display:block;font-size:0.85rem;font-weight:700;color:#4c1d95;margin-bottom:5px;">👤 השם שלי</label>
-      <input type="text" id="gateStudentName" placeholder="לדוגמה: יוסי" style="width:100%;font-family:'Heebo',sans-serif;padding:12px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:1rem;direction:rtl;outline:none;background:#faf5ff;">
-    </div>
-    <div style="text-align:right; margin-bottom:16px;">
-      <label style="display:block;font-size:0.85rem;font-weight:700;color:#4c1d95;margin-bottom:5px;">🔑 סיסמת כיתה / משפחה</label>
-      <input type="text" id="gateClassCode" placeholder="הסיסמה שקיבלתם מהמורה" style="width:100%;font-family:'Heebo',sans-serif;padding:12px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:1rem;direction:rtl;outline:none;background:#faf5ff;">
-    </div>
-    <input type="hidden" id="gatePersonalCode" value="">
-    <button class="gate-google-btn" onclick="gateLogin()" style="background:linear-gradient(135deg,#7c3aed,#ec4899);font-size:1.1rem;padding:14px;">🚀 כנסו!</button>
-    <div class="gate-divider">אין לכם סיסמה?</div>
-    <a href="https://wa.me/972526953500?text=%D7%A9%D7%9C%D7%95%D7%9D%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A1%D7%99%D7%A1%D7%9E%D7%94%20%D7%9C%D7%9B%D7%99%D7%AA%D7%94%2F%D7%9E%D7%A9%D7%A4%D7%97%D7%94" target="_blank" rel="noopener" class="gate-guest-btn" style="text-decoration:none;">💬 שלחו הודעה לקבלת סיסמה</a>
-  </div>
-</div>
+<!-- Gate removed — direct access to sticker-album -->
 
 <!-- ══ Footer ══ -->
 <footer class="footer">
@@ -2047,91 +1994,10 @@ function switchTab(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ══ Gate Modal ══
-let gateTarget = 'sticker-album/';
-function openGate(target) {
-  gateTarget = target || 'sticker-album/';
-  // Auto-enter if already logged in
-  const saved = JSON.parse(localStorage.getItem('purim_student_login') || '{}');
-  if (saved.studentName && saved.classCode) {
-    const hash = gateTarget.includes('#') ? gateTarget.split('#')[1] : '';
-    const base = gateTarget.replace(/#.*$/, '');
-    const url = base + '#login=' + encodeURIComponent(saved.classCode) + '&name=' + encodeURIComponent(saved.studentName) + (hash ? '&view=' + hash : '');
-    window.location.href = url;
-    return;
-  }
-  document.getElementById('gateModal').classList.add('active');
-  if (saved.studentName) document.getElementById('gateStudentName').value = saved.studentName;
-  if (saved.classCode) document.getElementById('gateClassCode').value = saved.classCode;
-}
-function closeGate() {
-  document.getElementById('gateModal').classList.remove('active');
-}
+// ══ Direct Album Access (gate removed) ══
 const FB_SPACES = 'https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim-spaces';
-
-async function gateLogin() {
-  const studentName = document.getElementById('gateStudentName').value.trim();
-  const classCode = document.getElementById('gateClassCode').value.trim();
-  // Auto-generate personal code from name (simple, no need for user to remember)
-  const personalCode = studentName.replace(/\s+/g, '-') + '-' + Math.floor(Math.random() * 9000 + 1000);
-  const btn = document.querySelector('#gateModal .gate-google-btn');
-
-  if (!studentName) {
-    document.getElementById('gateStudentName').style.borderColor = '#ef4444';
-    document.getElementById('gateStudentName').focus();
-    setTimeout(() => document.getElementById('gateStudentName').style.borderColor = '', 1500);
-    return;
-  }
-  if (!classCode) {
-    document.getElementById('gateClassCode').style.borderColor = '#ef4444';
-    document.getElementById('gateClassCode').focus();
-    setTimeout(() => document.getElementById('gateClassCode').style.borderColor = '', 1500);
-    return;
-  }
-
-  // Validate against Firebase
-  btn.textContent = '⏳ בודק סיסמה...';
-  btn.disabled = true;
-  try {
-    const res = await fetch(`${FB_SPACES}/${encodeURIComponent(classCode)}.json`);
-    const space = await res.json();
-    if (!space) {
-      btn.textContent = '❌ סיסמה שגויה — נסו שוב';
-      btn.style.background = '#ef4444';
-      document.getElementById('gateClassCode').style.borderColor = '#ef4444';
-      setTimeout(() => { btn.textContent = '🚀 כנסו!'; btn.style.background = 'linear-gradient(135deg,#7c3aed,#ec4899)'; btn.disabled = false; }, 2000);
-      return;
-    }
-
-    // Register student in Firebase
-    await fetch(`${FB_SPACES}/${encodeURIComponent(classCode)}/students/${encodeURIComponent(personalCode)}.json`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: studentName, lastLogin: Date.now() })
-    });
-
-    // Save for next time
-    localStorage.setItem('purim_student_login', JSON.stringify({ studentName, classCode, personalCode }));
-    localStorage.setItem('purim_student_space', JSON.stringify(space));
-
-    btn.textContent = '✅ נכנסים!';
-    btn.style.background = '#22c55e';
-    setTimeout(() => {
-      closeGate();
-      btn.textContent = '🚀 כנסו!';
-      btn.style.background = 'linear-gradient(135deg,#7c3aed,#ec4899)';
-      btn.disabled = false;
-      // Navigate
-      const hash = gateTarget.includes('#') ? gateTarget.split('#')[1] : '';
-      const base = gateTarget.replace(/#.*$/, '');
-      window.location.href = base + '#login=' + encodeURIComponent(classCode) + '&pin=' + encodeURIComponent(personalCode) + '&name=' + encodeURIComponent(studentName) + (hash ? '&view=' + hash : '');
-    }, 600);
-  } catch (e) {
-    btn.textContent = '❌ שגיאת רשת — נסו שוב';
-    btn.style.background = '#ef4444';
-    setTimeout(() => { btn.textContent = '🚀 כנסו!'; btn.style.background = 'linear-gradient(135deg,#7c3aed,#ec4899)'; btn.disabled = false; }, 2000);
-  }
-}
+function openGate(target) { window.location.href = target || 'sticker-album/'; }
+function closeGate() {}
 
 // ══ User Status & Menu ══
 (function initUserStatus() {
@@ -2151,7 +2017,7 @@ async function gateLogin() {
 function showUserMenu() {
   const saved = JSON.parse(localStorage.getItem('purim_student_login') || '{}');
   if (!saved.classCode) {
-    openGate('sticker-album/');
+    window.location.href = 'sticker-album/';
     return;
   }
   const existing = document.getElementById('userMenuPopup');
@@ -2163,7 +2029,7 @@ function showUserMenu() {
   menu.innerHTML = `
     <div style="font-weight:700;color:#1e1b4b;margin-bottom:8px;">👤 ${saved.studentName}</div>
     <div style="font-size:0.8rem;color:#6b7280;margin-bottom:12px;">🔑 ${saved.classCode}</div>
-    <button onclick="openGate('sticker-album/')" style="width:100%;font-family:'Heebo',sans-serif;padding:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:6px;">🏅 לאלבום המדבקות</button>
+    <button onclick="window.location.href='sticker-album/'" style="width:100%;font-family:'Heebo',sans-serif;padding:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:6px;">🏅 לאלבום המדבקות</button>
     <button onclick="openTeacherPanel()" style="width:100%;font-family:'Heebo',sans-serif;padding:8px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:6px;">🏫 ניהול כיתה (מורה)</button>
     <button onclick="logoutUser()" style="width:100%;font-family:'Heebo',sans-serif;padding:8px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;border-radius:10px;font-size:0.85rem;cursor:pointer;">🔄 החלפת משתמש</button>
   `;
