@@ -861,12 +861,15 @@ async function cloudLoadDB() {
 
 async function cloudSaveDB(db) {
   try {
-    await fetch(`${BLOB_URL}/${CLOUD_DB_ID}`, {
+    const res = await fetch(`${BLOB_URL}/${CLOUD_DB_ID}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(db)
     });
-  } catch(e) { console.warn('Cloud save failed:', e); }
+    await res.text(); // Must consume response to ensure request completes
+    if (!res.ok) console.error('Cloud save error:', res.status);
+    else console.log('Cloud DB saved ✅');
+  } catch(e) { console.error('Cloud save failed:', e); }
 }
 
 async function cloudSaveSpace(joinCode, data) {
