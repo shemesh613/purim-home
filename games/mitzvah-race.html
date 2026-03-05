@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🏃 מרוץ מצווה</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Heebo',sans-serif;background:#0f172a;color:#fff;min-height:100vh;overflow:hidden;user-select:none}
+.game{position:relative;width:100vw;height:100vh;overflow:hidden}
+
+/* Sky */
+.sky{position:absolute;inset:0;background:linear-gradient(180deg,#1e3a5f 0%,#4a90d9 50%,#87ceeb 100%)}
+.cloud{position:absolute;font-size:2rem;opacity:0.6;animation:cloudMove var(--d,20s) linear infinite}
+@keyframes cloudMove{0%{transform:translateX(100vw)}100%{transform:translateX(-100px)}}
+
+/* Ground */
+.ground{position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(180deg,#22c55e,#16a34a)}
+.ground::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:#15803d}
+
+/* Runner */
+.runner{position:absolute;bottom:120px;right:60px;font-size:3.5rem;transition:transform .05s;z-index:10}
+.runner.jump{animation:jump .5s ease-out}
+@keyframes jump{0%{transform:translateY(0)}40%{transform:translateY(-100px)}100%{transform:translateY(0)}}
+
+/* Obstacles */
+.obstacle{position:absolute;bottom:120px;font-size:2.5rem;z-index:5}
+
+/* Power meter */
+.power-area{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);text-align:center;z-index:20}
+.tap-btn{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#fbbf24,#d97706);border:4px solid #fde68a;font-size:2.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 30px rgba(251,191,36,0.4);transition:transform .05s}
+.tap-btn:active{transform:scale(0.9)}
+
+/* Speed bar */
+.speed-bar{position:absolute;top:80px;left:50%;transform:translateX(-50%);width:200px;z-index:20}
+.speed-label{font-size:.75rem;color:rgba(255,255,255,0.7);text-align:center;margin-bottom:4px}
+.speed-track{height:8px;background:rgba(255,255,255,0.2);border-radius:8px;overflow:hidden}
+.speed-fill{height:100%;background:linear-gradient(90deg,#22c55e,#fbbf24,#ef4444);border-radius:8px;transition:width .1s}
+
+/* HUD */
+.hud{position:absolute;top:16px;left:0;right:0;display:flex;justify-content:space-between;padding:0 20px;z-index:20}
+.hud-item{background:rgba(0,0,0,0.4);padding:8px 16px;border-radius:12px;text-align:center}
+.hud-item .val{font-size:1.2rem;font-weight:900}
+.hud-item .lbl{font-size:.65rem;color:rgba(255,255,255,0.6)}
+
+/* Character select */
+.char-select{position:absolute;inset:0;background:rgba(0,0,0,0.85);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.char-select.hidden{display:none}
+.char-select h2{font-size:1.6rem;margin-bottom:8px}
+.char-select p{color:rgba(255,255,255,0.6);margin-bottom:24px;font-size:.9rem}
+.char-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:360px;width:100%}
+.char-card{background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.15);border-radius:16px;padding:20px;text-align:center;cursor:pointer;transition:all .2s}
+.char-card:hover{border-color:#fbbf24;background:rgba(251,191,36,0.1)}
+.char-card .emoji{font-size:3rem;margin-bottom:8px}
+.char-card .name{font-weight:700;font-size:1rem;margin-bottom:4px}
+.char-card .power{font-size:.75rem;color:rgba(255,255,255,0.5)}
+.char-card .story{font-size:.7rem;color:rgba(255,255,255,0.4);margin-top:6px;line-height:1.4}
+
+/* Game over */
+.game-over{position:absolute;inset:0;background:rgba(0,0,0,0.85);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.game-over.hidden{display:none}
+.game-over h2{font-size:2rem;margin:12px 0}
+.game-over .score{font-size:3rem;font-weight:900;color:#fbbf24}
+.btn{padding:14px 40px;border-radius:14px;border:none;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;margin-top:16px}
+.btn-primary{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff}
+.btn-share{background:#25D366;color:#fff}
+
+.back-btn{position:fixed;top:16px;right:16px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;z-index:200}
+</style>
+</head>
+<body>
+<a href="../" class="back-btn">🏠</a>
+<div class="game" id="gameArea">
+  <div class="sky">
+    <div class="cloud" style="top:10%;--d:15s;animation-delay:-3s">☁️</div>
+    <div class="cloud" style="top:20%;--d:22s;animation-delay:-8s;font-size:3rem">☁️</div>
+    <div class="cloud" style="top:5%;--d:18s;animation-delay:-12s">☁️</div>
+  </div>
+  <div class="ground"></div>
+
+  <div class="hud">
+    <div class="hud-item"><div class="val" id="distDisplay">0m</div><div class="lbl">מרחק</div></div>
+    <div class="hud-item"><div class="val" id="coinCount">0</div><div class="lbl">מטבעות</div></div>
+  </div>
+
+  <div class="speed-bar">
+    <div class="speed-label">⚡ מהירות</div>
+    <div class="speed-track"><div class="speed-fill" id="speedFill" style="width:10%"></div></div>
+  </div>
+
+  <div class="runner" id="runner">🏃</div>
+
+  <div class="power-area">
+    <div class="tap-btn" id="tapBtn">👆</div>
+  </div>
+
+  <!-- Character Select -->
+  <div class="char-select" id="charSelect">
+    <h2>🏃 בחרו דמות</h2>
+    <p>לכל דמות כוח מיוחד!</p>
+    <div class="char-grid">
+      <div class="char-card" onclick="selectChar(0)">
+        <div class="emoji">👸</div>
+        <div class="name">אסתר המלכה</div>
+        <div class="power">⚡ כוח: היעלמות</div>
+        <div class="story">הצילה את עם ישראל בגבורה ובתבונה</div>
+      </div>
+      <div class="char-card" onclick="selectChar(1)">
+        <div class="emoji">⚔️</div>
+        <div class="name">דבורה הנביאה</div>
+        <div class="power">💪 כוח: כוח-על</div>
+        <div class="story">שפטה את ישראל והובילה למלחמה</div>
+      </div>
+      <div class="char-card" onclick="selectChar(2)">
+        <div class="emoji">🙏</div>
+        <div class="name">חנה</div>
+        <div class="power">💚 כוח: ריפוי</div>
+        <div class="story">התפללה בכל ליבה ונענתה</div>
+      </div>
+      <div class="char-card" onclick="selectChar(3)">
+        <div class="emoji">📖</div>
+        <div class="name">רבי עקיבא</div>
+        <div class="power">🛡️ כוח: מגן</div>
+        <div class="story">התחיל ללמוד בגיל 40 והפך לגדול הדור</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over -->
+  <div class="game-over hidden" id="gameOver">
+    <div style="font-size:4rem" id="goEmoji">🏆</div>
+    <h2>סיימתם!</h2>
+    <div class="score" id="goScore">0m</div>
+    <button class="btn btn-primary" onclick="restart()">🔄 שוב!</button>
+    <button class="btn btn-share" onclick="shareScore()">📲 שתפו</button>
+  </div>
+</div>
+
+<script>
+const CHARS = [
+  {emoji:'👸',name:'אסתר',runner:'👸'},
+  {emoji:'⚔️',name:'דבורה',runner:'💪'},
+  {emoji:'🙏',name:'חנה',runner:'🙏'},
+  {emoji:'📖',name:'רבי עקיבא',runner:'📖'}
+];
+const OBSTACLES = ['🪨','🌵','🔥','👹','🐍'];
+
+let charIdx=0, speed=0, distance=0, coins=0, gameRunning=false, obstacles=[], powerCooldown=0;
+let lastTap=0, tapRate=0;
+
+const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+function playTap(){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=440+speed*20;o.type='sine';g.gain.value=0.08;g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.1);o.start();o.stop(audioCtx.currentTime+0.1);}
+function playCoin(){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=880;o.type='sine';g.gain.value=0.1;g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);o.start();o.stop(audioCtx.currentTime+0.2);}
+function playHit(){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=150;o.type='sawtooth';g.gain.value=0.15;g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.3);o.start();o.stop(audioCtx.currentTime+0.3);}
+
+function selectChar(idx) {
+  charIdx = idx;
+  document.getElementById('charSelect').classList.add('hidden');
+  document.getElementById('runner').textContent = CHARS[idx].runner;
+  startGame();
+}
+
+function startGame() {
+  speed=1; distance=0; coins=0; gameRunning=true; obstacles=[];
+  document.getElementById('gameOver').classList.add('hidden');
+  document.querySelectorAll('.obstacle').forEach(o=>o.remove());
+  gameLoop();
+  spawnLoop();
+}
+
+function restart() {
+  document.getElementById('charSelect').classList.remove('hidden');
+  document.getElementById('gameOver').classList.add('hidden');
+}
+
+// Tap
+document.getElementById('tapBtn').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  if (!gameRunning) return;
+  const now = Date.now();
+  tapRate = 1000 / Math.max(50, now - lastTap);
+  lastTap = now;
+  speed = Math.min(15, speed + 0.8);
+  playTap();
+});
+
+// Jump on game area tap (not on button)
+document.getElementById('gameArea').addEventListener('pointerdown', (e) => {
+  if (e.target.closest('.tap-btn') || e.target.closest('.char-card') || e.target.closest('.btn') || e.target.closest('.back-btn')) return;
+  if (!gameRunning) return;
+  const runner = document.getElementById('runner');
+  if (!runner.classList.contains('jump')) {
+    runner.classList.add('jump');
+    setTimeout(() => runner.classList.remove('jump'), 500);
+  }
+});
+
+function spawnLoop() {
+  if (!gameRunning) return;
+  const delay = Math.max(800, 2500 - distance * 2);
+  setTimeout(() => {
+    if (!gameRunning) return;
+    spawnObstacle();
+    if (Math.random() > 0.5) spawnCoin();
+    spawnLoop();
+  }, delay);
+}
+
+function spawnObstacle() {
+  const el = document.createElement('div');
+  el.className = 'obstacle';
+  el.textContent = OBSTACLES[Math.floor(Math.random()*OBSTACLES.length)];
+  el.style.left = '-50px';
+  el.dataset.x = window.innerWidth + 50;
+  el.style.transform = `translateX(${el.dataset.x}px)`;
+  document.getElementById('gameArea').appendChild(el);
+  obstacles.push(el);
+}
+
+function spawnCoin() {
+  const el = document.createElement('div');
+  el.className = 'obstacle';
+  el.textContent = '🪙';
+  el.dataset.coin = '1';
+  el.dataset.x = window.innerWidth + 150;
+  el.style.transform = `translateX(${el.dataset.x}px)`;
+  el.style.bottom = (120 + Math.random()*80) + 'px';
+  document.getElementById('gameArea').appendChild(el);
+  obstacles.push(el);
+}
+
+function gameLoop() {
+  if (!gameRunning) return;
+
+  // Decay speed
+  speed = Math.max(0.5, speed - 0.03);
+  distance += speed * 0.1;
+
+  // Update HUD
+  document.getElementById('distDisplay').textContent = Math.floor(distance) + 'm';
+  document.getElementById('coinCount').textContent = coins;
+  document.getElementById('speedFill').style.width = Math.min(100, (speed/15)*100) + '%';
+
+  // Move obstacles
+  const runnerRect = document.getElementById('runner').getBoundingClientRect();
+  for (let i = obstacles.length-1; i >= 0; i--) {
+    const ob = obstacles[i];
+    let x = parseFloat(ob.dataset.x) - speed * 3;
+    ob.dataset.x = x;
+    ob.style.transform = `translateX(${x}px)`;
+
+    // Check collision
+    const obRect = ob.getBoundingClientRect();
+    if (Math.abs(obRect.left - runnerRect.left) < 40 && Math.abs(obRect.top - runnerRect.top) < 50) {
+      if (ob.dataset.coin) {
+        coins++;
+        playCoin();
+        ob.remove();
+        obstacles.splice(i, 1);
+      } else if (!document.getElementById('runner').classList.contains('jump')) {
+        // Hit!
+        gameRunning = false;
+        playHit();
+        document.getElementById('goScore').textContent = Math.floor(distance) + 'm';
+        document.getElementById('goEmoji').textContent = distance > 200 ? '🏆' : distance > 100 ? '⭐' : '💪';
+        document.getElementById('gameOver').classList.remove('hidden');
+        return;
+      }
+    }
+
+    if (x < -60) { ob.remove(); obstacles.splice(i, 1); }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+function shareScore() {
+  const msg = `🏃 מרוץ מצווה!\nרצתי ${Math.floor(distance)} מטר עם ${CHARS[charIdx].name}! (${coins} מטבעות)\nhttps://shemesh613.github.io/purim-home/games/mitzvah-race.html`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+</script>
+</body>
+</html>

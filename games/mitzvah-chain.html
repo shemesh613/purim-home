@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🔗 שרשרת מצוות</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Heebo',sans-serif;background:linear-gradient(135deg,#0f172a,#1e1b4b);color:#fff;min-height:100vh;overflow-x:hidden;user-select:none}
+.game{display:flex;flex-direction:column;align-items:center;padding:20px;min-height:100vh;max-width:440px;margin:0 auto}
+
+/* Header */
+h1{font-size:1.6rem;margin-bottom:4px}
+.subtitle{font-size:.8rem;color:rgba(255,255,255,0.5);margin-bottom:16px}
+
+/* Streak */
+.streak-area{text-align:center;margin-bottom:16px}
+.streak-num{font-size:3.5rem;font-weight:900;background:linear-gradient(135deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
+.streak-label{font-size:.85rem;color:rgba(255,255,255,0.6)}
+.streak-fire{font-size:2rem;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+
+/* Today's challenge */
+.challenge{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:20px;width:100%;margin-bottom:16px;text-align:center}
+.challenge h2{font-size:1.1rem;margin-bottom:8px;color:#fbbf24}
+.challenge .mitzvah-icon{font-size:3rem;margin:8px 0}
+.challenge .mitzvah-name{font-size:1.3rem;font-weight:900;margin-bottom:4px}
+.challenge .mitzvah-desc{font-size:.8rem;color:rgba(255,255,255,0.6);line-height:1.5;margin-bottom:12px}
+.challenge .mitzvah-source{font-size:.7rem;color:rgba(251,191,36,0.6);font-style:italic}
+
+/* Actions */
+.actions{width:100%;display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.action-btn{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 18px;cursor:pointer;transition:all .2s;width:100%}
+.action-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(251,191,36,0.3)}
+.action-btn .a-icon{font-size:1.5rem;width:40px;text-align:center}
+.action-btn .a-text{flex:1}
+.action-btn .a-title{font-weight:700;font-size:.95rem}
+.action-btn .a-desc{font-size:.7rem;color:rgba(255,255,255,0.5)}
+.action-btn.done{border-color:#22c55e;background:rgba(34,197,94,0.1)}
+.action-btn.done .a-title::after{content:' ✅';font-size:.8rem}
+
+/* Chain visualization */
+.chain{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:16px;width:100%}
+.chain-link{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .3s}
+.chain-link.active{background:linear-gradient(135deg,#f59e0b,#ef4444);box-shadow:0 0 12px rgba(245,158,11,0.4)}
+.chain-link.done{background:rgba(34,197,94,0.3);border:1px solid #22c55e}
+.chain-link.future{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1)}
+.chain-link.missed{background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3)}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;margin-bottom:16px}
+.stat{background:rgba(255,255,255,0.06);border-radius:12px;padding:12px;text-align:center}
+.stat .val{font-size:1.3rem;font-weight:900;color:#fbbf24}
+.stat .lbl{font-size:.65rem;color:rgba(255,255,255,0.5)}
+
+/* Completion modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.modal.hidden{display:none}
+.modal h2{font-size:1.8rem;margin:12px 0}
+.modal .reward{font-size:4rem;margin:12px 0}
+.modal .msg{font-size:1rem;color:rgba(255,255,255,0.7);text-align:center;line-height:1.6;max-width:300px}
+.btn{padding:14px 40px;border-radius:14px;border:none;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;margin-top:16px}
+.btn-primary{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff}
+.btn-share{background:#25D366;color:#fff}
+
+/* Confetti */
+.confetti{position:fixed;pointer-events:none;z-index:200}
+
+.back-btn{position:fixed;top:16px;right:16px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;z-index:200}
+</style>
+</head>
+<body>
+<a href="../" class="back-btn">🏠</a>
+<div class="game">
+  <h1>🔗 שרשרת מצוות</h1>
+  <p class="subtitle">כל יום מצווה חדשה — שמרו על הרצף!</p>
+
+  <div class="streak-area">
+    <div class="streak-fire" id="streakFire">🔥</div>
+    <div class="streak-num" id="streakNum">0</div>
+    <div class="streak-label">ימים ברצף</div>
+  </div>
+
+  <div class="challenge" id="challengeBox">
+    <h2>🎯 המצווה של היום</h2>
+    <div class="mitzvah-icon" id="mIcon">🤝</div>
+    <div class="mitzvah-name" id="mName">טוען...</div>
+    <div class="mitzvah-desc" id="mDesc"></div>
+    <div class="mitzvah-source" id="mSource"></div>
+  </div>
+
+  <div class="actions" id="actionList"></div>
+
+  <div style="width:100%">
+    <div style="font-size:.8rem;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:8px">📅 השרשרת שלי (30 יום)</div>
+    <div class="chain" id="chainVis"></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="val" id="totalDays">0</div><div class="lbl">סה״כ ימים</div></div>
+    <div class="stat"><div class="val" id="bestStreak">0</div><div class="lbl">שיא רצף</div></div>
+    <div class="stat"><div class="val" id="totalMitzvot">0</div><div class="lbl">מצוות שבוצעו</div></div>
+  </div>
+</div>
+
+<!-- Completion Modal -->
+<div class="modal hidden" id="completeModal">
+  <div class="reward" id="cReward">🏆</div>
+  <h2 id="cTitle">כל הכבוד!</h2>
+  <div class="msg" id="cMsg"></div>
+  <button class="btn btn-primary" onclick="closeModal()">🔥 המשיכו מחר!</button>
+  <button class="btn btn-share" onclick="shareStreak()">📲 שתפו</button>
+</div>
+
+<script>
+const MITZVOT = [
+  {icon:'🤝',name:'גמילות חסדים',desc:'עשו מעשה טוב למישהו — עזרו, חייכו, תנו מחמאה',source:'פרקי אבות א, ב',actions:['עזרתי למישהו','נתתי מחמאה','חייכתי לזר']},
+  {icon:'📖',name:'לימוד תורה',desc:'למדו משהו חדש מהתורה — פסוק, משנה, או הלכה',source:'דברים ו, ז',actions:['קראתי פסוק','למדתי משנה','שמעתי שיעור']},
+  {icon:'🙏',name:'תפילה בכוונה',desc:'התפללו בכוונה מיוחדת — אפילו משפט אחד מהלב',source:'דברים יא, יג',actions:['התפללתי שחרית','אמרתי ברכה בכוונה','התפללתי על חבר']},
+  {icon:'🪙',name:'צדקה',desc:'תנו צדקה היום — כסף, אוכל, או זמן למי שצריך',source:'דברים טו, ח',actions:['נתתי כסף','תרמתי אוכל','עזרתי בהתנדבות']},
+  {icon:'👨‍👩‍👧‍👦',name:'כיבוד הורים',desc:'עשו משהו מיוחד להורים — עזרו בבית, אמרו תודה',source:'שמות כ, יב',actions:['עזרתי בבית','אמרתי תודה','הכנתי הפתעה']},
+  {icon:'🕊️',name:'שלום',desc:'עשו שלום — פייסו חבר, וותרו, דברו בנחת',source:'תהילים לד, טו',actions:['פייסתי חבר','ויתרתי','דיברתי בנחת']},
+  {icon:'🌱',name:'שמירת הטבע',desc:'שמרו על הבריאה — אל תבזבזו, הרימו זבל, שתלו',source:'בראשית ב, טו',actions:['הרמתי זבל','חסכתי מים','טיפלתי בצמח']},
+  {icon:'😊',name:'שמחה',desc:'שמחו ושמחו אחרים — ספרו בדיחה, שחקו, שירו',source:'תהילים ק, ב',actions:['שמחתי מישהו','שרתי','צחקתי עם חברים']},
+  {icon:'🍞',name:'הכנסת אורחים',desc:'קבלו אורחים בשמחה או הזמינו מישהו',source:'בראשית יח, א',actions:['הזמנתי חבר','קיבלתי אורח','שיתפתי אוכל']},
+  {icon:'💪',name:'אמונה',desc:'חזקו את האמונה — הודו לה׳ על דבר טוב',source:'חבקוק ב, ד',actions:['אמרתי תודה לה׳','ראיתי נס קטן','התחזקתי']},
+  {icon:'🗣️',name:'שמירת הלשון',desc:'שמרו על הדיבור — אל תרכלו, דברו טוב על אחרים',source:'ויקרא יט, טז',actions:['נמנעתי מרכילות','דיברתי טוב','שתקתי כשצריך']},
+  {icon:'⏰',name:'ניצול הזמן',desc:'נצלו את הזמן לטובה — למדו, עזרו, התפתחו',source:'פרקי אבות ב, ד',actions:['למדתי משהו חדש','עזרתי במקום לבטל','קראתי ספר']},
+  {icon:'❤️',name:'אהבת ישראל',desc:'אהבו יהודי אחר — חברו, עזרו, קבלו בסבר פנים',source:'ויקרא יט, יח',actions:['עזרתי ליהודי','התחברתי עם חבר חדש','קיבלתי בסבר פנים']},
+  {icon:'🎓',name:'חוכמה',desc:'חפשו חוכמה — שאלו שאלה טובה, למדו מאחרים',source:'פרקי אבות ד, א',actions:['שאלתי שאלה','למדתי מאחר','קראתי דבר חכם']}
+];
+
+const STREAK_REWARDS = [
+  {days:3,emoji:'⭐',title:'התחלה מצוינת!',msg:'3 ימים ברצף! כוכב ראשון!'},
+  {days:7,emoji:'🌟',title:'שבוע שלם!',msg:'7 ימים! אתם כוכבי מצוות!'},
+  {days:14,emoji:'🏅',title:'שבועיים!',msg:'14 ימים ברצף — מדהים!'},
+  {days:21,emoji:'👑',title:'הרגל חדש!',msg:'21 ימים — יצרתם הרגל של מצוות!'},
+  {days:30,emoji:'🏆',title:'אלופים!',msg:'30 ימים ברצף! אתם גיבורי מצוות!'}
+];
+
+// State
+let state = {streak:0, bestStreak:0, totalDays:0, totalActions:0, history:{}, lastDate:null};
+
+// Load
+try {
+  const s = JSON.parse(localStorage.getItem('mitzvah-chain'));
+  if (s) state = {...state, ...s};
+} catch(e){}
+
+function save() {
+  localStorage.setItem('mitzvah-chain', JSON.stringify(state));
+}
+
+function getToday() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getDayMitzvah() {
+  const d = new Date();
+  const dayOfYear = Math.floor((d - new Date(d.getFullYear(),0,0))/(1000*60*60*24));
+  return MITZVOT[dayOfYear % MITZVOT.length];
+}
+
+// Audio
+const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+function playDing(){
+  [523,659,784].forEach((f,i)=>{
+    setTimeout(()=>{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.connect(g);g.connect(audioCtx.destination);
+      o.frequency.value=f;o.type='sine';g.gain.value=0.12;
+      g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.25);
+      o.start();o.stop(audioCtx.currentTime+0.25);
+    },i*100);
+  });
+}
+function playComplete(){
+  [523,659,784,1047].forEach((f,i)=>{
+    setTimeout(()=>{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.connect(g);g.connect(audioCtx.destination);
+      o.frequency.value=f;o.type='sine';g.gain.value=0.15;
+      g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.4);
+      o.start();o.stop(audioCtx.currentTime+0.4);
+    },i*150);
+  });
+}
+
+// Confetti
+function spawnConfetti(){
+  for(let i=0;i<40;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.top='-10px';
+    c.style.width=(6+Math.random()*8)+'px';
+    c.style.height=(6+Math.random()*8)+'px';
+    c.style.background=['#fbbf24','#ef4444','#22c55e','#3b82f6','#a855f7','#ec4899'][Math.floor(Math.random()*6)];
+    c.style.borderRadius=Math.random()>.5?'50%':'2px';
+    document.body.appendChild(c);
+    const x=(Math.random()-.5)*200;
+    const r=Math.random()*720-360;
+    c.animate([
+      {transform:'translate(0,0) rotate(0deg)',opacity:1},
+      {transform:`translate(${x}px,${window.innerHeight+20}px) rotate(${r}deg)`,opacity:0}
+    ],{duration:1500+Math.random()*1500,easing:'cubic-bezier(.25,.46,.45,.94)'});
+    setTimeout(()=>c.remove(),3000);
+  }
+}
+
+// Check streak continuity
+function checkStreak(){
+  const today = getToday();
+  if(state.lastDate){
+    const last = new Date(state.lastDate);
+    const now = new Date(today);
+    const diff = Math.floor((now-last)/(1000*60*60*24));
+    if(diff > 1){
+      // Streak broken
+      state.streak = 0;
+    }
+  }
+}
+
+// Render
+function render(){
+  checkStreak();
+  const today = getToday();
+  const m = getDayMitzvah();
+  const todayData = state.history[today] || {actions:[]};
+
+  // Mitzvah info
+  document.getElementById('mIcon').textContent = m.icon;
+  document.getElementById('mName').textContent = m.name;
+  document.getElementById('mDesc').textContent = m.desc;
+  document.getElementById('mSource').textContent = '📜 ' + m.source;
+
+  // Streak
+  document.getElementById('streakNum').textContent = state.streak;
+  document.getElementById('streakFire').style.display = state.streak > 0 ? '' : 'none';
+
+  // Stats
+  document.getElementById('totalDays').textContent = state.totalDays;
+  document.getElementById('bestStreak').textContent = state.bestStreak;
+  document.getElementById('totalMitzvot').textContent = state.totalActions;
+
+  // Actions
+  const list = document.getElementById('actionList');
+  list.innerHTML = m.actions.map((a,i) => {
+    const done = todayData.actions.includes(i);
+    return `<div class="action-btn ${done?'done':''}" onclick="doAction(${i})">
+      <div class="a-icon">${done?'✅':['1️⃣','2️⃣','3️⃣'][i]}</div>
+      <div class="a-text"><div class="a-title">${a}</div><div class="a-desc">${done?'בוצע היום! 🎉':'לחצו כשתבצעו'}</div></div>
+    </div>`;
+  }).join('');
+
+  // Chain visualization (last 30 days)
+  const chain = document.getElementById('chainVis');
+  let html = '';
+  for(let i=29;i>=0;i--){
+    const d = new Date();
+    d.setDate(d.getDate()-i);
+    const ds = d.toISOString().split('T')[0];
+    const dayData = state.history[ds];
+    let cls = 'future';
+    let icon = '·';
+    if(ds === today){
+      cls = todayData.actions.length>0 ? 'done' : 'active';
+      icon = todayData.actions.length>0 ? '✓' : '🔥';
+    } else if(dayData && dayData.actions.length>0){
+      cls = 'done';
+      icon = '✓';
+    } else if(new Date(ds) < new Date(today)){
+      cls = dayData ? 'done' : 'missed';
+      icon = dayData && dayData.actions.length>0 ? '✓' : '✗';
+    }
+    html += `<div class="chain-link ${cls}" title="${ds}">${icon}</div>`;
+  }
+  chain.innerHTML = html;
+}
+
+function doAction(idx){
+  const today = getToday();
+  if(!state.history[today]) state.history[today] = {actions:[], mitzvah: getDayMitzvah().name};
+  const td = state.history[today];
+
+  if(td.actions.includes(idx)) return; // Already done
+
+  td.actions.push(idx);
+  state.totalActions++;
+  playDing();
+
+  // First action today = new day in streak
+  if(td.actions.length === 1){
+    const last = state.lastDate;
+    const lastD = last ? new Date(last) : null;
+    const todayD = new Date(today);
+    if(lastD && Math.floor((todayD-lastD)/(1000*60*60*24)) === 1){
+      state.streak++;
+    } else if(!lastD || Math.floor((todayD-lastD)/(1000*60*60*24)) > 1){
+      state.streak = 1;
+    }
+    state.totalDays++;
+    state.lastDate = today;
+    if(state.streak > state.bestStreak) state.bestStreak = state.streak;
+  }
+
+  save();
+  render();
+
+  // Check if all actions done
+  if(td.actions.length >= getDayMitzvah().actions.length){
+    setTimeout(()=>{
+      playComplete();
+      spawnConfetti();
+      showCompletion();
+    }, 300);
+  }
+}
+
+function showCompletion(){
+  const reward = STREAK_REWARDS.filter(r => state.streak >= r.days).pop();
+  const modal = document.getElementById('completeModal');
+  document.getElementById('cReward').textContent = reward ? reward.emoji : '⭐';
+  document.getElementById('cTitle').textContent = reward ? reward.title : 'כל הכבוד!';
+  document.getElementById('cMsg').textContent = reward
+    ? reward.msg
+    : `${state.streak} ${state.streak===1?'יום':'ימים'} ברצף!\nהשלמתם את כל המשימות היום!`;
+  modal.classList.remove('hidden');
+}
+
+function closeModal(){
+  document.getElementById('completeModal').classList.add('hidden');
+}
+
+function shareStreak(){
+  const m = getDayMitzvah();
+  const msg = `🔗 שרשרת מצוות!\n🔥 ${state.streak} ימים ברצף!\nהיום: ${m.icon} ${m.name}\nסה״כ ${state.totalActions} מצוות!\nhttps://shemesh613.github.io/purim-home/games/mitzvah-chain.html`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+render();
+</script>
+</body>
+</html>

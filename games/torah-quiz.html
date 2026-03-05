@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🧩 טורנמנט הלימוד</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Heebo',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;min-height:100vh;overflow-x:hidden}
+.game{max-width:500px;margin:0 auto;padding:20px;min-height:100vh;display:flex;flex-direction:column}
+h1{text-align:center;font-size:1.6rem;margin-bottom:4px}
+.subtitle{text-align:center;font-size:.8rem;color:rgba(255,255,255,0.5);margin-bottom:20px}
+
+/* Score bar */
+.score-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:10px 16px;background:rgba(255,255,255,0.08);border-radius:14px}
+.score-item{text-align:center}
+.score-item .val{font-size:1.4rem;font-weight:900;color:#fbbf24}
+.score-item .lbl{font-size:.7rem;color:rgba(255,255,255,0.5)}
+
+/* Timer */
+.timer-bar{height:6px;background:rgba(255,255,255,0.1);border-radius:6px;margin-bottom:20px;overflow:hidden}
+.timer-fill{height:100%;border-radius:6px;transition:width .1s linear}
+.timer-fill.green{background:#22c55e}
+.timer-fill.yellow{background:#fbbf24}
+.timer-fill.red{background:#ef4444}
+
+/* Question */
+.question-num{font-size:.8rem;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:8px}
+.question{font-size:1.25rem;font-weight:700;text-align:center;margin-bottom:24px;line-height:1.6;min-height:60px}
+
+/* Answers */
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.answer{padding:16px 12px;border-radius:14px;border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);cursor:pointer;text-align:center;font-size:1rem;font-weight:700;transition:all .2s;min-height:60px;display:flex;align-items:center;justify-content:center}
+.answer:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.1)}
+.answer.correct{border-color:#22c55e;background:rgba(34,197,94,0.2);color:#22c55e}
+.answer.wrong{border-color:#ef4444;background:rgba(239,68,68,0.2);color:#ef4444}
+.answer.disabled{pointer-events:none}
+.answer:nth-child(1){border-color:rgba(99,102,241,0.4)}
+.answer:nth-child(2){border-color:rgba(236,72,153,0.4)}
+.answer:nth-child(3){border-color:rgba(34,197,94,0.4)}
+.answer:nth-child(4){border-color:rgba(251,191,36,0.4)}
+
+/* Runner track */
+.track{position:relative;height:50px;background:rgba(255,255,255,0.05);border-radius:25px;margin-bottom:20px;overflow:hidden}
+.runner{position:absolute;top:5px;font-size:2.2rem;transition:right .5s cubic-bezier(0.34,1.56,0.64,1);right:5px}
+.track-marks{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.track-mark{width:2px;height:16px;background:rgba(255,255,255,0.1);border-radius:2px}
+
+/* Screens */
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center}
+.screen.active{display:flex}
+.big-emoji{font-size:5rem;margin-bottom:16px}
+.screen h2{font-size:1.8rem;margin-bottom:8px}
+.screen p{color:rgba(255,255,255,0.6);margin-bottom:24px;font-size:.95rem}
+.btn{padding:14px 40px;border-radius:14px;border:none;font-family:inherit;font-size:1.1rem;font-weight:700;cursor:pointer;transition:transform .2s}
+.btn:active{transform:scale(0.95)}
+.btn-primary{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff}
+.btn-share{background:#25D366;color:#fff;font-size:.9rem;padding:10px 24px;margin-top:12px}
+
+/* Result */
+.result-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:20px 0}
+.result-stat{background:rgba(255,255,255,0.08);border-radius:12px;padding:14px}
+.result-stat .val{font-size:1.5rem;font-weight:900;color:#fbbf24}
+.result-stat .lbl{font-size:.75rem;color:rgba(255,255,255,0.5)}
+
+.back-btn{position:fixed;top:16px;right:16px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;z-index:50}
+</style>
+</head>
+<body>
+<a href="../" class="back-btn">🏠</a>
+<div class="game">
+
+<!-- Start Screen -->
+<div class="screen active" id="startScreen">
+  <div class="big-emoji">🧩</div>
+  <h2>טורנמנט הלימוד</h2>
+  <p>ענו על שאלות ביהדות כמה שיותר מהר!<br>תשובה מהירה = יותר נקודות!</p>
+  <button class="btn btn-primary" onclick="startGame()">🚀 התחילו!</button>
+</div>
+
+<!-- Game Screen -->
+<div class="screen" id="gameScreen">
+  <div class="score-bar">
+    <div class="score-item"><div class="val" id="scoreDisplay">0</div><div class="lbl">ניקוד</div></div>
+    <div class="score-item"><div class="val" id="streakDisplay">0</div><div class="lbl">רצף 🔥</div></div>
+    <div class="score-item"><div class="val" id="qNum">1/10</div><div class="lbl">שאלה</div></div>
+  </div>
+  <div class="timer-bar"><div class="timer-fill green" id="timerFill" style="width:100%"></div></div>
+  <div class="track" id="track">
+    <div class="track-marks"></div>
+    <div class="runner" id="runner">🏃</div>
+  </div>
+  <div class="question" id="question"></div>
+  <div class="answers" id="answers"></div>
+</div>
+
+<!-- Result Screen -->
+<div class="screen" id="resultScreen">
+  <div class="big-emoji" id="resultEmoji">🏆</div>
+  <h2 id="resultTitle">כל הכבוד!</h2>
+  <div class="result-stats">
+    <div class="result-stat"><div class="val" id="finalScore">0</div><div class="lbl">ניקוד</div></div>
+    <div class="result-stat"><div class="val" id="finalCorrect">0</div><div class="lbl">נכונות</div></div>
+    <div class="result-stat"><div class="val" id="finalStreak">0</div><div class="lbl">רצף שיא</div></div>
+  </div>
+  <button class="btn btn-primary" onclick="startGame()">🔄 שחקו שוב</button>
+  <button class="btn btn-share" onclick="shareResult()">📲 שתפו בוואטסאפ</button>
+</div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {q:'כמה מצוות יש בתורה?', a:['תרי"ג (613)','248','365','1000'], c:0},
+  {q:'מי בנה את התיבה?', a:['נח','אברהם','משה','דוד'], c:0},
+  {q:'כמה שבטים יש לעם ישראל?', a:['12','10','7','13'], c:0},
+  {q:'מי קיבל את התורה בהר סיני?', a:['משה רבנו','אהרן','יהושע','אליהו'], c:0},
+  {q:'מה שם אמו של משה?', a:['יוכבד','מרים','שרה','רבקה'], c:0},
+  {q:'כמה ימים נמשך המבול?', a:['40 יום ו-40 לילה','7 ימים','30 יום','100 יום'], c:0},
+  {q:'מה המצווה הראשונה בתורה?', a:['פרו ורבו','שמע ישראל','כבד את אביך','לא תגנוב'], c:0},
+  {q:'מי הרג את גוליית?', a:['דוד','שאול','שמשון','יהונתן'], c:0},
+  {q:'כמה נרות מדליקים בחנוכייה (בסה"כ)?', a:['44','36','8','48'], c:0},
+  {q:'מה שם הספר הראשון בתורה?', a:['בראשית','שמות','ויקרא','במדבר'], c:0},
+  {q:'מי חלם על סולם עם מלאכים?', a:['יעקב','יוסף','אברהם','משה'], c:0},
+  {q:'כמה מכות היו במצרים?', a:['10','7','12','5'], c:0},
+  {q:'מה חג הפורים חוגג?', a:['הצלת היהודים מהמן','יציאת מצרים','מתן תורה','חנוכת המקדש'], c:0},
+  {q:'מי היה אביו של יצחק?', a:['אברהם','יעקב','נח','משה'], c:0},
+  {q:'באיזה יום נברא האדם?', a:['יום שישי','יום ראשון','יום שלישי','יום שביעי'], c:0},
+  {q:'מה האות הראשונה בתורה?', a:['ב','א','מ','ל'], c:0},
+  {q:'כמה בנים היו ליעקב?', a:['12','10','7','14'], c:0},
+  {q:'מי פתח את ים סוף?', a:['משה','אהרן','יהושע','נחשון'], c:0},
+  {q:'מה שמו של הכהן הגדול הראשון?', a:['אהרן','משה','אלעזר','פנחס'], c:0},
+  {q:'כמה ימים חג הסוכות?', a:['7','8','5','3'], c:0},
+];
+
+let questions, currentQ, score, streak, maxStreak, correct, timer, timerInterval;
+const TIMER_MAX = 10000; // 10 seconds
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(freq, dur=0.15) {
+  const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+  o.connect(g); g.connect(audioCtx.destination);
+  o.frequency.value = freq; o.type = 'sine'; g.gain.value = 0.12;
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  o.start(); o.stop(audioCtx.currentTime + dur);
+}
+function playCorrect() { [523,659,784].forEach((f,i) => setTimeout(()=>playSound(f,0.2), i*100)); }
+function playWrong() { playSound(200, 0.3); }
+
+function shuffle(arr) { for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startGame() {
+  questions = shuffle([...QUESTIONS]).slice(0, 10);
+  currentQ = 0; score = 0; streak = 0; maxStreak = 0; correct = 0;
+  showScreen('gameScreen');
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('qNum').textContent = `${currentQ+1}/10`;
+  document.getElementById('question').textContent = q.q;
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('streakDisplay').textContent = streak;
+
+  // Shuffle answers but remember correct
+  const correctText = q.a[q.c];
+  const shuffled = shuffle([...q.a]);
+  const newCorrect = shuffled.indexOf(correctText);
+
+  const answersEl = document.getElementById('answers');
+  answersEl.innerHTML = shuffled.map((a, i) =>
+    `<div class="answer" data-idx="${i}" data-correct="${i===newCorrect}" onclick="answer(this,${i===newCorrect})">${a}</div>`
+  ).join('');
+
+  // Runner position
+  const pct = (currentQ / 10) * 85;
+  document.getElementById('runner').style.right = `calc(${pct}% + 5px)`;
+
+  // Timer
+  timer = TIMER_MAX;
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timer -= 50;
+    const pct = (timer / TIMER_MAX) * 100;
+    const fill = document.getElementById('timerFill');
+    fill.style.width = pct + '%';
+    fill.className = 'timer-fill ' + (pct > 60 ? 'green' : pct > 30 ? 'yellow' : 'red');
+    if (timer <= 0) {
+      clearInterval(timerInterval);
+      timeUp();
+    }
+  }, 50);
+}
+
+function answer(el, isCorrect) {
+  clearInterval(timerInterval);
+  document.querySelectorAll('.answer').forEach(a => a.classList.add('disabled'));
+
+  if (isCorrect) {
+    el.classList.add('correct');
+    const timeBonus = Math.floor(timer / 100);
+    const streakBonus = streak * 10;
+    score += 100 + timeBonus + streakBonus;
+    streak++;
+    correct++;
+    if (streak > maxStreak) maxStreak = streak;
+    playCorrect();
+  } else {
+    el.classList.add('wrong');
+    document.querySelector(`.answer[data-correct="true"]`).classList.add('correct');
+    streak = 0;
+    playWrong();
+  }
+
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('streakDisplay').textContent = streak;
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ >= 10) endGame();
+    else showQuestion();
+  }, 1200);
+}
+
+function timeUp() {
+  document.querySelectorAll('.answer').forEach(a => a.classList.add('disabled'));
+  document.querySelector(`.answer[data-correct="true"]`).classList.add('correct');
+  streak = 0;
+  playWrong();
+  setTimeout(() => { currentQ++; if(currentQ>=10) endGame(); else showQuestion(); }, 1200);
+}
+
+function endGame() {
+  document.getElementById('runner').style.right = '90%';
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('finalCorrect').textContent = correct + '/10';
+  document.getElementById('finalStreak').textContent = maxStreak;
+
+  if (correct >= 8) { document.getElementById('resultEmoji').textContent = '🏆'; document.getElementById('resultTitle').textContent = 'מדהים! גאון!'; }
+  else if (correct >= 5) { document.getElementById('resultEmoji').textContent = '⭐'; document.getElementById('resultTitle').textContent = 'כל הכבוד!'; }
+  else { document.getElementById('resultEmoji').textContent = '💪'; document.getElementById('resultTitle').textContent = 'נסו שוב!'; }
+
+  // Save best
+  const best = parseInt(localStorage.getItem('quiz-best') || '0');
+  if (score > best) localStorage.setItem('quiz-best', score);
+
+  showScreen('resultScreen');
+}
+
+function shareResult() {
+  const msg = `🧩 טורנמנט הלימוד\nהשגתי ${score} נקודות! (${correct}/10 נכונות, רצף ${maxStreak})\nבואו לנסות!\nhttps://shemesh613.github.io/purim-home/games/torah-quiz.html`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// Track marks
+document.querySelector('.track-marks').innerHTML = Array(10).fill(0).map(()=>'<div class="track-mark"></div>').join('');
+</script>
+</body>
+</html>
