@@ -930,16 +930,24 @@ async function studentCloudSync(joinCode) {
     if (member && state.collected) {
       member.collected = state.collected;
     }
-    // PATCH only the members array and taskCompletions — never touch admin.tasks
+    // Write members INSIDE admin.members (not top-level) to avoid corrupting structure
     const memberData = state.admin.members;
     const completions = state.taskCompletions || {};
-    const res = await fetch(`${FIREBASE_URL}/spaces/${joinCode}.json`, {
-      method: 'PATCH',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ members: memberData, taskCompletions: completions })
-    });
-    if (res.ok) console.log('Student sync ✅ (PATCH members + collected)');
-    else console.warn('Student sync failed:', res.status);
+    // Use separate PUTs to specific paths — safe, no overwrite of admin.tasks
+    const [r1, r2] = await Promise.all([
+      fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/members.json`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(memberData)
+      }),
+      fetch(`${FIREBASE_URL}/spaces/${joinCode}/taskCompletions.json`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(completions)
+      })
+    ]);
+    if (r1.ok && r2.ok) console.log('Student sync ✅ (admin/members + taskCompletions)');
+    else console.warn('Student sync partial fail:', r1.status, r2.status);
   } catch(e) { console.warn('Student sync error:', e); }
 }
 
