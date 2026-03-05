@@ -896,19 +896,54 @@ async function cloudSaveSpace(joinCode, data, retries=2) {
   return false;
 }
 
-// Debounced cloud save
+// Debounced cloud save (teacher only — full space data)
 let _cloudTimer = null;
 function debouncedCloudSave(joinCode) {
   clearTimeout(_cloudTimer);
   _cloudTimer = setTimeout(() => cloudSaveSpace(joinCode, getSharedData()), 2000);
 }
 
-// Periodic background sync — every 60s, ensure cloud is up to date
-setInterval(() => {
-  if (globalState.activeSpace && state.admin) {
-    cloudSaveSpace(globalState.activeSpace, getSharedData()).then(ok => {
-      if (ok) console.log('Background sync ✅');
+// Debounced student sync — only updates member data via PATCH, never overwrites admin
+let _studentTimer = null;
+function debouncedStudentSync(joinCode) {
+  clearTimeout(_studentTimer);
+  _studentTimer = setTimeout(() => studentCloudSync(joinCode), 2000);
+}
+
+async function studentCloudSync(joinCode) {
+  if (!state.student || !state.admin?.members) return;
+  try {
+    // PATCH only the members array and taskCompletions — never touch admin.tasks
+    const memberData = state.admin.members;
+    const completions = state.taskCompletions || {};
+    const res = await fetch(`${FIREBASE_URL}/spaces/${joinCode}.json`, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ members: memberData, taskCompletions: completions })
     });
+    if (res.ok) console.log('Student sync ✅ (PATCH members only)');
+    else console.warn('Student sync failed:', res.status);
+  } catch(e) { console.warn('Student sync error:', e); }
+}
+
+// Periodic background sync — every 60s
+setInterval(() => {
+  if (!globalState.activeSpace) return;
+  // Teacher: push full data
+  if (state.admin && !state.student) {
+    cloudSaveSpace(globalState.activeSpace, getSharedData()).then(ok => {
+      if (ok) console.log('Background sync (teacher) ✅');
+    });
+  }
+  // Student: pull latest tasks + push member data
+  if (state.student?.joinCode) {
+    studentCloudSync(state.student.joinCode);
+    cloudLoadSpace(state.student.joinCode).then(cloud => {
+      if (cloud?.admin?.tasks) {
+        state.admin.tasks = cloud.admin.tasks;
+        localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
+      }
+    }).catch(() => {});
   }
 }, 60000);
 
@@ -920,7 +955,7 @@ document.addEventListener('visibilitychange', () => {
     console.log('Tab visible (teacher) — pushing to cloud...');
     cloudSaveSpace(globalState.activeSpace, getSharedData());
   }
-  // Student: pull latest tasks from cloud
+  // Student: pull latest tasks from cloud (read only! never overwrite)
   if (state.student?.joinCode) {
     console.log('Tab visible (student) — pulling from cloud...');
     cloudLoadSpace(state.student.joinCode).then(cloud => {
@@ -928,8 +963,9 @@ document.addEventListener('visibilitychange', () => {
         state.admin.tasks = cloud.admin.tasks;
         if (cloud.admin.members) state.admin.members = cloud.admin.members;
         if (cloud.taskCompletions) state.taskCompletions = {...state.taskCompletions, ...cloud.taskCompletions};
-        saveState();
-        renderStudentTasks();
+        // Save locally only — not to cloud (student never overwrites cloud)
+        localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
+        if (typeof renderStudentTasks === 'function') renderStudentTasks();
       }
     }).catch(e => console.warn('Student visibility sync failed:', e));
   }
@@ -1004,9 +1040,13 @@ function saveState() {
     localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
   }
   saveGlobal();
-  // Sync to cloud (Firebase)
-  if (globalState.activeSpace && state.admin) {
+  // Sync to cloud (Firebase) — ONLY if admin (teacher), never overwrite from student side
+  if (globalState.activeSpace && state.admin && !state.student) {
     debouncedCloudSave(globalState.activeSpace);
+  }
+  // Student: only push member data (completions, not full admin)
+  if (globalState.activeSpace && state.student?.joinCode) {
+    debouncedStudentSync(state.student.joinCode);
   }
 }
 
