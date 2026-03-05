@@ -913,6 +913,11 @@ function debouncedStudentSync(joinCode) {
 async function studentCloudSync(joinCode) {
   if (!state.student || !state.admin?.members) return;
   try {
+    // Save this student's collected stickers into their member record
+    const member = state.admin.members.find(m => m.name === state.student.name);
+    if (member && state.collected) {
+      member.collected = state.collected;
+    }
     // PATCH only the members array and taskCompletions — never touch admin.tasks
     const memberData = state.admin.members;
     const completions = state.taskCompletions || {};
@@ -921,7 +926,7 @@ async function studentCloudSync(joinCode) {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ members: memberData, taskCompletions: completions })
     });
-    if (res.ok) console.log('Student sync ✅ (PATCH members only)');
+    if (res.ok) console.log('Student sync ✅ (PATCH members + collected)');
     else console.warn('Student sync failed:', res.status);
   } catch(e) { console.warn('Student sync error:', e); }
 }
@@ -2179,7 +2184,24 @@ async function showStudentView() {
         // Also update members list & taskCompletions from cloud
         if (cloud.admin.members) state.admin.members = cloud.admin.members;
         if (cloud.taskCompletions) state.taskCompletions = {...state.taskCompletions, ...cloud.taskCompletions};
-        saveState();
+        // Restore collected stickers from cloud if local is empty
+        const myMember = (cloud.admin?.members || cloud.members || []).find(m => m.name === state.student.name);
+        if (myMember?.collected) {
+          const localTotal = Object.values(state.collected).reduce((s,a) => s+a.length, 0);
+          const cloudTotal = Object.values(myMember.collected).reduce((s,a) => s+a.length, 0);
+          if (cloudTotal > localTotal) {
+            // Cloud has more stickers — merge (take union)
+            for (const theme in myMember.collected) {
+              if (!state.collected[theme]) state.collected[theme] = [];
+              myMember.collected[theme].forEach(id => {
+                if (!state.collected[theme].includes(id)) state.collected[theme].push(id);
+              });
+            }
+            console.log('Restored stickers from cloud ✅', cloudTotal, 'pieces');
+          }
+        }
+        // Save locally only (student never overwrites cloud admin data)
+        localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
         console.log('Student synced tasks from cloud ✅', state.admin.tasks.length, 'tasks');
       }
     } catch(e) { console.warn('Student cloud sync failed:', e); }
