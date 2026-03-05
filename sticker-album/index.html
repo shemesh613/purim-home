@@ -855,8 +855,12 @@ async function cloudCreate(data) {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify(data)
     });
-    // ID is in the Location header or X-jsonblob-id
-    return res.headers.get('X-jsonblob-id') || res.headers.get('Location')?.split('/').pop() || null;
+    // Try all ways to extract blob ID
+    const blobId = res.headers.get('X-jsonblob-id')
+      || res.headers.get('Location')?.split('/').pop()
+      || null;
+    console.log('cloudCreate:', {blobId, status: res.status, url: res.url});
+    return blobId;
   } catch(e) { console.warn('Cloud create failed:', e); return null; }
 }
 
@@ -1552,18 +1556,20 @@ function adminRegister() {
   const joinCode = generateCode(); // short code for display
   const tempAdmin = { name, password, role: selectedRole, joinCode, tasks: [], members: [] };
   cloudCreate({ admin: tempAdmin, taskCompletions: {}, members: [] }).then(async (binId) => {
+    // Use binId as the join code if available (guarantees cloud lookup works)
+    const finalCode = binId || joinCode;
     state = defaultState();
     state.seenWelcome = true;
-    state.admin = { name, password, role: selectedRole, joinCode, binId: binId || null, tasks: [], members: [] };
-    globalState.activeSpace = joinCode;
-    if (!globalState.mySpaces.includes(joinCode)) globalState.mySpaces.push(joinCode);
+    state.admin = { name, password, role: selectedRole, joinCode: finalCode, binId: binId || null, tasks: [], members: [] };
+    globalState.activeSpace = finalCode;
+    if (!globalState.mySpaces.includes(finalCode)) globalState.mySpaces.push(finalCode);
     saveState();
-    // Save binId mapping to cloud master index (await to ensure it completes)
+    // Also save mapping in master index as backup
     if (binId) {
-      try { await saveMasterIndex(joinCode, binId); } catch(e) { console.warn('Master index save failed:', e); }
+      try { await saveMasterIndex(finalCode, binId); } catch(e) { console.warn('Master index save failed:', e); }
     }
     showAdminDashboard();
-    showToast('✅ נרשמתם בהצלחה! קוד כניסה: ' + joinCode, 'success');
+    showToast('✅ נרשמתם בהצלחה!', 'success');
   });
 }
 
@@ -1973,16 +1979,23 @@ async function studentLogin() {
 
   // If not found locally, try cloud
   if (!spaceData.admin || spaceData.admin.joinCode !== code) {
-    const binId = await lookupBinId(code);
-    if (binId) {
-      const cloud = await cloudLoad(binId);
-      if (cloud?.admin) {
-        spaceData = {...defaultState()};
-        spaceData.admin = cloud.admin;
-        spaceData.taskCompletions = cloud.taskCompletions || {};
-        spaceData.admin.members = cloud.members || cloud.admin.members || [];
-        spaceData.admin.binId = binId;
-      }
+    // The join code IS the binId — try loading directly from cloud
+    let cloud = await cloudLoad(code);
+    // Fallback: check master index
+    if (!cloud?.admin) {
+      const binId = await lookupBinId(code);
+      if (binId && binId !== code) cloud = await cloudLoad(binId);
+    }
+    if (cloud?.admin) {
+      spaceData = {...defaultState()};
+      spaceData.seenWelcome = true;
+      spaceData.admin = cloud.admin;
+      spaceData.taskCompletions = cloud.taskCompletions || {};
+      spaceData.admin.members = cloud.members || cloud.admin.members || [];
+      spaceData.admin.binId = code;
+      // Cache locally
+      localStorage.setItem(spaceKey(code), JSON.stringify(spaceData));
+      if (!globalState.mySpaces.includes(code)) { globalState.mySpaces.push(code); saveGlobal(); }
     }
   }
 
