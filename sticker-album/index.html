@@ -1658,7 +1658,7 @@ function showAdminError(msg) {
   setTimeout(() => document.getElementById('adminError').innerHTML = '', 3000);
 }
 
-function showAdminDashboard() {
+async function showAdminDashboard() {
   document.getElementById('adminAuth').style.display = 'none';
   document.getElementById('adminDashboard').style.display = 'block';
 
@@ -1672,6 +1672,24 @@ function showAdminDashboard() {
   codeBox.style.display = 'inline-flex';
   document.getElementById('myJoinCode').textContent = state.admin.joinCode;
   document.getElementById('shareButtons').style.display = 'flex';
+
+  // Sync members from cloud (students may have joined from other devices)
+  try {
+    const cloud = await cloudLoadSpace(state.admin.joinCode);
+    if (cloud?.admin?.members?.length) {
+      const localMembers = state.admin.members || [];
+      cloud.admin.members.forEach(cm => {
+        if (!localMembers.find(lm => lm.name === cm.name)) {
+          localMembers.push(cm);
+        }
+      });
+      state.admin.members = localMembers;
+      if (cloud.taskCompletions) {
+        state.taskCompletions = {...state.taskCompletions, ...cloud.taskCompletions};
+      }
+      saveState();
+    }
+  } catch(e) { console.warn('Cloud sync on dashboard:', e); }
 
   resetDailyTasksAll();
   renderTaskManager();
