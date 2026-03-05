@@ -845,54 +845,40 @@ const STICKERS = {
   ]
 };
 
-// ===== CLOUD SYNC (jsonblob.com — zero auth, free) =====
+// ===== CLOUD SYNC (jsonblob.com — single shared blob, no CORS issues) =====
 const BLOB_URL = 'https://jsonblob.com/api/jsonBlob';
-const MASTER_ID = '019cbd53-8511-7a49-a842-264f40fe35c1'; // maps join codes → blob IDs
+const CLOUD_DB_ID = '019cbd53-8511-7a49-a842-264f40fe35c1';
+// All spaces stored inside ONE blob: { spaces: { "CODE": { admin, members, tasks... } } }
 
-async function cloudCreate(data) {
+async function cloudLoadDB() {
   try {
-    const res = await fetch(BLOB_URL, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(data)
-    });
-    // Try all ways to extract blob ID
-    const blobId = res.headers.get('X-jsonblob-id')
-      || res.headers.get('Location')?.split('/').pop()
-      || null;
-    console.log('cloudCreate:', {blobId, status: res.status, url: res.url});
-    return blobId;
-  } catch(e) { console.warn('Cloud create failed:', e); return null; }
+    const res = await fetch(`${BLOB_URL}/${CLOUD_DB_ID}`);
+    if (!res.ok) return { spaces: {} };
+    const data = await res.json();
+    return data?.spaces ? data : { spaces: {} };
+  } catch(e) { console.warn('Cloud load failed:', e); return { spaces: {} }; }
 }
 
-async function cloudSave(blobId, data) {
+async function cloudSaveDB(db) {
   try {
-    await fetch(`${BLOB_URL}/${blobId}`, {
-      method:'PUT', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(data)
+    await fetch(`${BLOB_URL}/${CLOUD_DB_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(db)
     });
   } catch(e) { console.warn('Cloud save failed:', e); }
 }
 
-async function cloudLoad(blobId) {
-  try {
-    const res = await fetch(`${BLOB_URL}/${blobId}`);
-    if (!res.ok) return null;
-    return await res.json();
-  } catch(e) { console.warn('Cloud load failed:', e); return null; }
+async function cloudSaveSpace(joinCode, data) {
+  const db = await cloudLoadDB();
+  db.spaces[joinCode] = data;
+  await cloudSaveDB(db);
+  console.log('Cloud saved space:', joinCode);
 }
 
-async function saveMasterIndex(joinCode, blobId) {
-  try {
-    const master = await cloudLoad(MASTER_ID) || {codes:{}};
-    master.codes[joinCode] = blobId;
-    await cloudSave(MASTER_ID, master);
-    console.log('Master index saved:', joinCode, '→', blobId);
-  } catch(e) { console.error('saveMasterIndex failed:', e); }
-}
-
-async function lookupBinId(joinCode) {
-  const master = await cloudLoad(MASTER_ID);
-  return master?.codes?.[joinCode] || null;
+async function cloudLoadSpace(joinCode) {
+  const db = await cloudLoadDB();
+  return db.spaces?.[joinCode] || null;
 }
 
 // ===== STATE MANAGEMENT =====
@@ -939,9 +925,9 @@ function saveState() {
     localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
   }
   saveGlobal();
-  // Also save to cloud if we have a binId
-  if (state.admin?.binId) {
-    cloudSave(state.admin.binId, getSharedData());
+  // Sync to cloud
+  if (globalState.activeSpace && state.admin) {
+    cloudSaveSpace(globalState.activeSpace, getSharedData());
   }
 }
 
@@ -1551,26 +1537,16 @@ function adminRegister() {
     }
   }
 
-  // Create cloud bin — the binId becomes the join code
   showToast('⏳ יוצר מרחב...', 'info');
-  const joinCode = generateCode(); // short code for display
-  const tempAdmin = { name, password, role: selectedRole, joinCode, tasks: [], members: [] };
-  cloudCreate({ admin: tempAdmin, taskCompletions: {}, members: [] }).then(async (binId) => {
-    // Use binId as the join code if available (guarantees cloud lookup works)
-    const finalCode = binId || joinCode;
-    state = defaultState();
-    state.seenWelcome = true;
-    state.admin = { name, password, role: selectedRole, joinCode: finalCode, binId: binId || null, tasks: [], members: [] };
-    globalState.activeSpace = finalCode;
-    if (!globalState.mySpaces.includes(finalCode)) globalState.mySpaces.push(finalCode);
-    saveState();
-    // Also save mapping in master index as backup
-    if (binId) {
-      try { await saveMasterIndex(finalCode, binId); } catch(e) { console.warn('Master index save failed:', e); }
-    }
-    showAdminDashboard();
-    showToast('✅ נרשמתם בהצלחה!', 'success');
-  });
+  const joinCode = generateCode();
+  state = defaultState();
+  state.seenWelcome = true;
+  state.admin = { name, password, role: selectedRole, joinCode, tasks: [], members: [] };
+  globalState.activeSpace = joinCode;
+  if (!globalState.mySpaces.includes(joinCode)) globalState.mySpaces.push(joinCode);
+  saveState(); // saves locally + syncs to cloud
+  showAdminDashboard();
+  showToast('✅ נרשמתם בהצלחה! קוד כניסה: ' + joinCode, 'success');
 }
 
 async function adminLogin() {
@@ -1595,21 +1571,21 @@ async function adminLogin() {
     }
   }
 
-  // If no local match, try cloud lookup by scanning master index
+  // If no local match, try cloud
   if (matches.length === 0) {
     showToast('🔍 מחפש בענן...', 'info');
     try {
-      const master = await cloudLoad(MASTER_ID);
-      if (master && master.codes) {
-        for (const [code, blobId] of Object.entries(master.codes)) {
-          if (globalState.mySpaces.includes(code)) continue; // already checked
-          const cloudData = await cloudLoad(blobId);
-          if (cloudData && cloudData.admin && cloudData.admin.name === name && cloudData.admin.password === password) {
-            // Found in cloud — restore locally
+      const db = await cloudLoadDB();
+      for (const [code, cloudData] of Object.entries(db.spaces || {})) {
+        if (globalState.mySpaces.includes(code)) continue;
+        if (cloudData?.admin?.name === name) {
+          foundName = true;
+          if (cloudData.admin.password === password) {
             const s = defaultState();
             s.seenWelcome = true;
-            Object.assign(s, cloudData);
-            s.admin.binId = blobId;
+            s.admin = cloudData.admin;
+            s.taskCompletions = cloudData.taskCompletions || {};
+            s.admin.members = cloudData.members || cloudData.admin.members || [];
             localStorage.setItem(spaceKey(code), JSON.stringify(s));
             if (!globalState.mySpaces.includes(code)) globalState.mySpaces.push(code);
             saveGlobal();
@@ -1918,16 +1894,15 @@ async function joinWithCode() {
 
   // If not found locally, try cloud
   if (!spaceData.admin || spaceData.admin.joinCode !== code) {
-    const binId = await lookupBinId(code);
-    if (binId) {
-      const cloud = await cloudLoad(binId);
-      if (cloud?.admin) {
-        spaceData = {...defaultState()};
-        spaceData.admin = cloud.admin;
-        spaceData.taskCompletions = cloud.taskCompletions || {};
-        spaceData.admin.members = cloud.members || cloud.admin.members || [];
-        spaceData.admin.binId = binId;
-      }
+    const cloud = await cloudLoadSpace(code);
+    if (cloud?.admin) {
+      spaceData = {...defaultState()};
+      spaceData.seenWelcome = true;
+      spaceData.admin = cloud.admin;
+      spaceData.taskCompletions = cloud.taskCompletions || {};
+      spaceData.admin.members = cloud.members || cloud.admin.members || [];
+      localStorage.setItem(spaceKey(code), JSON.stringify(spaceData));
+      if (!globalState.mySpaces.includes(code)) { globalState.mySpaces.push(code); saveGlobal(); }
     }
   }
 
@@ -1979,20 +1954,14 @@ async function studentLogin() {
 
   // If not found locally, try cloud
   if (!spaceData.admin || spaceData.admin.joinCode !== code) {
-    // The join code IS the binId — try loading directly from cloud
-    let cloud = await cloudLoad(code);
-    // Fallback: check master index
-    if (!cloud?.admin) {
-      const binId = await lookupBinId(code);
-      if (binId && binId !== code) cloud = await cloudLoad(binId);
-    }
+    showToast('🔍 מחפש בענן...', 'info');
+    const cloud = await cloudLoadSpace(code);
     if (cloud?.admin) {
       spaceData = {...defaultState()};
       spaceData.seenWelcome = true;
       spaceData.admin = cloud.admin;
       spaceData.taskCompletions = cloud.taskCompletions || {};
       spaceData.admin.members = cloud.members || cloud.admin.members || [];
-      spaceData.admin.binId = code;
       // Cache locally
       localStorage.setItem(spaceKey(code), JSON.stringify(spaceData));
       if (!globalState.mySpaces.includes(code)) { globalState.mySpaces.push(code); saveGlobal(); }
