@@ -83,7 +83,8 @@ a{color:inherit;text-decoration:none}
 
 /* ===== SECTION PAGES ===== */
 .section-page{display:none;animation:fadeIn .4s ease-out}
-.section-page.active{display:block}
+.section-page.active{display:block;animation:fadeTab .35s ease-out}
+@keyframes fadeTab{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
 /* ===== THEME HERO ===== */
@@ -958,6 +959,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateStats();
   checkAdminState();
   checkQuizReward();
+  startTabRotation();
 });
 
 // ===== QUIZ INTEGRATION =====
@@ -1003,8 +1005,27 @@ function enterApp() {
 // ===== BACKGROUND (no-op, blobs are pure CSS) =====
 function generateStars() { /* blobs in CSS only */ }
 
+// ===== TAB AUTO-ROTATE =====
+let tabRotateInterval = null;
+const ALBUM_TABS = ['purim','pesach','heroes','relaxation','military','gooddeeds'];
+let currentRotateIdx = 0;
+
+function startTabRotation() {
+  if (tabRotateInterval) return;
+  tabRotateInterval = setInterval(() => {
+    currentRotateIdx = (currentRotateIdx + 1) % ALBUM_TABS.length;
+    switchTab(ALBUM_TABS[currentRotateIdx], true);
+  }, 2000);
+}
+
+function stopTabRotation() {
+  if (tabRotateInterval) { clearInterval(tabRotateInterval); tabRotateInterval = null; }
+}
+
 // ===== TAB SWITCHING =====
-function switchTab(tab) {
+function switchTab(tab, fromRotation) {
+  // Stop auto-rotate on manual click
+  if (!fromRotation) stopTabRotation();
   // Handle album tabs
   document.querySelectorAll('.main-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   // Handle login tab
