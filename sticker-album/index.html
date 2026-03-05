@@ -637,7 +637,11 @@ a{color:inherit;text-decoration:none}
         <div class="join-code-box" id="joinCodeDisplay" onclick="copyJoinCode()" style="display:none">
           <div class="label">📋 קוד כניסה לתלמידים / ילדים</div>
           <div class="code" id="myJoinCode"></div>
-          <div class="hint">👆 לחצו להעתקה — שלחו את הקוד לתלמידים / ילדים</div>
+          <div class="hint">👆 לחצו להעתקה</div>
+        </div>
+        <div id="shareButtons" style="display:none;margin-top:10px;gap:8px;justify-content:center;flex-wrap:wrap">
+          <button class="btn-secondary" onclick="shareWhatsApp()" style="background:#25D366;color:#fff;border-color:#25D366">📲 שלח בוואטסאפ</button>
+          <button class="btn-secondary" onclick="copyJoinMessage()">📋 העתק הודעה</button>
         </div>
         <div style="margin-top:12px">
           <button class="btn-secondary" onclick="adminLogout()">🚪 התנתקות</button>
@@ -1630,6 +1634,7 @@ function showAdminDashboard() {
   const codeBox = document.getElementById('joinCodeDisplay');
   codeBox.style.display = 'inline-flex';
   document.getElementById('myJoinCode').textContent = state.admin.joinCode;
+  document.getElementById('shareButtons').style.display = 'flex';
 
   resetDailyTasksAll();
   renderTaskManager();
@@ -2154,10 +2159,34 @@ function generateCode() {
   return String(1000 + Math.floor(Math.random() * 9000));
 }
 
+function getJoinMessage() {
+  const code = state.admin?.joinCode;
+  const role = state.admin?.role === 'teacher' ? 'המורה' : 'ההורה';
+  const link = 'https://shemesh613.github.io/purim-home/sticker-album/';
+  return `🧩 שלום! ${role} הזמין אותך לאלבום מדבקות פאזל!\n\n` +
+    `📌 קוד הכניסה שלך: *${code}*\n\n` +
+    `איך נכנסים?\n` +
+    `1️⃣ לחצו על הקישור\n` +
+    `2️⃣ בחרו "תלמיד/ילד"\n` +
+    `3️⃣ הכניסו את הקוד, שם וקוד אישי בן 4 ספרות\n` +
+    `4️⃣ השלימו משימות וצברו חלקי פאזל! 🎉\n\n` +
+    `🔗 ${link}`;
+}
+
 function copyJoinCode() {
   const code = state.admin?.joinCode;
   if (!code) return;
-  navigator.clipboard.writeText(code).then(() => showToast('📋 הקוד הועתק! שלחו אותו לתלמידים / ילדים', 'success'));
+  navigator.clipboard.writeText(code).then(() => showToast('📋 הקוד הועתק!', 'success'));
+}
+
+function copyJoinMessage() {
+  const msg = getJoinMessage();
+  navigator.clipboard.writeText(msg).then(() => showToast('📋 ההודעה הועתקה! הדביקו בוואטסאפ', 'success'));
+}
+
+function shareWhatsApp() {
+  const msg = encodeURIComponent(getJoinMessage());
+  window.open('https://wa.me/?text=' + msg, '_blank');
 }
 
 function showToast(text, type = 'info') {
