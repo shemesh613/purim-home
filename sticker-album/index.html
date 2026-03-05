@@ -859,14 +859,22 @@ async function cloudLoadSpace(joinCode) {
 
 async function cloudSaveSpace(joinCode, data) {
   try {
+    console.log('Cloud saving...', joinCode, JSON.stringify(data).length, 'bytes');
     const res = await fetch(`${FIREBASE_URL}/spaces/${joinCode}.json`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(data)
     });
-    if (!res.ok) console.error('Cloud save error:', res.status);
-    else console.log('Cloud saved ✅', joinCode);
-  } catch(e) { console.error('Cloud save failed:', e); }
+    if (!res.ok) {
+      console.error('Cloud save error:', res.status, await res.text());
+      showToast('⚠️ שמירה לענן נכשלה ('+res.status+')', 'error');
+    } else {
+      console.log('Cloud saved ✅', joinCode);
+    }
+  } catch(e) {
+    console.error('Cloud save failed:', e);
+    showToast('⚠️ שמירה לענן נכשלה', 'error');
+  }
 }
 
 // Debounced cloud save
@@ -1931,7 +1939,8 @@ async function joinWithCode() {
   }
 
   if (!spaceData.admin || spaceData.admin.joinCode !== code) {
-    showStudentError('קוד כיתה/משפחה שגוי — בקשו קוד מהמורה/הורה');
+    console.warn('Join failed: code=', code, 'spaceData.admin=', spaceData.admin);
+    showStudentError('קוד כיתה/משפחה שגוי — בקשו קוד מהמורה/הורה. ודאו שהמורה יצר מרחב חדש.');
     return;
   }
 
