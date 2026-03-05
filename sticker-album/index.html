@@ -845,141 +845,35 @@ const STICKERS = {
   ]
 };
 
-// ===== CLOUD SYNC — URL-encoded sharing + GitHub API =====
-// ===== CLOUD SYNC via GitHub API + URL-encoded sharing =====
-const GH_REPO = 'shemesh613/purim-home';
-const GH_DATA_PATH = 'data/spaces';
+// ===== CLOUD SYNC — Firebase Realtime Database =====
+const FIREBASE_URL = 'https://album-bea15-default-rtdb.firebaseio.com';
 
-// Read space from GitHub (public repo, CORS works, no auth needed)
 async function cloudLoadSpace(joinCode) {
   try {
-    const url = `https://api.github.com/repos/${GH_REPO}/contents/${GH_DATA_PATH}/${joinCode}.json`;
-    const res = await fetch(url, {headers: {'Accept': 'application/vnd.github.v3+json'}});
+    const res = await fetch(`${FIREBASE_URL}/spaces/${joinCode}.json`);
     if (!res.ok) return null;
-    const file = await res.json();
-    const decoded = atob(file.content);
-    return JSON.parse(decoded);
-  } catch(e) { console.warn('GitHub load failed:', e); return null; }
+    const data = await res.json();
+    return data;
+  } catch(e) { console.warn('Cloud load failed:', e); return null; }
 }
 
-// Encode space data into a shareable URL
-function encodeSpaceToURL(joinCode) {
-  const data = getSharedData();
-  const minimal = {
-    c: joinCode,
-    n: data.admin?.name,
-    r: data.admin?.role,
-    p: data.admin?.password,
-    t: (data.admin?.tasks || []).map(t => ({e: t.emoji, n: t.name})),
-    m: (data.admin?.members || []).map(m => ({n: m.name}))
-  };
-  const json = JSON.stringify(minimal);
-  const encoded = btoa(unescape(encodeURIComponent(json)));
-  return `https://shemesh613.github.io/purim-home/sticker-album/?s=${encoded}`;
-}
-
-// Decode space data from URL parameter
-function decodeSpaceFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  const encoded = params.get('s');
-  if (!encoded) return null;
+async function cloudSaveSpace(joinCode, data) {
   try {
-    const json = decodeURIComponent(escape(atob(encoded)));
-    const d = JSON.parse(json);
-    return {
-      admin: {
-        name: d.n, password: d.p, role: d.r, joinCode: d.c,
-        tasks: (d.t || []).map(t => ({emoji: t.e, name: t.n})),
-        members: (d.m || []).map(m => ({name: m.n, pin: null, stickers: [], completedTasks: [], teacherGifts: []}))
-      },
-      taskCompletions: {},
-      members: (d.m || []).map(m => ({name: m.n, pin: null, stickers: [], completedTasks: [], teacherGifts: []}))
-    };
-  } catch(e) { console.warn('URL decode failed:', e); return null; }
-}
-
-// Try to load space from URL param, then GitHub, then return null
-async function cloudFindSpace(joinCode) {
-  // 1. Check URL param
-  const urlData = decodeSpaceFromURL();
-  if (urlData?.admin?.joinCode === joinCode) {
-    console.log('Space loaded from URL ✅');
-    return urlData;
-  }
-  // 2. Try GitHub
-  const ghData = await cloudLoadSpace(joinCode);
-  if (ghData?.admin) {
-    console.log('Space loaded from GitHub ✅');
-    return ghData;
-  }
-  return null;
-}
-
-// Push space data to GitHub repo (uses gh token - works from authorized contexts)
-const GH_TOKEN = ''; // Set via admin settings if available
-let _pushTimer = null;
-function debouncedPushToGitHub(joinCode) {
-  clearTimeout(_pushTimer);
-  _pushTimer = setTimeout(() => pushSpaceToGitHub(joinCode), 3000);
-}
-
-async function pushSpaceToGitHub(joinCode) {
-  if (!GH_TOKEN) return; // No token = URL-only sharing mode
-  const data = getSharedData();
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-  const path = `${GH_DATA_PATH}/${joinCode}.json`;
-  try {
-    // Get current file SHA (needed for updates)
-    let sha = '';
-    try {
-      const existing = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
-        headers: {'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json'}
-      });
-      if (existing.ok) { const f = await existing.json(); sha = f.sha; }
-    } catch(e) {}
-    const body = {message: `sync space ${joinCode}`, content};
-    if (sha) body.sha = sha;
-    await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
+    const res = await fetch(`${FIREBASE_URL}/spaces/${joinCode}.json`, {
       method: 'PUT',
-      headers: {'Authorization': `token ${GH_TOKEN}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json'},
-      body: JSON.stringify(body)
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
     });
-    console.log('GitHub push OK ✅', joinCode);
-  } catch(e) { console.warn('GitHub push failed:', e); }
+    if (!res.ok) console.error('Cloud save error:', res.status);
+    else console.log('Cloud saved ✅', joinCode);
+  } catch(e) { console.error('Cloud save failed:', e); }
 }
 
-// Auto-import space from URL on page load
-function checkURLImport() {
-  const urlData = decodeSpaceFromURL();
-  if (!urlData?.admin?.joinCode) return;
-  const code = urlData.admin.joinCode;
-  // Store the space data locally so student login can find it
-  let existing = loadSpace(code);
-  if (!existing.admin || existing.admin.joinCode !== code) {
-    existing = {...defaultState()};
-    existing.seenWelcome = true;
-    existing.admin = urlData.admin;
-    existing.taskCompletions = urlData.taskCompletions || {};
-    existing.admin.members = urlData.members || urlData.admin.members || [];
-    localStorage.setItem(spaceKey(code), JSON.stringify(existing));
-    if (!globalState.mySpaces.includes(code)) { globalState.mySpaces.push(code); saveGlobal(); }
-    console.log('Space imported from URL:', code);
-  } else {
-    // Update tasks if URL has newer data
-    if (urlData.admin.tasks?.length) {
-      existing.admin.tasks = urlData.admin.tasks;
-      localStorage.setItem(spaceKey(code), JSON.stringify(existing));
-    }
-  }
-  // Pre-fill the join code field
-  setTimeout(() => {
-    const joinCodeField = document.getElementById('joinCode');
-    if (joinCodeField) joinCodeField.value = code;
-  }, 500);
-  // Clean URL
-  if (window.history.replaceState) {
-    window.history.replaceState({}, '', window.location.pathname);
-  }
+// Debounced cloud save
+let _cloudTimer = null;
+function debouncedCloudSave(joinCode) {
+  clearTimeout(_cloudTimer);
+  _cloudTimer = setTimeout(() => cloudSaveSpace(joinCode, getSharedData()), 2000);
 }
 
 // ===== STATE MANAGEMENT =====
@@ -1026,9 +920,9 @@ function saveState() {
     localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
   }
   saveGlobal();
-  // Push to GitHub when teacher saves (debounced)
+  // Sync to cloud (Firebase)
   if (globalState.activeSpace && state.admin) {
-    debouncedPushToGitHub(globalState.activeSpace);
+    debouncedCloudSave(globalState.activeSpace);
   }
 }
 
@@ -1058,7 +952,6 @@ function getAllSpaces() {
 
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
-  checkURLImport(); // Import space from share URL if present
   generateStars();
   if (globalState.seenWelcome || state.seenWelcome) {
     document.getElementById('welcomeScreen').style.display = 'none';
@@ -1649,9 +1542,13 @@ async function adminRegister() {
   // Save locally
   localStorage.setItem(spaceKey(joinCode), JSON.stringify(state));
   saveGlobal();
-  showToast('✅ נרשמתם בהצלחה! קוד כניסה: ' + joinCode, 'success');
-  // Push space data to GitHub for cross-device access
-  pushSpaceToGitHub(joinCode);
+  // Save to cloud (Firebase)
+  try {
+    await cloudSaveSpace(joinCode, getSharedData());
+    showToast('✅ נרשמתם בהצלחה! קוד כניסה: ' + joinCode, 'success');
+  } catch(e) {
+    showToast('✅ נרשמתם! קוד כניסה: ' + joinCode, 'success');
+  }
   showAdminDashboard();
 }
 
@@ -1677,11 +1574,32 @@ async function adminLogin() {
     }
   }
 
-  // If no local match, try GitHub
-  if (matches.length === 0 && !foundName) {
-    showToast('🔍 מחפש מרחב...', 'info');
-    // Admin login only works with local data or shared URL
-    // Suggest the teacher to use their original device or get a new share link
+  // If no local match, try cloud (Firebase)
+  if (matches.length === 0) {
+    showToast('🔍 מחפש בענן...', 'info');
+    try {
+      const res = await fetch(`${FIREBASE_URL}/spaces.json`);
+      if (res.ok) {
+        const allSpaces = await res.json() || {};
+        for (const [code, cloudData] of Object.entries(allSpaces)) {
+          if (globalState.mySpaces.includes(code)) continue;
+          if (cloudData?.admin?.name === name) {
+            foundName = true;
+            if (cloudData.admin.password === password) {
+              const s = defaultState();
+              s.seenWelcome = true;
+              s.admin = cloudData.admin;
+              s.taskCompletions = cloudData.taskCompletions || {};
+              s.admin.members = cloudData.members || cloudData.admin.members || [];
+              localStorage.setItem(spaceKey(code), JSON.stringify(s));
+              if (!globalState.mySpaces.includes(code)) globalState.mySpaces.push(code);
+              saveGlobal();
+              matches.push({ code, state: s });
+            }
+          }
+        }
+      }
+    } catch(e) { console.warn('Cloud search failed:', e); }
   }
 
   if (matches.length === 0) {
@@ -1980,9 +1898,9 @@ async function joinWithCode() {
   // First try local
   let spaceData = loadSpace(code);
 
-  // If not found locally, try URL param + GitHub
+  // If not found locally, try cloud (Firebase)
   if (!spaceData.admin || spaceData.admin.joinCode !== code) {
-    const cloud = await cloudFindSpace(code);
+    const cloud = await cloudLoadSpace(code);
     if (cloud?.admin) {
       spaceData = {...defaultState()};
       spaceData.seenWelcome = true;
@@ -2040,10 +1958,10 @@ async function studentLogin() {
 
   let spaceData = loadSpace(code);
 
-  // If not found locally, try URL param + GitHub
+  // If not found locally, try cloud (Firebase)
   if (!spaceData.admin || spaceData.admin.joinCode !== code) {
-    showToast('🔍 מחפש מרחב...', 'info');
-    const cloud = await cloudFindSpace(code);
+    showToast('🔍 מחפש בענן...', 'info');
+    const cloud = await cloudLoadSpace(code);
     if (cloud?.admin) {
       spaceData = {...defaultState()};
       spaceData.seenWelcome = true;
@@ -2355,7 +2273,7 @@ function generateCode() {
 function getJoinMessage() {
   const code = state.admin?.joinCode;
   const role = state.admin?.role === 'teacher' ? 'המורה' : 'ההורה';
-  const shareLink = encodeSpaceToURL(code);
+  const link = 'https://shemesh613.github.io/purim-home/sticker-album/';
   return `🧩 שלום! ${role} הזמין אותך לאלבום מדבקות פאזל!\n\n` +
     `📌 קוד הכניסה שלך: *${code}*\n\n` +
     `איך נכנסים?\n` +
@@ -2363,7 +2281,7 @@ function getJoinMessage() {
     `2️⃣ בחרו "תלמיד/ילד"\n` +
     `3️⃣ הכניסו את הקוד, שם וקוד אישי בן 4 ספרות\n` +
     `4️⃣ השלימו משימות וצברו חלקי פאזל! 🎉\n\n` +
-    `🔗 ${shareLink}`;
+    `🔗 ${link}`;
 }
 
 function copyJoinCode() {
