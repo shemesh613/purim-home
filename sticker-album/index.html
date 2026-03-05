@@ -857,24 +857,43 @@ async function cloudLoadSpace(joinCode) {
   } catch(e) { console.warn('Cloud load failed:', e); return null; }
 }
 
-async function cloudSaveSpace(joinCode, data) {
-  try {
-    console.log('Cloud saving...', joinCode, JSON.stringify(data).length, 'bytes');
-    const res = await fetch(`${FIREBASE_URL}/spaces/${joinCode}.json`, {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(data)
-    });
-    if (!res.ok) {
-      console.error('Cloud save error:', res.status, await res.text());
-      showToast('⚠️ שמירה לענן נכשלה ('+res.status+')', 'error');
-    } else {
-      console.log('Cloud saved ✅', joinCode);
+async function cloudSaveSpace(joinCode, data, retries=2) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const body = JSON.stringify(data);
+      console.log(`Cloud saving (attempt ${attempt+1})...`, joinCode, body.length, 'bytes');
+      const res = await fetch(`${FIREBASE_URL}/spaces/${joinCode}.json`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body
+      });
+      if (!res.ok) {
+        console.error('Cloud save error:', res.status, await res.text());
+        if (attempt === retries) showToast('⚠️ שמירה לענן נכשלה ('+res.status+')', 'error');
+        else await new Promise(r => setTimeout(r, 1000));
+        continue;
+      }
+      // Verify the save actually worked
+      const verify = await fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/joinCode.json`);
+      const saved = await verify.json();
+      if (saved === joinCode) {
+        console.log('Cloud saved & verified ✅', joinCode);
+        return true;
+      } else {
+        console.warn('Cloud save verification failed, retrying...', saved);
+        if (attempt === retries) showToast('⚠️ אימות שמירה נכשל', 'error');
+        continue;
+      }
+    } catch(e) {
+      console.error('Cloud save failed:', e);
+      if (attempt === retries) {
+        showToast('⚠️ שמירה לענן נכשלה — תנסה שוב אוטומטית', 'error');
+        addPendingWrite(joinCode, data);
+      }
+      else await new Promise(r => setTimeout(r, 1000));
     }
-  } catch(e) {
-    console.error('Cloud save failed:', e);
-    showToast('⚠️ שמירה לענן נכשלה', 'error');
   }
+  return false;
 }
 
 // Debounced cloud save
@@ -883,6 +902,48 @@ function debouncedCloudSave(joinCode) {
   clearTimeout(_cloudTimer);
   _cloudTimer = setTimeout(() => cloudSaveSpace(joinCode, getSharedData()), 2000);
 }
+
+// Periodic background sync — every 60s, ensure cloud is up to date
+setInterval(() => {
+  if (globalState.activeSpace && state.admin) {
+    cloudSaveSpace(globalState.activeSpace, getSharedData()).then(ok => {
+      if (ok) console.log('Background sync ✅');
+    });
+  }
+}, 60000);
+
+// Sync when tab regains focus (user switches back to this tab)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && globalState.activeSpace && state.admin) {
+    console.log('Tab visible — syncing...');
+    cloudSaveSpace(globalState.activeSpace, getSharedData());
+  }
+});
+
+// Pending writes queue — retry failed saves on page load
+const PENDING_KEY = 'sticker-pending-writes';
+function addPendingWrite(joinCode, data) {
+  try {
+    const q = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
+    q.push({joinCode, data, time: Date.now()});
+    localStorage.setItem(PENDING_KEY, JSON.stringify(q.slice(-10))); // keep last 10
+  } catch(e){}
+}
+function processPendingWrites() {
+  try {
+    const q = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
+    if (!q.length) return;
+    console.log('Processing', q.length, 'pending writes...');
+    const remaining = [];
+    q.forEach(async (w) => {
+      if (Date.now() - w.time > 86400000) return; // skip writes older than 24h
+      const ok = await cloudSaveSpace(w.joinCode, w.data, 1);
+      if (!ok) remaining.push(w);
+    });
+    setTimeout(() => localStorage.setItem(PENDING_KEY, JSON.stringify(remaining)), 5000);
+  } catch(e){}
+}
+setTimeout(processPendingWrites, 3000); // process on page load after 3s
 
 // ===== STATE MANAGEMENT =====
 const GLOBAL_KEY = 'sticker-album-global';
@@ -1550,12 +1611,14 @@ async function adminRegister() {
   // Save locally
   localStorage.setItem(spaceKey(joinCode), JSON.stringify(state));
   saveGlobal();
-  // Save to cloud (Firebase)
-  try {
-    await cloudSaveSpace(joinCode, getSharedData());
-    showToast('✅ נרשמתם בהצלחה! קוד כניסה: ' + joinCode, 'success');
-  } catch(e) {
-    showToast('✅ נרשמתם! קוד כניסה: ' + joinCode, 'success');
+  // Save to cloud (Firebase) with verification
+  const cloudOk = await cloudSaveSpace(joinCode, getSharedData());
+  if (cloudOk) {
+    showToast('✅ נרשמתם בהצלחה! קוד כניסה: ' + joinCode + ' (מסונכרן לענן ☁️)', 'success');
+  } else {
+    showToast('⚠️ נרשמתם מקומית (קוד: ' + joinCode + ') — סנכרון ענן נכשל, ננסה שוב', 'error');
+    // Retry cloud save in background after 5 seconds
+    setTimeout(() => cloudSaveSpace(joinCode, getSharedData()), 5000);
   }
   showAdminDashboard();
 }
