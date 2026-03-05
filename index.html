@@ -1051,10 +1051,14 @@
       position: relative;
       white-space: nowrap;
     }
-    .role-sidebar a:hover {
-      background: rgba(255,255,255,0.15);
+    .role-sidebar a:hover, .role-sidebar a.active {
+      background: rgba(255,255,255,0.2);
       color: #fff;
       transform: scale(1.05);
+    }
+    .role-sidebar a.active {
+      background: rgba(255,255,255,0.25);
+      box-shadow: 0 0 12px rgba(255,255,255,0.3);
     }
     .role-sidebar a .role-icon {
       font-size: 1.5rem;
@@ -1138,19 +1142,19 @@
     .gate-google-btn {
       display: inline-flex;
       align-items: center; gap: 10px;
-      padding: 12px 28px;
-      background: #4285f4;
+      padding: 14px 28px;
+      background: linear-gradient(135deg,#7c3aed,#ec4899);
       color: #fff;
       font-family: 'Heebo', sans-serif;
-      font-size: 1.05rem; font-weight: 700;
+      font-size: 1.1rem; font-weight: 700;
       border: none; border-radius: 14px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(66,133,244,0.3);
+      box-shadow: 0 4px 15px rgba(124,58,237,0.3);
       transition: all 0.3s;
       width: 100%;
       justify-content: center;
     }
-    .gate-google-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(66,133,244,0.4); }
+    .gate-google-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
     .gate-divider {
       display: flex; align-items: center; gap: 12px;
       margin: 16px 0;
@@ -1977,22 +1981,18 @@
   <div class="gate-box">
     <button class="gate-close" onclick="closeGate()">✕</button>
     <div class="gate-icon">🎒</div>
-    <div class="gate-title">כניסת תלמיד</div>
-    <div class="gate-desc">הכניסו את השם שלכם, סיסמת הכיתה/משפחה וסיסמה אישית</div>
+    <div class="gate-title">כניסה לאלבום</div>
+    <div class="gate-desc">הכניסו את השם שלכם וסיסמת הכיתה</div>
     <div style="text-align:right; margin-bottom:12px;">
       <label style="display:block;font-size:0.85rem;font-weight:700;color:#4c1d95;margin-bottom:5px;">👤 השם שלי</label>
-      <input type="text" id="gateStudentName" placeholder="לדוגמה: יוסי" style="width:100%;font-family:'Heebo',sans-serif;padding:10px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:0.95rem;direction:rtl;outline:none;background:#faf5ff;">
-    </div>
-    <div style="text-align:right; margin-bottom:12px;">
-      <label style="display:block;font-size:0.85rem;font-weight:700;color:#4c1d95;margin-bottom:5px;">🔑 סיסמת כיתה / משפחה</label>
-      <input type="text" id="gateClassCode" placeholder="הסיסמה שקיבלתם מהמורה או ההורה" style="width:100%;font-family:'Heebo',sans-serif;padding:10px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:0.95rem;direction:rtl;outline:none;background:#faf5ff;">
+      <input type="text" id="gateStudentName" placeholder="לדוגמה: יוסי" style="width:100%;font-family:'Heebo',sans-serif;padding:12px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:1rem;direction:rtl;outline:none;background:#faf5ff;">
     </div>
     <div style="text-align:right; margin-bottom:16px;">
-      <label style="display:block;font-size:0.85rem;font-weight:700;color:#4c1d95;margin-bottom:5px;">🔐 סיסמה אישית שלי</label>
-      <input type="text" id="gatePersonalCode" placeholder="המציאו סיסמה ותזכרו אותה!" style="width:100%;font-family:'Heebo',sans-serif;padding:10px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:0.95rem;direction:rtl;outline:none;background:#faf5ff;">
-      <p style="font-size:0.72rem;color:#9ca3af;margin-top:4px;">💡 זו הסיסמה האישית שלכם — תשמרו אותה טוב!</p>
+      <label style="display:block;font-size:0.85rem;font-weight:700;color:#4c1d95;margin-bottom:5px;">🔑 סיסמת כיתה / משפחה</label>
+      <input type="text" id="gateClassCode" placeholder="הסיסמה שקיבלתם מהמורה" style="width:100%;font-family:'Heebo',sans-serif;padding:12px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:1rem;direction:rtl;outline:none;background:#faf5ff;">
     </div>
-    <button class="gate-google-btn" onclick="gateLogin()" style="background:linear-gradient(135deg,#7c3aed,#ec4899);">🚀 כנסו!</button>
+    <input type="hidden" id="gatePersonalCode" value="">
+    <button class="gate-google-btn" onclick="gateLogin()" style="background:linear-gradient(135deg,#7c3aed,#ec4899);font-size:1.1rem;padding:14px;">🚀 כנסו!</button>
     <div class="gate-divider">אין לכם סיסמה?</div>
     <a href="https://wa.me/972526953500?text=%D7%A9%D7%9C%D7%95%D7%9D%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A1%D7%99%D7%A1%D7%9E%D7%94%20%D7%9C%D7%9B%D7%99%D7%AA%D7%94%2F%D7%9E%D7%A9%D7%A4%D7%97%D7%94" target="_blank" rel="noopener" class="gate-guest-btn" style="text-decoration:none;">💬 שלחו הודעה לקבלת סיסמה</a>
   </div>
@@ -2031,12 +2031,18 @@ document.getElementById('tabsNav').addEventListener('click', function(e) {
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+  document.querySelectorAll('.role-sidebar a').forEach(a => a.classList.remove('active'));
   const tabEl = document.getElementById('tab-' + id);
   if (tabEl) tabEl.classList.add('active');
   const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`);
   if (btn) {
     btn.classList.add('active');
     btn.setAttribute('aria-selected','true');
+  }
+  // Highlight sidebar link for teacher/parent tabs
+  if (id === 'teacher' || id === 'parent') {
+    const sideLink = document.querySelector(`.role-sidebar a[onclick*="'${id}'"]`);
+    if (sideLink) sideLink.classList.add('active');
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2047,16 +2053,16 @@ function openGate(target) {
   gateTarget = target || 'sticker-album/';
   // Auto-enter if already logged in
   const saved = JSON.parse(localStorage.getItem('purim_student_login') || '{}');
-  if (saved.studentName && saved.classCode && saved.personalCode) {
+  if (saved.studentName && saved.classCode) {
     const hash = gateTarget.includes('#') ? gateTarget.split('#')[1] : '';
     const base = gateTarget.replace(/#.*$/, '');
-    window.location.href = base + '#login=' + encodeURIComponent(saved.classCode) + '&pin=' + encodeURIComponent(saved.personalCode) + '&name=' + encodeURIComponent(saved.studentName) + (hash ? '&view=' + hash : '');
+    const url = base + '#login=' + encodeURIComponent(saved.classCode) + '&name=' + encodeURIComponent(saved.studentName) + (hash ? '&view=' + hash : '');
+    window.location.href = url;
     return;
   }
   document.getElementById('gateModal').classList.add('active');
   if (saved.studentName) document.getElementById('gateStudentName').value = saved.studentName;
   if (saved.classCode) document.getElementById('gateClassCode').value = saved.classCode;
-  if (saved.personalCode) document.getElementById('gatePersonalCode').value = saved.personalCode;
 }
 function closeGate() {
   document.getElementById('gateModal').classList.remove('active');
@@ -2066,7 +2072,8 @@ const FB_SPACES = 'https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabas
 async function gateLogin() {
   const studentName = document.getElementById('gateStudentName').value.trim();
   const classCode = document.getElementById('gateClassCode').value.trim();
-  const personalCode = document.getElementById('gatePersonalCode').value.trim();
+  // Auto-generate personal code from name (simple, no need for user to remember)
+  const personalCode = studentName.replace(/\s+/g, '-') + '-' + Math.floor(Math.random() * 9000 + 1000);
   const btn = document.querySelector('#gateModal .gate-google-btn');
 
   if (!studentName) {
@@ -2079,12 +2086,6 @@ async function gateLogin() {
     document.getElementById('gateClassCode').style.borderColor = '#ef4444';
     document.getElementById('gateClassCode').focus();
     setTimeout(() => document.getElementById('gateClassCode').style.borderColor = '', 1500);
-    return;
-  }
-  if (!personalCode) {
-    document.getElementById('gatePersonalCode').style.borderColor = '#ef4444';
-    document.getElementById('gatePersonalCode').focus();
-    setTimeout(() => document.getElementById('gatePersonalCode').style.borderColor = '', 1500);
     return;
   }
 
