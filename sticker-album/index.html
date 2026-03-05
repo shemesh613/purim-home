@@ -194,6 +194,9 @@ a{color:inherit;text-decoration:none}
 .btn-secondary{padding:10px 20px;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.08);color:var(--text);border-radius:12px;font-size:.85rem;cursor:pointer;transition:all .2s}
 .btn-secondary:hover{background:rgba(0,0,0,0.08)}
 .btn-danger{padding:8px 16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#dc2626;border-radius:10px;font-size:.8rem;cursor:pointer}
+.tpl-btn{padding:6px 12px;border-radius:20px;border:1.5px solid rgba(124,58,237,0.2);background:linear-gradient(135deg,#f9f0ff,#f3e8ff);color:#7c3aed;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.tpl-btn:hover{background:linear-gradient(135deg,#ede9fe,#ddd6fe);transform:scale(1.05);box-shadow:0 2px 8px rgba(124,58,237,0.15)}
+.tpl-btn.used{opacity:.4;pointer-events:none;text-decoration:line-through}
 .alert{padding:10px 14px;border-radius:10px;font-size:.85rem;margin-bottom:12px;animation:fadeIn .3s}
 .alert-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#dc2626}
 .alert-success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#059669}
@@ -655,12 +658,16 @@ a{color:inherit;text-decoration:none}
           הוסיפו משימות — כשתלמיד/ילד משלים משימה ותאשרו, הוא יקבל מדבקה!
         </p>
         <div id="taskManager"></div>
-        <div class="form-row" style="margin-top:12px">
+        <div style="margin-top:12px">
+          <div style="font-size:.8rem;color:#7c3aed;font-weight:700;margin-bottom:6px">⚡ הוספה מהירה מתבניות:</div>
+          <div id="taskTemplates" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+        </div>
+        <div class="form-row" style="margin-top:8px">
           <div class="form-group" style="flex:2">
-            <input type="text" class="form-input" id="newTaskName" placeholder="שם המשימה">
+            <input type="text" class="form-input" id="newTaskName" placeholder="או כתבו משימה חופשית...">
           </div>
           <div class="form-group" style="flex:1">
-            <button class="btn-primary" onclick="addTask()">+ הוסף משימה</button>
+            <button class="btn-primary" onclick="addTask()">+ הוסף</button>
           </div>
         </div>
       </div>
@@ -1638,6 +1645,7 @@ function showAdminDashboard() {
 
   resetDailyTasksAll();
   renderTaskManager();
+  renderTemplates();
   renderStudentGrid();
 }
 
@@ -1652,6 +1660,49 @@ function resetDailyTasksAll() {
   state.taskCompletions = {};
   state._lastAdminReset = today;
   saveState();
+}
+
+const TASK_TEMPLATES = [
+  {emoji:'📖', name:'לימוד 10 דקות'},
+  {emoji:'📚', name:'קריאת ספר 10 עמודים'},
+  {emoji:'🤝', name:'התעניינות בחבר'},
+  {emoji:'🫶', name:'עזרה בבית'},
+  {emoji:'💛', name:'ויתור לאח או אחות'},
+  {emoji:'🙏', name:'אמירת תפילה'},
+  {emoji:'🍽️', name:'עזרה בהכנת ארוחה'},
+  {emoji:'🧹', name:'סידור החדר'},
+  {emoji:'✏️', name:'כתיבת מכתב תודה'},
+  {emoji:'🎨', name:'יצירה או ציור'},
+  {emoji:'🏃', name:'פעילות גופנית 15 דקות'},
+  {emoji:'😊', name:'מחמאה לשלושה אנשים'},
+  {emoji:'🌱', name:'השקיית צמח'},
+  {emoji:'📝', name:'הכנת שיעורי בית'},
+  {emoji:'🎭', name:'הכנה לפורים'},
+  {emoji:'🫓', name:'עזרה בהכנות לפסח'},
+  {emoji:'🇮🇱', name:'לימוד על גיבורי ישראל'},
+  {emoji:'💌', name:'שליחת מכתב לחייל'},
+];
+
+function renderTemplates() {
+  const container = document.getElementById('taskTemplates');
+  if (!container) return;
+  const existing = (state.admin?.tasks || []).map(t => t.name);
+  container.innerHTML = TASK_TEMPLATES.map(t => {
+    const used = existing.includes(t.name);
+    return `<button class="tpl-btn${used?' used':''}" onclick="addFromTemplate('${t.name.replace(/'/g,"\\'")}')${used?';return':''}">${t.emoji} ${t.name}</button>`;
+  }).join('');
+}
+
+function addFromTemplate(name) {
+  if (!state.admin) return;
+  if (!state.admin.tasks) state.admin.tasks = [];
+  if (state.admin.tasks.some(t => t.name === name)) return;
+  state.admin.tasks.push({id: 't' + Date.now(), name, reward: 1});
+  saveState();
+  renderTaskManager();
+  renderTemplates();
+  renderAllChecklists();
+  showToast('✅ משימה נוספה', 'success');
 }
 
 function renderTaskManager() {
@@ -1677,6 +1728,7 @@ function addTask() {
   document.getElementById('newTaskName').value = '';
   saveState();
   renderTaskManager();
+  renderTemplates();
   renderAllChecklists();
   showToast('✅ משימה נוספה', 'success');
 }
@@ -1685,6 +1737,7 @@ function removeTask(index) {
   state.admin.tasks.splice(index, 1);
   saveState();
   renderTaskManager();
+  renderTemplates();
   renderAllChecklists();
 }
 
