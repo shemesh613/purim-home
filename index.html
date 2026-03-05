@@ -863,6 +863,47 @@
       box-shadow: 0 4px 15px rgba(37,211,102,0.3);
     }
     .share-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(37,211,102,0.4); }
+
+    /* ══ Floating Share FAB ══ */
+    .share-fab {
+      position: fixed;
+      bottom: 24px; left: 24px;
+      z-index: 100;
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #25d366, #128c7e);
+      color: #fff;
+      border: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s;
+      animation: fabPulse 3s ease-in-out infinite;
+    }
+    .share-fab:hover { transform: scale(1.15); box-shadow: 0 8px 30px rgba(37,211,102,0.5); }
+    @keyframes fabPulse {
+      0%, 100% { box-shadow: 0 4px 20px rgba(37,211,102,0.4); }
+      50% { box-shadow: 0 4px 30px rgba(37,211,102,0.6), 0 0 60px rgba(37,211,102,0.2); }
+    }
+    .share-fab-label {
+      position: fixed;
+      bottom: 90px; left: 14px;
+      z-index: 100;
+      background: #fff;
+      color: #128c7e;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      pointer-events: none;
+      animation: fabLabelBounce 4s ease-in-out infinite;
+    }
+    @keyframes fabLabelBounce {
+      0%, 70%, 100% { opacity: 0; transform: translateY(5px); }
+      75%, 95% { opacity: 1; transform: translateY(0); }
+    }
     .footer-text {
       margin-top: 15px;
       font-size: 0.85rem; color: #9ca3af;
@@ -1234,22 +1275,22 @@
         <p class="card-desc">שאלות על יציאת מצרים, ליל הסדר והאגדתא — עם מדבקות!</p>
         <span class="card-badge" style="background:#92400e;color:#fef3c7;">🏅 מדבקות</span>
       </a>
-      <div class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b; cursor:default;">
+      <a href="games/seder-plate.html" class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b;">
         <span class="card-emoji">🍽️</span>
         <h3 class="card-title">קערת הסדר</h3>
         <p class="card-desc">למדו את ששת הסימנים בקערת הסדר — אינטראקטיבי!</p>
-        <span class="card-badge" style="background:#d97706;color:#fff;">🔜 בקרוב</span>
-      </div>
+        <span class="card-badge" style="background:#059669;color:#fff;">🎯 שחקו!</span>
+      </a>
+      <a href="games/plagues.html" class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b;">
+        <span class="card-emoji">🐸</span>
+        <h3 class="card-title">עשר המכות</h3>
+        <p class="card-desc">סדרו את עשר המכות בסדר הנכון — עם עובדות מגניבות!</p>
+        <span class="card-badge" style="background:#059669;color:#fff;">⚡ שחקו!</span>
+      </a>
       <div class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b; cursor:default;">
         <span class="card-emoji">🎤</span>
         <h3 class="card-title">מה נשתנה</h3>
         <p class="card-desc">תרגלו את ארבע הקושיות — הקלטה, טקסט והתאמה!</p>
-        <span class="card-badge" style="background:#d97706;color:#fff;">🔜 בקרוב</span>
-      </div>
-      <div class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b; cursor:default;">
-        <span class="card-emoji">🐸</span>
-        <h3 class="card-title">עשר המכות</h3>
-        <p class="card-desc">משחק זיכרון — סדרו, התאימו ולמדו!</p>
         <span class="card-badge" style="background:#d97706;color:#fff;">🔜 בקרוב</span>
       </div>
       <div class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b; cursor:default;">
@@ -1802,6 +1843,10 @@
 
 </main>
 <!-- Gate removed — direct access to sticker-album -->
+
+<!-- ══ Floating Share FAB ══ -->
+<button class="share-fab" onclick="shareWA(event)" title="שתפו בוואטסאפ!">📲</button>
+<div class="share-fab-label">שתפו! 📲</div>
 
 <!-- ══ Footer ══ -->
 <footer class="footer">

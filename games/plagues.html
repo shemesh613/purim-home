@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ עשר המכות — סדרו אותן!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: linear-gradient(180deg, #fef9ef, #fff7ed);
+      color: #1e1b4b;
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 15px 10px 40px;
+      overflow-x: hidden;
+    }
+
+    a.back-link {
+      position: fixed; top: 12px; right: 12px;
+      color: #b45309; text-decoration: none;
+      font-size: 0.85rem; z-index: 200;
+      background: #fff; padding: 5px 12px;
+      border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      font-family: 'Heebo', sans-serif;
+      transition: box-shadow 0.2s;
+    }
+    a.back-link:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
+
+    h1 {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      color: #92400e;
+      text-align: center;
+      margin: 8px 0 2px;
+      text-shadow: 0 2px 8px rgba(180,83,9,0.15);
+    }
+    .subtitle {
+      font-size: 0.9rem; color: #b45309; text-align: center;
+      margin-bottom: 10px; opacity: 0.85;
+    }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex; gap: 10px; align-items: center;
+      margin-bottom: 12px; flex-wrap: wrap; justify-content: center;
+    }
+    .stat-pill {
+      background: #fff; padding: 5px 16px;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      font-size: 0.9rem; font-weight: 700;
+    }
+    .stat-pill span { color: #b45309; }
+    #timer-pill {
+      background: linear-gradient(135deg, #fbbf24, #f97316);
+      color: #fff; padding: 5px 18px;
+      border-radius: 20px;
+      box-shadow: 0 3px 12px rgba(251,191,36,0.4);
+      font-weight: 900; font-size: 1.1rem;
+      font-family: 'Heebo', sans-serif;
+      letter-spacing: 1px;
+    }
+    #timer-pill.danger {
+      animation: timerDanger 0.4s linear infinite;
+    }
+    @keyframes timerDanger {
+      0%, 100% { background: linear-gradient(135deg, #ef4444, #dc2626); }
+      50%       { background: linear-gradient(135deg, #fbbf24, #f97316); }
+    }
+
+    /* ── Game layout ── */
+    .game-area {
+      display: flex;
+      gap: 14px;
+      width: 100%;
+      max-width: 900px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Source pool */
+    .pool-panel {
+      background: rgba(255,255,255,0.7);
+      border-radius: 18px;
+      padding: 12px 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      min-width: 150px;
+      flex: 1;
+      max-width: 220px;
+    }
+    .pool-panel h3 {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 0.95rem; color: #92400e;
+      text-align: center; margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px dashed rgba(180,83,9,0.25);
+    }
+
+    #source-pool {
+      display: flex; flex-direction: column; gap: 6px;
+      min-height: 60px;
+    }
+
+    /* Answer slots */
+    .slots-panel {
+      background: rgba(255,255,255,0.6);
+      border-radius: 18px;
+      padding: 12px 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      flex: 2;
+      max-width: 580px;
+    }
+    .slots-panel h3 {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 0.95rem; color: #92400e;
+      text-align: center; margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px dashed rgba(180,83,9,0.25);
+    }
+
+    #answer-slots {
+      display: flex; flex-direction: column; gap: 7px;
+    }
+
+    /* ── Plague Card ── */
+    .plague-card {
+      display: flex; align-items: center; gap: 10px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 9px 14px;
+      cursor: grab;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.09);
+      border: 2px solid transparent;
+      user-select: none;
+      transition: transform 0.18s, box-shadow 0.18s, border-color 0.3s;
+      touch-action: none;
+      position: relative;
+    }
+    .plague-card:active { cursor: grabbing; }
+    .plague-card.dragging {
+      transform: scale(1.06) rotate(2deg);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      z-index: 1000;
+      opacity: 0.92;
+    }
+    .plague-card .plague-emoji {
+      font-size: 1.6rem; line-height: 1;
+      flex-shrink: 0;
+    }
+    .plague-card .plague-name {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1rem; font-weight: 700;
+      color: #1e1b4b;
+      flex: 1;
+    }
+    .plague-card .plague-num {
+      font-size: 0.75rem; color: #b45309;
+      font-weight: 900; opacity: 0.6;
+      flex-shrink: 0;
+    }
+
+    /* Slot (drop target) */
+    .answer-slot {
+      min-height: 56px;
+      border-radius: 12px;
+      border: 2px dashed rgba(180,83,9,0.3);
+      background: rgba(254,249,239,0.5);
+      display: flex; align-items: center;
+      padding: 4px 10px;
+      position: relative;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .answer-slot.drag-over {
+      background: rgba(251,191,36,0.2);
+      border-color: #fbbf24;
+    }
+    .answer-slot .slot-num {
+      position: absolute;
+      right: 8px; top: 50%; transform: translateY(-50%);
+      font-size: 0.75rem; font-weight: 900;
+      color: rgba(180,83,9,0.4);
+    }
+    .answer-slot .slot-hint {
+      color: rgba(180,83,9,0.35);
+      font-size: 0.78rem;
+      flex: 1; text-align: center;
+      pointer-events: none;
+    }
+
+    /* Correct state */
+    .plague-card.correct {
+      border-color: #22c55e;
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      box-shadow: 0 0 18px rgba(34,197,94,0.45);
+      cursor: default;
+      animation: correctPop 0.5s ease-out;
+    }
+    @keyframes correctPop {
+      0%   { transform: scale(0.85); }
+      50%  { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .plague-card.correct .plague-name { color: #166534; }
+    .plague-card.correct .plague-num { opacity: 1; color: #22c55e; }
+
+    /* Wrong flash */
+    .plague-card.wrong-flash {
+      animation: wrongShake 0.4s ease-out;
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+    @keyframes wrongShake {
+      0%   { transform: translateX(0); }
+      20%  { transform: translateX(-8px) rotate(-2deg); }
+      40%  { transform: translateX(8px) rotate(2deg); }
+      60%  { transform: translateX(-6px); }
+      80%  { transform: translateX(4px); }
+      100% { transform: translateX(0); }
+    }
+
+    /* Fun fact bubble */
+    .fun-fact {
+      display: none;
+      font-size: 0.72rem;
+      color: #166534;
+      background: rgba(220,252,231,0.8);
+      border-radius: 8px;
+      padding: 3px 8px;
+      margin-top: 3px;
+      line-height: 1.4;
+      max-width: 340px;
+    }
+    .fun-fact.visible { display: block; animation: factIn 0.4s ease-out; }
+    @keyframes factIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; } }
+
+    /* ── Instruction hint ── */
+    .hint-bar {
+      background: rgba(255,255,255,0.75);
+      border-radius: 12px; padding: 7px 16px;
+      font-size: 0.82rem; color: #92400e;
+      text-align: center;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      max-width: 600px; width: 100%;
+    }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      width: 100%; max-width: 600px;
+      height: 8px; background: #fde68a;
+      border-radius: 8px; overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 8px;
+      background: linear-gradient(90deg, #22c55e, #fbbf24, #f97316);
+      background-size: 300% 100%;
+      animation: pgShimmer 2s linear infinite;
+      transition: width 0.5s ease;
+    }
+    @keyframes pgShimmer { 0% { background-position: 300% 0; } 100% { background-position: -300% 0; } }
+
+    /* ── Buttons ── */
+    .btn {
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.95rem; font-weight: 700;
+      padding: 9px 22px; border-radius: 12px;
+      border: none; cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      touch-action: manipulation;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-orange {
+      background: linear-gradient(135deg, #fbbf24, #f97316);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(251,191,36,0.4);
+    }
+    .btn-orange:hover { box-shadow: 0 6px 20px rgba(251,191,36,0.5); transform: translateY(-1px); }
+    .btn-green {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(34,197,94,0.35);
+    }
+    .btn-green:hover { box-shadow: 0 6px 20px rgba(34,197,94,0.45); transform: translateY(-1px); }
+    .btn-whatsapp {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(37,211,102,0.35);
+    }
+
+    .action-bar {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      justify-content: center; margin-top: 12px;
+    }
+
+    /* ── Win overlay ── */
+    #win-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 500;
+      align-items: center; justify-content: center;
+      flex-direction: column;
+    }
+    #win-overlay.show { display: flex; }
+
+    .win-card {
+      background: linear-gradient(160deg, #fff, #fef9ef);
+      border-radius: 24px;
+      padding: 30px 36px;
+      text-align: center;
+      max-width: 380px; width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: winPop 0.6s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+    @keyframes winPop {
+      0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    .win-card h2 {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 2rem; color: #92400e;
+      margin-bottom: 8px;
+    }
+    .win-time {
+      font-size: 1.5rem; font-weight: 900;
+      color: #b45309; margin: 6px 0;
+    }
+    .win-stars {
+      font-size: 2.4rem; margin: 8px 0;
+      animation: starSpin 0.8s ease-out 0.3s both;
+    }
+    @keyframes starSpin { from { transform: scale(0) rotate(-180deg); } to { transform: scale(1) rotate(0); } }
+    .win-msg {
+      font-size: 0.95rem; color: #78350f;
+      margin: 10px 0 16px; line-height: 1.6;
+    }
+    .win-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── Confetti canvas ── */
+    #confetti-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 490;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .game-area { flex-direction: column; align-items: center; }
+      .pool-panel { max-width: 100%; width: 100%; }
+      .slots-panel { max-width: 100%; width: 100%; }
+      #source-pool { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+      .plague-card { min-width: 120px; flex: 1; }
+    }
+    @media (max-width: 400px) {
+      h1 { font-size: 1.2rem; }
+      .plague-card { padding: 7px 10px; }
+      .plague-card .plague-emoji { font-size: 1.3rem; }
+      .plague-card .plague-name { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a class="back-link" href="/purim-home/">← חזרה</a>
+
+<h1>⚡ עשר המכות — סדרו אותן!</h1>
+<p class="subtitle">גררו כל מכה למקום הנכון לפי הסדר שקרה במצרים</p>
+
+<div class="stats-bar">
+  <div class="stat-pill">נכון: <span id="correct-count">0</span>/10</div>
+  <div id="timer-pill">00:00</div>
+  <div class="stat-pill">ניסיונות: <span id="attempts-count">0</span></div>
+</div>
+
+<div class="hint-bar">💡 גررו קלפים מהבריכה השמאלית לחריץ המתאים — מ-1 עד 10 בסדר הנכון</div>
+
+<div class="progress-wrap">
+  <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+</div>
+
+<div class="game-area">
+  <!-- Source pool (shuffled cards) -->
+  <div class="pool-panel">
+    <h3>🃏 הקלפים</h3>
+    <div id="source-pool"></div>
+  </div>
+
+  <!-- Answer slots -->
+  <div class="slots-panel">
+    <h3>📋 הסדר הנכון (1 = ראשון)</h3>
+    <div id="answer-slots"></div>
+  </div>
+</div>
+
+<div class="action-bar">
+  <button class="btn btn-orange" onclick="shuffleAndReset()">🔀 ערבוב מחדש</button>
+  <button class="btn btn-green" onclick="showHint()">💡 רמז</button>
+  <button class="btn btn-whatsapp" onclick="shareWhatsApp()">📲 שתפו בוואטסאפ</button>
+</div>
+
+<!-- Win overlay -->
+<div id="win-overlay">
+  <canvas id="confetti-canvas"></canvas>
+  <div class="win-card">
+    <h2>🎉 מדהים!</h2>
+    <div class="win-stars" id="win-stars">⭐⭐⭐</div>
+    <div class="win-time">⏱️ זמן: <span id="win-time-val">00:00</span></div>
+    <div class="win-msg" id="win-msg">סידרתם את עשר המכות בסדר המושלם! ממש כמו משה רבנו!</div>
+    <div class="win-actions">
+      <button class="btn btn-orange" onclick="shuffleAndReset(); closeWin();">🔀 שחקו שוב</button>
+      <button class="btn btn-whatsapp" onclick="shareWhatsApp()">📲 שתפו</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Data ──
+  const PLAGUES = [
+    { id: 1,  name: 'דם',            emoji: '🩸', fact: 'כל המים במצרים הפכו לדם — הנילוס, הבארות, ואפילו בכלי זכוכית!' },
+    { id: 2,  name: 'צפרדע',         emoji: '🐸', fact: 'צפרדעים פלשו לתוך התנורים, המיטות, ואפילו לבצק של הלחם!' },
+    { id: 3,  name: 'כינים',         emoji: '🪲', fact: 'החרטומים אמרו לפרעה: "זה אצבע אלהים!" — לא הצליחו לחקות את המכה.' },
+    { id: 4,  name: 'ערוב',          emoji: '🦁', fact: 'חיות טרף שונות ערבבו יחד ופלשו לבתי המצרים — אך לא לגושן!' },
+    { id: 5,  name: 'דבר',           emoji: '🐄', fact: 'מגפה קשה פקדה את בהמות המצרים — סוסים, חמורים, גמלים ובקר.' },
+    { id: 6,  name: 'שחין',          emoji: '🔴', fact: 'אבעבועות בוערות כיסו את כל המצרים — ואפילו את החרטומים!' },
+    { id: 7,  name: 'ברד',           emoji: '🌨️', fact: 'ברד ואש ירדו יחד — נס בתוך נס! הלוא שחין + ברד = שניים בבת אחת.' },
+    { id: 8,  name: 'ארבה',          emoji: '🦗', fact: 'הארבה כיסה את כל עין הארץ ואכל כל ירוק שנשאר אחרי הברד.' },
+    { id: 9,  name: 'חושך',          emoji: '🌑', fact: 'שלושה ימים חושך מוחשי — המצרים לא יכלו לזוז! ישראל היה אור.' },
+    { id: 10, name: 'מכת בכורות',    emoji: '⚡', fact: 'בחצות הלילה — כל בכור מצרי נפל. פרעה קרא למשה בלילה ושלח את ישראל.' },
+  ];
+
+  let solved = new Set();
+  let attempts = 0;
+  let timerSeconds = 0;
+  let timerInterval = null;
+  let gameStarted = false;
+  let dragSrcId = null;
+
+  // ── Timer ──
+  function startTimer() {
+    if (gameStarted) return;
+    gameStarted = true;
+    timerInterval = setInterval(() => {
+      timerSeconds++;
+      updateTimerDisplay();
+      const pill = document.getElementById('timer-pill');
+      pill.classList.toggle('danger', timerSeconds >= 120);
+    }, 1000);
+  }
+  function stopTimer() { clearInterval(timerInterval); }
+  function updateTimerDisplay() {
+    const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+    const s = String(timerSeconds % 60).padStart(2, '0');
+    document.getElementById('timer-pill').textContent = `⏱️ ${m}:${s}`;
+  }
+  function fmtTime(sec) {
+    return `${String(Math.floor(sec / 60)).padStart(2,'0')}:${String(sec % 60).padStart(2,'0')}`;
+  }
+
+  // ── Build DOM ──
+  function buildPool(order) {
+    const pool = document.getElementById('source-pool');
+    pool.innerHTML = '';
+    order.forEach(plague => {
+      if (solved.has(plague.id)) return;
+      pool.appendChild(makeCard(plague));
+    });
+  }
+
+  function buildSlots() {
+    const container = document.getElementById('answer-slots');
+    container.innerHTML = '';
+    for (let i = 1; i <= 10; i++) {
+      const slot = document.createElement('div');
+      slot.className = 'answer-slot';
+      slot.dataset.slotNum = i;
+      slot.innerHTML = `<span class="slot-num">${i}</span><span class="slot-hint">מקום מכה מספר ${i}</span>`;
+      setupSlotDrop(slot);
+      container.appendChild(slot);
+    }
+  }
+
+  function makeCard(plague) {
+    const card = document.createElement('div');
+    card.className = 'plague-card';
+    card.dataset.id = plague.id;
+    card.draggable = true;
+    card.innerHTML = `
+      <span class="plague-emoji">${plague.emoji}</span>
+      <span class="plague-name">${plague.name}</span>
+    `;
+    setupDrag(card, plague);
+    setupTouch(card, plague);
+    return card;
+  }
+
+  function makeCorrectCard(plague) {
+    const card = document.createElement('div');
+    card.className = 'plague-card correct';
+    card.innerHTML = `
+      <span class="plague-emoji">${plague.emoji}</span>
+      <span class="plague-name">${plague.name}</span>
+      <span class="plague-num">✓ מכה ${plague.id}</span>
+    `;
+    const fact = document.createElement('div');
+    fact.className = 'fun-fact visible';
+    fact.textContent = plague.fact;
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:flex;flex-direction:column;gap:4px;';
+    wrapper.appendChild(card);
+    wrapper.appendChild(fact);
+    return wrapper;
+  }
+
+  // ── Drag & Drop (desktop) ──
+  function setupDrag(card, plague) {
+    card.addEventListener('dragstart', e => {
+      dragSrcId = plague.id;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', plague.id);
+      startTimer();
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+    });
+  }
+
+  function setupSlotDrop(slot) {
+    slot.addEventListener('dragover', e => {
+      e.preventDefault();
+      slot.classList.add('drag-over');
+    });
+    slot.addEventListener('dragleave', () => {
+      slot.classList.remove('drag-over');
+    });
+    slot.addEventListener('drop', e => {
+      e.preventDefault();
+      slot.classList.remove('drag-over');
+      const id = parseInt(e.dataTransfer.getData('text/plain') || dragSrcId);
+      handleDrop(id, parseInt(slot.dataset.slotNum), slot);
+    });
+  }
+
+  // ── Touch drag ──
+  let touchCard = null, touchClone = null, touchPlague = null;
+
+  function setupTouch(card, plague) {
+    card.addEventListener('touchstart', e => {
+      touchPlague = plague;
+      touchCard = card;
+      startTimer();
+      const touch = e.touches[0];
+      touchClone = card.cloneNode(true);
+      touchClone.style.cssText = `
+        position:fixed; z-index:2000; pointer-events:none;
+        left:${touch.clientX - 60}px; top:${touch.clientY - 28}px;
+        transform:scale(1.1) rotate(3deg);
+        box-shadow:0 12px 32px rgba(0,0,0,0.25);
+        width:${card.offsetWidth}px;
+        transition:none;
+        opacity:0.92;
+      `;
+      document.body.appendChild(touchClone);
+      card.style.opacity = '0.4';
+    }, { passive: true });
+
+    card.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      if (touchClone) {
+        touchClone.style.left = `${touch.clientX - 60}px`;
+        touchClone.style.top  = `${touch.clientY - 28}px`;
+      }
+      // highlight slot under finger
+      document.querySelectorAll('.answer-slot').forEach(s => s.classList.remove('drag-over'));
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      const slot = el && el.closest('.answer-slot');
+      if (slot) slot.classList.add('drag-over');
+    }, { passive: false });
+
+    card.addEventListener('touchend', e => {
+      if (touchClone) { touchClone.remove(); touchClone = null; }
+      if (touchCard) touchCard.style.opacity = '';
+      document.querySelectorAll('.answer-slot').forEach(s => s.classList.remove('drag-over'));
+      const touch = e.changedTouches[0];
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      const slot = el && el.closest('.answer-slot');
+      if (slot && touchPlague) {
+        handleDrop(touchPlague.id, parseInt(slot.dataset.slotNum), slot);
+      }
+      touchCard = null; touchPlague = null;
+    });
+  }
+
+  // ── Core Logic ──
+  function handleDrop(plagueId, slotNum, slotEl) {
+    if (solved.has(plagueId)) return;
+    if (slotEl.querySelector('.plague-card')) return; // slot already occupied
+
+    const plague = PLAGUES.find(p => p.id === plagueId);
+    attempts++;
+    document.getElementById('attempts-count').textContent = attempts;
+
+    if (plagueId === slotNum) {
+      // Correct!
+      solved.add(plagueId);
+      // Remove card from pool
+      document.querySelectorAll('#source-pool .plague-card').forEach(c => {
+        if (parseInt(c.dataset.id) === plagueId) c.remove();
+      });
+      // Fill slot
+      slotEl.innerHTML = '';
+      slotEl.appendChild(makeCorrectCard(plague));
+      slotEl.style.minHeight = '';
+
+      // Update progress
+      const pct = (solved.size / 10) * 100;
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('correct-count').textContent = solved.size;
+
+      // Check win
+      if (solved.size === 10) setTimeout(triggerWin, 600);
+
+    } else {
+      // Wrong
+      attempts++; // extra penalty
+      document.getElementById('attempts-count').textContent = attempts;
+      const srcCard = document.querySelector(`#source-pool [data-id="${plagueId}"]`);
+      if (srcCard) {
+        srcCard.classList.remove('wrong-flash');
+        void srcCard.offsetWidth; // reflow
+        srcCard.classList.add('wrong-flash');
+        setTimeout(() => srcCard.classList.remove('wrong-flash'), 500);
+      }
+    }
+  }
+
+  function showHint() {
+    const remaining = PLAGUES.filter(p => !solved.has(p.id));
+    if (!remaining.length) return;
+    const pick = remaining[0];
+    alert(`💡 רמז: "${pick.name}" ${pick.emoji} היא מכה מספר ${pick.id}`);
+  }
+
+  // ── Win ──
+  function triggerWin() {
+    stopTimer();
+    const time = fmtTime(timerSeconds);
+    document.getElementById('win-time-val').textContent = time;
+
+    // Stars by time
+    let stars = '⭐⭐⭐';
+    let msg = 'סידרתם את עשר המכות בסדר המושלם! ממש כמו משה רבנו!';
+    if (timerSeconds > 120) { stars = '⭐⭐'; msg = 'כל הכבוד! סידרתם את המכות — המשיכו להתאמן!'; }
+    if (timerSeconds > 180) { stars = '⭐';   msg = 'הצלחתם! אבל בפעם הבאה תנסו יותר מהר 😄'; }
+    if (attempts <= 12)     { stars = '⭐⭐⭐'; msg = 'מושלם! מעט מאד טעויות — אתם אלופים!'; }
+
+    document.getElementById('win-stars').textContent = stars;
+    document.getElementById('win-msg').textContent = msg;
+    document.getElementById('win-overlay').classList.add('show');
+    launchConfetti();
+  }
+
+  function closeWin() {
+    document.getElementById('win-overlay').classList.remove('show');
+    stopConfetti();
+  }
+
+  // ── Confetti ──
+  let confettiAnim = null;
+  function launchConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+    const colors = ['#fbbf24','#f97316','#22c55e','#3b82f6','#ec4899','#a855f7','#ef4444'];
+    const particles = Array.from({length: 130}, () => ({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 100,
+      w: 8 + Math.random() * 10,
+      h: 4 + Math.random() * 6,
+      r: Math.random() * Math.PI * 2,
+      dr: (Math.random() - 0.5) * 0.3,
+      vy: 2 + Math.random() * 4,
+      vx: (Math.random() - 0.5) * 2,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: 1,
+    }));
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.r += p.dr; p.alpha -= 0.006;
+        if (p.alpha < 0) p.alpha = 0;
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.r);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.restore();
+      });
+      confettiAnim = requestAnimationFrame(draw);
+    }
+    draw();
+    setTimeout(stopConfetti, 5000);
+  }
+  function stopConfetti() {
+    if (confettiAnim) { cancelAnimationFrame(confettiAnim); confettiAnim = null; }
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // ── Share ──
+  function shareWhatsApp() {
+    const time = fmtTime(timerSeconds);
+    const star = solved.size === 10 ? '🏆 סיימתי ב-' + time + '!' : `✅ ${solved.size}/10 מכות`;
+    const text = `⚡ שיחקתי עשר המכות! ${star}\nנסו גם אתם 👉 ${location.href}`;
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+
+  // ── Reset ──
+  function shuffleAndReset() {
+    stopTimer();
+    stopConfetti();
+    closeWin();
+    solved = new Set();
+    attempts = 0;
+    timerSeconds = 0;
+    gameStarted = false;
+    document.getElementById('correct-count').textContent = 0;
+    document.getElementById('attempts-count').textContent = 0;
+    document.getElementById('timer-pill').textContent = '00:00';
+    document.getElementById('timer-pill').classList.remove('danger');
+    document.getElementById('progress-fill').style.width = '0%';
+
+    const shuffled = [...PLAGUES].sort(() => Math.random() - 0.5);
+    buildPool(shuffled);
+    buildSlots();
+  }
+
+  // ── Init ──
+  shuffleAndReset();
+</script>
+</body>
+</html>
