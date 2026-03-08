@@ -458,6 +458,7 @@
     <div class="existing-users" id="existingUsers" style="display:none">
       <h3>🔄 כניסה חוזרת:</h3>
       <div class="user-list" id="userList"></div>
+      <button class="reset-btn" style="margin-top:12px;font-size:0.8em;" onclick="forgetMe()">🗑️ זה לא אני — מחק את השם</button>
     </div>
   </div>
 
@@ -663,23 +664,30 @@
   }
 
   function renderEntryScreen() {
-    const users = getUsers();
+    const lastUser = localStorage.getItem(ACTIVE_KEY);
     const existingDiv = document.getElementById('existingUsers');
     const listDiv = document.getElementById('userList');
-    if (users.length === 0) {
+    // Only show quick login for the last user on this device
+    if (!lastUser || !getUsers().includes(lastUser)) {
       existingDiv.style.display = 'none';
       return;
     }
     existingDiv.style.display = '';
     listDiv.innerHTML = '';
-    const emojis = ['🐬','🐠','🐙','🦀','🐚','🦑','🐡','🦈'];
-    users.forEach((name, i) => {
-      const chip = document.createElement('div');
-      chip.className = 'user-chip';
-      chip.innerHTML = `<span class="chip-emoji">${emojis[i % emojis.length]}</span> ${name}`;
-      chip.onclick = () => loginAs(name);
-      listDiv.appendChild(chip);
-    });
+    const chip = document.createElement('div');
+    chip.className = 'user-chip';
+    chip.innerHTML = `<span class="chip-emoji">🐬</span> ${lastUser}`;
+    chip.onclick = () => loginAs(lastUser);
+    listDiv.appendChild(chip);
+  }
+
+  function forgetMe() {
+    const lastUser = localStorage.getItem(ACTIVE_KEY);
+    if (lastUser) {
+      deleteUser(lastUser);
+    }
+    localStorage.removeItem(ACTIVE_KEY);
+    showEntryScreen();
   }
 
   function joinGame() {
