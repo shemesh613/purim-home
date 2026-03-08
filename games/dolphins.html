@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐬 דולפינים של שלום!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Rubik', sans-serif;
+    background: linear-gradient(180deg, #0a1628 0%, #0d2847 30%, #1a5276 60%, #2980b9 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .bubbles { position: fixed; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  .bubble {
+    position: absolute; bottom: -80px;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(255,255,255,0.05));
+    border-radius: 50%; animation: rise linear infinite;
+  }
+  @keyframes rise { 0% { transform: translateY(0) scale(1); opacity: 0.6; } 100% { transform: translateY(-110vh) scale(0.3); opacity: 0; } }
+
+  .waves { position: fixed; top: -5px; width: 100%; height: 80px; z-index: 1; }
+  .wave { position: absolute; width: 200%; height: 100%; background: repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.05) 40px, rgba(255,255,255,0.05) 80px); animation: waveMove 8s linear infinite; }
+  @keyframes waveMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+  .container { position: relative; z-index: 2; max-width: 950px; margin: 0 auto; padding: 25px 20px; }
+
+  h1 { text-align: center; color: #fff; font-size: 2.6em; text-shadow: 0 0 30px rgba(0,200,255,0.5), 0 4px 8px rgba(0,0,0,0.3); margin-bottom: 8px; animation: glow 2s ease-in-out infinite alternate; cursor: default; }
+  @keyframes glow {
+    from { text-shadow: 0 0 20px rgba(0,200,255,0.4), 0 4px 8px rgba(0,0,0,0.3); }
+    to { text-shadow: 0 0 40px rgba(0,200,255,0.8), 0 0 60px rgba(0,150,255,0.3), 0 4px 8px rgba(0,0,0,0.3); }
+  }
+
+  .subtitle { text-align: center; color: #7fdbff; font-size: 1.3em; margin-bottom: 20px; font-weight: 700; }
+
+  /* === ENTRY SCREEN === */
+  .entry-screen {
+    text-align: center; padding: 40px 20px;
+    animation: fadeIn 0.5s ease;
+  }
+  .entry-screen h2 { color: #fff; font-size: 2em; margin-bottom: 10px; }
+  .entry-screen p { color: #7fdbff; font-size: 1.1em; margin-bottom: 30px; }
+  .entry-input-wrap {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .entry-input {
+    background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3);
+    color: #fff; padding: 12px 20px; border-radius: 15px; font-size: 1.2em;
+    font-family: 'Rubik', sans-serif; text-align: center; width: 220px;
+    outline: none; transition: all 0.3s;
+  }
+  .entry-input::placeholder { color: rgba(255,255,255,0.4); }
+  .entry-input:focus { border-color: #00b894; box-shadow: 0 0 20px rgba(0,184,148,0.3); }
+  .entry-btn {
+    background: linear-gradient(135deg, #00b894, #00cec9); color: #fff;
+    border: none; padding: 12px 30px; border-radius: 15px; font-size: 1.2em;
+    font-family: 'Rubik', sans-serif; font-weight: 700; cursor: pointer;
+    transition: all 0.3s; box-shadow: 0 8px 25px rgba(0,184,148,0.4);
+  }
+  .entry-btn:hover { transform: scale(1.05); }
+  .entry-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .existing-users {
+    margin-top: 25px;
+  }
+  .existing-users h3 { color: #ffeaa7; font-size: 1.1em; margin-bottom: 12px; }
+  .user-list { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .user-chip {
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+    border: 1px solid rgba(255,255,255,0.2); color: #fff;
+    padding: 10px 20px; border-radius: 50px; font-size: 1.1em; font-weight: 700;
+    cursor: pointer; transition: all 0.3s; user-select: none;
+  }
+  .user-chip:hover { transform: scale(1.08); border-color: #00b894; box-shadow: 0 4px 15px rgba(0,184,148,0.3); }
+  .user-chip .chip-emoji { margin-left: 5px; }
+
+  /* === ADMIN PANEL === */
+  .admin-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500;
+    display: none; align-items: center; justify-content: center;
+  }
+  .admin-overlay.visible { display: flex; }
+  .admin-panel {
+    background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 20px; padding: 30px; max-width: 450px; width: 90%;
+    animation: achievementPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .admin-panel h3 { color: #ffd700; font-size: 1.3em; text-align: center; margin-bottom: 15px; }
+  .admin-user-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 15px;
+    margin-bottom: 8px; transition: all 0.3s;
+  }
+  .admin-user-row:hover { background: rgba(255,255,255,0.12); }
+  .admin-user-info { color: #fff; font-weight: 700; }
+  .admin-user-info small { color: #b2bec3; font-weight: 400; display: block; font-size: 0.8em; }
+  .admin-delete-btn {
+    background: rgba(255,56,56,0.2); border: 1px solid rgba(255,56,56,0.4);
+    color: #ff6b6b; padding: 6px 14px; border-radius: 8px; cursor: pointer;
+    font-family: 'Rubik', sans-serif; font-size: 0.85em; transition: all 0.3s;
+  }
+  .admin-delete-btn:hover { background: rgba(255,56,56,0.4); }
+  .admin-close-btn {
+    display: block; margin: 15px auto 0; background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 25px;
+    border-radius: 25px; cursor: pointer; font-family: 'Rubik', sans-serif;
+    font-size: 0.95em; transition: all 0.3s;
+  }
+  .admin-close-btn:hover { background: rgba(255,255,255,0.2); }
+  .admin-hint { color: #b2bec3; font-size: 0.8em; text-align: center; margin-top: 10px; }
+  .admin-no-users { color: #b2bec3; text-align: center; padding: 20px; }
+
+  /* Level bar */
+  .level-bar {
+    background: rgba(0,0,0,0.3); border-radius: 15px; padding: 12px 20px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .level-badge {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; padding: 6px 18px;
+    border-radius: 25px; font-weight: 900; font-size: 1.1em;
+    box-shadow: 0 4px 15px rgba(108,92,231,0.4);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  .xp-container { flex: 1; min-width: 200px; }
+  .xp-bar-bg {
+    background: rgba(255,255,255,0.1); border-radius: 10px; height: 20px; overflow: hidden;
+    position: relative;
+  }
+  .xp-bar-fill {
+    height: 100%; border-radius: 10px; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    background: linear-gradient(90deg, #00b894, #55efc4, #ffeaa7);
+    box-shadow: 0 0 15px rgba(85,239,196,0.5);
+  }
+  .xp-text { color: #b2bec3; font-size: 0.8em; text-align: center; margin-top: 4px; }
+  .score-display {
+    color: #ffeaa7; font-size: 1.8em; font-weight: 900;
+    text-shadow: 0 0 15px rgba(255,234,167,0.5);
+    min-width: 80px; text-align: center;
+  }
+  .current-user-label {
+    color: #55efc4; font-size: 0.9em; text-align: center; margin-bottom: 5px; font-weight: 700;
+  }
+  .switch-user-btn {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: #b2bec3; padding: 4px 12px; border-radius: 15px; cursor: pointer;
+    font-family: 'Rubik', sans-serif; font-size: 0.75em; transition: all 0.3s;
+    margin-right: 8px;
+  }
+  .switch-user-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+  /* Names */
+  .names { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
+  .name-badge {
+    background: linear-gradient(135deg, #00b894, #00cec9); color: #fff; padding: 10px 25px;
+    border-radius: 50px; font-size: 1.4em; font-weight: 900;
+    box-shadow: 0 8px 25px rgba(0,206,201,0.4); animation: float 3s ease-in-out infinite;
+    cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
+    user-select: none;
+  }
+  .name-badge:nth-child(3n+2) { animation-delay: 0.5s; background: linear-gradient(135deg, #e17055, #fdcb6e); box-shadow: 0 8px 25px rgba(253,203,110,0.4); }
+  .name-badge:nth-child(3n) { animation-delay: 1s; background: linear-gradient(135deg, #a29bfe, #fd79a8); box-shadow: 0 8px 25px rgba(162,155,254,0.4); }
+  .name-badge:hover { transform: scale(1.15) rotate(-3deg) !important; }
+  .name-badge:active { transform: scale(0.95) !important; }
+  .name-badge .name-score {
+    display: block; font-size: 0.5em; margin-top: 3px; opacity: 0.9;
+  }
+  .name-badge.celebrating {
+    animation: nameCelebrate 0.8s ease !important;
+  }
+  @keyframes nameCelebrate {
+    0% { transform: scale(1) rotate(0); }
+    20% { transform: scale(1.3) rotate(-10deg); }
+    40% { transform: scale(1.1) rotate(8deg); }
+    60% { transform: scale(1.25) rotate(-5deg); }
+    80% { transform: scale(1.1) rotate(3deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+  /* Compliment popup */
+  .compliment {
+    position: fixed; z-index: 200; pointer-events: none;
+    background: rgba(0,0,0,0.85); color: #fff; padding: 12px 24px;
+    border-radius: 15px; font-size: 1.3em; font-weight: 700;
+    animation: complimentAnim 2s ease forwards;
+    white-space: nowrap;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+  @keyframes complimentAnim {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    15% { transform: translateY(-20px) scale(1.1); opacity: 1; }
+    70% { transform: translateY(-40px) scale(1); opacity: 1; }
+    100% { transform: translateY(-80px) scale(0.8); opacity: 0; }
+  }
+
+  /* Days grid */
+  .days-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 25px; }
+  .days-grid .day-card:nth-child(5), .days-grid .day-card:nth-child(6), .days-grid .day-card:nth-child(7) {
+    grid-column: span 1;
+  }
+  .day-card {
+    background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 15px;
+    text-align: center; cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative; overflow: hidden;
+  }
+  .day-card::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    opacity: 0; transition: opacity 0.4s;
+  }
+  .day-card:hover::before { opacity: 1; }
+  .day-card:hover { transform: translateY(-6px) scale(1.03); border-color: rgba(0,200,255,0.5); box-shadow: 0 15px 40px rgba(0,150,255,0.3); }
+  .day-card.active { background: linear-gradient(135deg, rgba(0,184,148,0.4), rgba(0,206,201,0.3)); border-color: #00b894; box-shadow: 0 10px 30px rgba(0,184,148,0.4); }
+  .day-name { color: #fff; font-size: 1.2em; font-weight: 700; margin-bottom: 5px; }
+  .day-emoji { font-size: 2.2em; transition: transform 0.3s; }
+  .day-card:hover .day-emoji { transform: scale(1.2) rotate(10deg); }
+  .day-card.active .day-emoji { animation: celebrate 0.6s ease; }
+  @keyframes celebrate { 0% { transform: scale(1); } 50% { transform: scale(1.5) rotate(20deg); } 100% { transform: scale(1.2); } }
+  .day-status { color: #b2bec3; font-size: 0.85em; margin-top: 5px; min-height: 22px; }
+  .day-card.active .day-status { color: #55efc4; font-weight: 700; }
+  .day-bonus { color: #ffeaa7; font-size: 0.75em; margin-top: 3px; font-weight: 700; opacity: 0; transition: opacity 0.3s; }
+  .day-card.active .day-bonus { opacity: 1; }
+
+  /* Streak */
+  .streak-section {
+    background: linear-gradient(135deg, rgba(255,165,0,0.15), rgba(255,69,0,0.1));
+    border: 1px solid rgba(255,165,0,0.3); border-radius: 15px;
+    padding: 12px 20px; margin-bottom: 20px; text-align: center;
+    display: none;
+  }
+  .streak-section.visible { display: block; animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .streak-text { color: #ffa502; font-size: 1.3em; font-weight: 900; }
+  .streak-fire { font-size: 2em; animation: fireAnim 0.5s ease-in-out infinite alternate; }
+  @keyframes fireAnim { from { transform: scale(1) rotate(-5deg); } to { transform: scale(1.15) rotate(5deg); } }
+
+  /* Achievements */
+  .achievements {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
+  }
+  .achievement {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 8px 14px; text-align: center; min-width: 90px;
+    transition: all 0.3s; position: relative;
+  }
+  .achievement.unlocked {
+    background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15));
+    border-color: rgba(255,215,0,0.4);
+    box-shadow: 0 4px 15px rgba(255,215,0,0.2);
+  }
+  .achievement.locked { filter: grayscale(1) opacity(0.4); }
+  .achievement .ach-icon { font-size: 1.8em; }
+  .achievement .ach-name { color: #fff; font-size: 0.7em; font-weight: 700; margin-top: 3px; display: block; }
+  .achievement .ach-desc { color: #b2bec3; font-size: 0.6em; display: block; }
+  .achievement-unlock {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 300;
+    background: linear-gradient(135deg, #2d3436, #000);
+    border: 3px solid #ffd700; border-radius: 20px; padding: 30px 50px;
+    text-align: center; animation: achievementPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 60px rgba(255,215,0,0.4);
+  }
+  @keyframes achievementPop {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    60% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  }
+  .achievement-unlock .au-title { color: #ffd700; font-size: 0.9em; font-weight: 700; margin-bottom: 5px; }
+  .achievement-unlock .au-icon { font-size: 4em; display: block; margin: 10px 0; }
+  .achievement-unlock .au-name { color: #fff; font-size: 1.5em; font-weight: 900; }
+  .achievement-unlock .au-desc { color: #b2bec3; font-size: 0.9em; margin-top: 5px; }
+
+  /* Dolphin section */
+  .dolphin-section { text-align: center; margin-bottom: 20px; }
+  .dolphin-message { color: #ffeaa7; font-size: 1.6em; font-weight: 900; margin-bottom: 20px; text-shadow: 0 0 20px rgba(255,234,167,0.5); }
+
+  .sea-creatures { display: flex; justify-content: center; gap: 35px; flex-wrap: wrap; align-items: center; }
+  .creature { position: relative; font-size: 4.5em; cursor: pointer; transition: transform 0.3s; user-select: none; }
+  .creature:hover { transform: scale(1.15); }
+  .creature .x-mark {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0); font-size: 1.2em;
+    color: #ff3838; font-weight: 900;
+    text-shadow: 0 0 15px rgba(255,56,56,0.8), 2px 2px 0 #c0392b;
+    pointer-events: none; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 3;
+  }
+  .creature.crossed .x-mark { transform: translate(-50%, -50%) scale(1); }
+  .creature.crossed { filter: grayscale(0.5) opacity(0.6); }
+  .creature-label { display: block; font-size: 0.22em; color: #dfe6e9; margin-top: 3px; font-weight: 700; }
+
+  .dolphin-creature { animation: swim 3s ease-in-out infinite; }
+  @keyframes swim { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(10px) rotate(3deg); } 75% { transform: translateX(-10px) rotate(-3deg); } }
+  .dolphin-creature:hover { animation: none; transform: scale(1.2); }
+  .dolphin-creature.clicked { animation: dolphinJump 0.8s ease; }
+  @keyframes dolphinJump {
+    0% { transform: translateY(0) scale(1); }
+    30% { transform: translateY(-50px) scale(1.2) rotate(-10deg); }
+    50% { transform: translateY(-60px) scale(1.3); }
+    70% { transform: translateY(-30px) scale(1.1) rotate(5deg); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
+  /* Fun facts */
+  .fun-fact {
+    background: rgba(255,255,255,0.08); border-radius: 15px; padding: 15px 20px;
+    margin-bottom: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer; transition: all 0.3s;
+  }
+  .fun-fact:hover { background: rgba(255,255,255,0.12); transform: translateY(-3px); }
+  .fun-fact .fact-label { color: #74b9ff; font-size: 0.85em; font-weight: 700; }
+  .fun-fact .fact-text { color: #fff; font-size: 1.1em; margin-top: 5px; line-height: 1.5; }
+
+  /* Stats */
+  .stats-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
+  .stat-box {
+    flex: 1; min-width: 120px; text-align: center; padding: 15px;
+    background: rgba(255,255,255,0.08); border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .stat-box .stat-value { font-size: 2.5em; font-weight: 900; color: #55efc4; text-shadow: 0 0 20px rgba(85,239,196,0.5); }
+  .stat-box .stat-label { font-size: 0.9em; color: #b2bec3; }
+  .stat-box:nth-child(2) .stat-value { color: #ffeaa7; }
+  .stat-box:nth-child(3) .stat-value { color: #ff9ff3; }
+
+  /* Weekly goal */
+  .weekly-goal {
+    background: linear-gradient(135deg, rgba(85,239,196,0.1), rgba(0,184,148,0.05));
+    border: 1px solid rgba(85,239,196,0.2); border-radius: 15px;
+    padding: 15px; text-align: center; margin-bottom: 15px;
+  }
+  .goal-text { color: #55efc4; font-size: 1.1em; font-weight: 700; margin-bottom: 8px; }
+  .goal-stars { font-size: 2em; letter-spacing: 5px; }
+
+  .reset-btn {
+    display: block; margin: 15px auto 0;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: #b2bec3; padding: 8px 20px; border-radius: 25px;
+    cursor: pointer; font-family: 'Rubik', sans-serif; font-size: 0.9em; transition: all 0.3s;
+  }
+  .reset-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+  /* Sound toggle */
+  .sound-btn {
+    position: fixed; bottom: 15px; left: 15px; z-index: 50;
+    background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; width: 40px; height: 40px; border-radius: 50%;
+    cursor: pointer; font-size: 1.2em; transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sound-btn:hover { background: rgba(255,255,255,0.2); }
+
+  /* Back button */
+  .back-btn {
+    position: fixed; top: 15px; right: 15px; z-index: 50;
+    background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; padding: 8px 16px; border-radius: 25px;
+    cursor: pointer; font-family: 'Rubik', sans-serif; font-size: 0.9em;
+    text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 5px;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.2); }
+
+  /* Sparkles, confetti, hearts */
+  .sparkle { position: fixed; pointer-events: none; z-index: 100; animation: sparkleAnim 0.8s ease forwards; }
+  @keyframes sparkleAnim { 0% { transform: scale(0) rotate(0deg); opacity: 1; } 50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; } 100% { transform: scale(0) rotate(360deg); opacity: 0; } }
+  .confetti { position: fixed; z-index: 99; pointer-events: none; animation: confettiFall linear forwards; }
+  @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+  .heart-rain { position: fixed; z-index: 99; pointer-events: none; animation: heartFall 2s ease-in forwards; }
+  @keyframes heartFall { 0% { transform: translateY(-20px) scale(0); opacity: 0; } 20% { opacity: 1; transform: translateY(0) scale(1); } 100% { transform: translateY(80vh) rotate(30deg) scale(0.5); opacity: 0; } }
+
+  /* XP popup */
+  .xp-popup {
+    position: fixed; pointer-events: none; z-index: 150;
+    color: #ffeaa7; font-size: 1.5em; font-weight: 900;
+    text-shadow: 0 0 10px rgba(255,234,167,0.8);
+    animation: xpFloat 1.2s ease forwards;
+  }
+  @keyframes xpFloat {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    20% { transform: translateY(-15px) scale(1.2); opacity: 1; }
+    100% { transform: translateY(-80px) scale(0.8); opacity: 0; }
+  }
+
+  /* Mini game */
+  .mini-game {
+    background: rgba(0,0,0,0.3); border-radius: 15px; padding: 20px;
+    margin-bottom: 20px; text-align: center; display: none;
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  .mini-game.visible { display: block; animation: fadeIn 0.5s; }
+  .mini-game h3 { color: #74b9ff; font-size: 1.2em; margin-bottom: 12px; }
+  .quiz-q { color: #fff; font-size: 1.1em; margin-bottom: 15px; }
+  .quiz-options { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .quiz-opt {
+    background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2);
+    color: #fff; padding: 10px 20px; border-radius: 12px; cursor: pointer;
+    font-family: 'Rubik', sans-serif; font-size: 1em; font-weight: 700;
+    transition: all 0.3s;
+  }
+  .quiz-opt:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
+  .quiz-opt.correct { background: rgba(0,184,148,0.4); border-color: #00b894; }
+  .quiz-opt.wrong { background: rgba(255,56,56,0.3); border-color: #ff3838; }
+
+  /* Hidden game area until user logs in */
+  #gameArea { display: none; }
+  #gameArea.visible { display: block; animation: fadeIn 0.5s; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.6em; }
+    .days-grid { grid-template-columns: repeat(2, 1fr); }
+    .creature { font-size: 3em; }
+    .names { gap: 12px; }
+    .name-badge { font-size: 1em; padding: 8px 18px; }
+    .level-bar { flex-direction: column; }
+    .stats-row { flex-direction: column; }
+    .entry-input { width: 180px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bubbles" id="bubbles"></div>
+<div class="waves"><div class="wave"></div></div>
+
+<a class="back-btn" href="../index.html">🏠 חזרה</a>
+
+<!-- Admin overlay -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-panel">
+    <h3>⚙️ ניהול משתתפים</h3>
+    <div id="adminUserList"></div>
+    <div class="admin-hint">💡 לחצו על כותרת האתר 3 שניות כדי לפתוח שוב</div>
+    <button class="admin-close-btn" onclick="closeAdmin()">✖ סגור</button>
+  </div>
+</div>
+
+<div class="container">
+  <h1 id="mainTitle">🌊 ים של שלום ואחווה 🌊</h1>
+  <p class="subtitle">✨ להמשיך להיות דולפינים! ✨</p>
+
+  <!-- Entry Screen -->
+  <div class="entry-screen" id="entryScreen">
+    <h2>🐬 ברוכים הבאים!</h2>
+    <p>הזינו את השם שלכם כדי להתחיל</p>
+    <div class="entry-input-wrap">
+      <input class="entry-input" id="nameInput" type="text" placeholder="השם שלי..." maxlength="20"
+             onkeydown="if(event.key==='Enter')joinGame()">
+      <button class="entry-btn" onclick="joinGame()">🐬 כניסה</button>
+    </div>
+    <div class="existing-users" id="existingUsers" style="display:none">
+      <h3>🔄 כניסה חוזרת:</h3>
+      <div class="user-list" id="userList"></div>
+    </div>
+  </div>
+
+  <!-- Game Area (hidden until login) -->
+  <div id="gameArea">
+    <!-- Level & Score Bar -->
+    <div class="current-user-label">
+      <button class="switch-user-btn" onclick="switchUser()">🔄 החלף</button>
+      <span id="currentUserName"></span>
+    </div>
+    <div class="level-bar">
+      <div class="level-badge" id="levelBadge">🏅 שלב 1</div>
+      <div class="xp-container">
+        <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpFill" style="width:0%"></div></div>
+        <div class="xp-text" id="xpText">0 / 50 נ"ק לשלב הבא</div>
+      </div>
+      <div class="score-display" id="totalScore">⭐ 0</div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="achievements" id="achievementsContainer"></div>
+
+    <!-- Names (dynamic!) -->
+    <div class="names" id="namesContainer"></div>
+
+    <!-- Streak -->
+    <div class="streak-section" id="streakSection">
+      <span class="streak-fire">🔥</span>
+      <span class="streak-text" id="streakText"></span>
+      <span class="streak-fire">🔥</span>
+    </div>
+
+    <!-- Days -->
+    <div class="days-grid">
+      <div class="day-card" data-day="sunday" onclick="toggleDay(this, event)">
+        <div class="day-emoji">☀️</div>
+        <div class="day-name">יום ראשון</div>
+        <div class="day-status">לחצו לסמן שלום!</div>
+        <div class="day-bonus">+10 נ"ק</div>
+      </div>
+      <div class="day-card" data-day="monday" onclick="toggleDay(this, event)">
+        <div class="day-emoji">🌟</div>
+        <div class="day-name">יום שני</div>
+        <div class="day-status">לחצו לסמן שלום!</div>
+        <div class="day-bonus">+10 נ"ק</div>
+      </div>
+      <div class="day-card" data-day="tuesday" onclick="toggleDay(this, event)">
+        <div class="day-emoji">🌈</div>
+        <div class="day-name">יום שלישי</div>
+        <div class="day-status">לחצו לסמן שלום!</div>
+        <div class="day-bonus">+10 נ"ק</div>
+      </div>
+      <div class="day-card" data-day="wednesday" onclick="toggleDay(this, event)">
+        <div class="day-emoji">⭐</div>
+        <div class="day-name">יום רביעי</div>
+        <div class="day-status">לחצו לסמן שלום!</div>
+        <div class="day-bonus">+10 נ"ק</div>
+      </div>
+      <div class="day-card" data-day="thursday" onclick="toggleDay(this, event)">
+        <div class="day-emoji">🎉</div>
+        <div class="day-name">יום חמישי</div>
+        <div class="day-status">לחצו לסמן שלום!</div>
+        <div class="day-bonus">+10 נ"ק</div>
+      </div>
+      <div class="day-card" data-day="friday" onclick="toggleDay(this, event)">
+        <div class="day-emoji">🕯️</div>
+        <div class="day-name">יום שישי</div>
+        <div class="day-status">לחצו לסמן שלום!</div>
+        <div class="day-bonus">+10 נ"ק</div>
+      </div>
+      <div class="day-card" data-day="saturday" onclick="toggleDay(this, event)">
+        <div class="day-emoji">✡️</div>
+        <div class="day-name">שבת</div>
+        <div class="day-status">לחצו לסמן שלום!</div>
+        <div class="day-bonus">+10 נ"ק</div>
+      </div>
+    </div>
+
+    <!-- Mini quiz game -->
+    <div class="mini-game" id="miniGame">
+      <h3>🎮 חידת דולפין!</h3>
+      <div class="quiz-q" id="quizQ"></div>
+      <div class="quiz-options" id="quizOpts"></div>
+    </div>
+
+    <!-- Dolphin section -->
+    <div class="dolphin-section">
+      <div class="dolphin-message">🐬 אנחנו דולפינים - לא סרדינים ולא כרישים! 🐬</div>
+      <div class="sea-creatures">
+        <div class="creature" onclick="crossCreature(this, 'sardine', event)" id="sardine">
+          🐟
+          <span class="x-mark">✖</span>
+          <span class="creature-label">סרדין 🚫</span>
+        </div>
+        <div class="creature dolphin-creature" onclick="clickDolphin(this, event)" id="dolphin">
+          🐬
+          <span class="creature-label">דולפין 💚</span>
+        </div>
+        <div class="creature" onclick="crossCreature(this, 'shark', event)" id="shark">
+          🦈
+          <span class="x-mark">✖</span>
+          <span class="creature-label">כריש 🚫</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fun fact -->
+    <div class="fun-fact" onclick="nextFact()">
+      <div class="fact-label">💡 הידעתם? (לחצו לעוד!)</div>
+      <div class="fact-text" id="factText"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-value" id="peaceCount">0</div>
+        <div class="stat-label">ימי שלום 🕊️</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="weekCount">0</div>
+        <div class="stat-label">שבועות 📅</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="clickCount">0</div>
+        <div class="stat-label">לחיצות דולפין 🐬</div>
+      </div>
+    </div>
+
+    <!-- Weekly goal stars -->
+    <div class="weekly-goal">
+      <div class="goal-text">🎯 יעד שבועי: 7 ימי שלום</div>
+      <div class="goal-stars" id="goalStars">☆ ☆ ☆ ☆ ☆ ☆ ☆</div>
+    </div>
+
+    <button class="reset-btn" onclick="resetAll()">🔄 שבוע חדש</button>
+  </div>
+</div>
+
+<button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔊</button>
+
+<script>
+  // === BUBBLES ===
+  const bubblesContainer = document.getElementById('bubbles');
+  for (let i = 0; i < 20; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const s = Math.random() * 40 + 10;
+    b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;animation-duration:${Math.random()*8+6}s;animation-delay:${Math.random()*5}s`;
+    bubblesContainer.appendChild(b);
+  }
+
+  // === STORAGE KEYS ===
+  const USERS_KEY = 'dolphin_users';     // list of user names
+  const STATE_PREFIX = 'dolphin_user_';  // per-user state prefix
+  const ACTIVE_KEY = 'dolphin_active';   // last active user
+
+  let currentUser = null;
+  let state = null;
+
+  // === USER MANAGEMENT ===
+  function getUsers() {
+    return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+
+  function getUserState(name) {
+    const key = STATE_PREFIX + name;
+    return JSON.parse(localStorage.getItem(key) || 'null');
+  }
+
+  function saveUserState(name, data) {
+    localStorage.setItem(STATE_PREFIX + name, JSON.stringify(data));
+  }
+
+  function deleteUser(name) {
+    const users = getUsers().filter(u => u !== name);
+    saveUsers(users);
+    localStorage.removeItem(STATE_PREFIX + name);
+    if (currentUser === name) {
+      currentUser = null;
+      state = null;
+      showEntryScreen();
+    }
+    renderAdminPanel();
+    renderEntryScreen();
+  }
+
+  function createDefaultState() {
+    return {
+      score: 0, xp: 0, level: 1, weeks: 0, clicks: 0,
+      nameScores: {}, achievements: [], soundOn: true
+    };
+  }
+
+  // === ENTRY SCREEN ===
+  function showEntryScreen() {
+    document.getElementById('entryScreen').style.display = '';
+    document.getElementById('gameArea').classList.remove('visible');
+    renderEntryScreen();
+  }
+
+  function renderEntryScreen() {
+    const users = getUsers();
+    const existingDiv = document.getElementById('existingUsers');
+    const listDiv = document.getElementById('userList');
+    if (users.length === 0) {
+      existingDiv.style.display = 'none';
+      return;
+    }
+    existingDiv.style.display = '';
+    listDiv.innerHTML = '';
+    const emojis = ['🐬','🐠','🐙','🦀','🐚','🦑','🐡','🦈'];
+    users.forEach((name, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'user-chip';
+      chip.innerHTML = `<span class="chip-emoji">${emojis[i % emojis.length]}</span> ${name}`;
+      chip.onclick = () => loginAs(name);
+      listDiv.appendChild(chip);
+    });
+  }
+
+  function joinGame() {
+    const input = document.getElementById('nameInput');
+    const name = input.value.trim();
+    if (!name) return;
+
+    const users = getUsers();
+    if (!users.includes(name)) {
+      users.push(name);
+      saveUsers(users);
+      saveUserState(name, createDefaultState());
+    }
+    loginAs(name);
+  }
+
+  function loginAs(name) {
+    currentUser = name;
+    localStorage.setItem(ACTIVE_KEY, name);
+    state = getUserState(name) || createDefaultState();
+
+    // Ensure state has all fields
+    if (!state.nameScores) state.nameScores = {};
+    if (!state.achievements) state.achievements = [];
+    if (state.soundOn === undefined) state.soundOn = true;
+    if (!state.clicks) state.clicks = 0;
+    if (!state.weeks) state.weeks = 0;
+
+    document.getElementById('entryScreen').style.display = 'none';
+    document.getElementById('gameArea').classList.add('visible');
+    document.getElementById('currentUserName').textContent = '🐬 שלום, ' + name + '!';
+    document.getElementById('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
+
+    initGame();
+  }
+
+  function switchUser() {
+    currentUser = null;
+    state = null;
+    localStorage.removeItem(ACTIVE_KEY);
+    showEntryScreen();
+    document.getElementById('nameInput').value = '';
+  }
+
+  // === ADMIN PANEL (long press on title) ===
+  let titlePressTimer = null;
+  const mainTitle = document.getElementById('mainTitle');
+  mainTitle.addEventListener('pointerdown', () => {
+    titlePressTimer = setTimeout(() => openAdmin(), 2000);
+  });
+  mainTitle.addEventListener('pointerup', () => clearTimeout(titlePressTimer));
+  mainTitle.addEventListener('pointerleave', () => clearTimeout(titlePressTimer));
+
+  function openAdmin() {
+    renderAdminPanel();
+    document.getElementById('adminOverlay').classList.add('visible');
+  }
+  function closeAdmin() {
+    document.getElementById('adminOverlay').classList.remove('visible');
+  }
+
+  function renderAdminPanel() {
+    const users = getUsers();
+    const container = document.getElementById('adminUserList');
+    if (users.length === 0) {
+      container.innerHTML = '<div class="admin-no-users">אין משתתפים עדיין</div>';
+      return;
+    }
+    container.innerHTML = '';
+    users.forEach(name => {
+      const s = getUserState(name) || createDefaultState();
+      const row = document.createElement('div');
+      row.className = 'admin-user-row';
+      row.innerHTML = `
+        <div class="admin-user-info">
+          🐬 ${name}
+          <small>⭐ ${s.score} נק׳ | שלב ${s.level} | ${s.weeks} שבועות</small>
+        </div>
+        <button class="admin-delete-btn" onclick="confirmDelete('${name.replace(/'/g, "\\'")}')">🗑️ מחק</button>
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  function confirmDelete(name) {
+    if (confirm('למחוק את ' + name + '? כל הנתונים יימחקו.')) {
+      deleteUser(name);
+    }
+  }
+
+  // Close admin on overlay click
+  document.getElementById('adminOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('adminOverlay')) closeAdmin();
+  });
+
+  // === SOUND ===
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  function playTone(freq, dur, type='sine') {
+    if (!state || !state.soundOn) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.value = 0.15;
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  }
+  function playHappy() { playTone(523,0.1); setTimeout(()=>playTone(659,0.1),100); setTimeout(()=>playTone(784,0.15),200); }
+  function playClick() { playTone(880,0.05,'square'); }
+  function playLevelUp() { [523,587,659,698,784,880].forEach((f,i)=>setTimeout(()=>playTone(f,0.15),i*80)); }
+  function playAchievement() { [784,988,1175].forEach((f,i)=>setTimeout(()=>playTone(f,0.2,'triangle'),i*150)); }
+
+  function toggleSound() {
+    if (!state) return;
+    state.soundOn = !state.soundOn;
+    document.getElementById('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
+    saveState();
+  }
+
+  function saveState() {
+    if (currentUser && state) {
+      saveUserState(currentUser, state);
+    }
+  }
+
+  // === LEVELS ===
+  const levels = [
+    { name: 'דג קטן', xpNeeded: 50, icon: '🐟' },
+    { name: 'כוכב ים', xpNeeded: 120, icon: '⭐' },
+    { name: 'צב ים', xpNeeded: 200, icon: '🐢' },
+    { name: 'דולפין מתחיל', xpNeeded: 350, icon: '🐬' },
+    { name: 'דולפין מנוסה', xpNeeded: 500, icon: '🐬✨' },
+    { name: 'דולפין זהב', xpNeeded: 750, icon: '🐬🏆' },
+    { name: 'מלך הים', xpNeeded: 1000, icon: '👑🌊' },
+    { name: 'אגדת האוקיינוס', xpNeeded: 9999, icon: '🔱' },
+  ];
+
+  function addXP(amount, e) {
+    state.xp += amount;
+    state.score += amount;
+    let leveledUp = false;
+    while (state.level < levels.length && state.xp >= levels[state.level - 1].xpNeeded) {
+      state.xp -= levels[state.level - 1].xpNeeded;
+      state.level++;
+      leveledUp = true;
+    }
+    if (leveledUp) {
+      playLevelUp();
+      createConfetti();
+      showCompliment(e, '🎉 עלית שלב! ' + levels[state.level - 1].icon + ' ' + levels[state.level - 1].name);
+    }
+    updateUI();
+    saveState();
+    if (e) showXpPopup(e, '+' + amount);
+  }
+
+  function showXpPopup(e, text) {
+    const p = document.createElement('div');
+    p.className = 'xp-popup';
+    p.textContent = text;
+    p.style.left = (e.clientX || e.pageX || window.innerWidth/2) + 'px';
+    p.style.top = (e.clientY || e.pageY || 300) + 'px';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1200);
+  }
+
+  // === ACHIEVEMENTS ===
+  const achievementDefs = [
+    { id: 'first_peace', icon: '🕊️', name: 'יום ראשון', desc: 'סמנת יום שלום ראשון', check: () => getDaysCount() >= 1 },
+    { id: 'all_days', icon: '🌟', name: 'שבוע מושלם!', desc: '7 ימי שלום בשבוע', check: () => getDaysCount() >= 7 },
+    { id: 'dolphin_5', icon: '🐬', name: 'חבר הדולפין', desc: '5 לחיצות על הדולפין', check: () => state.clicks >= 5 },
+    { id: 'dolphin_20', icon: '🐬💫', name: 'רוכב דולפינים', desc: '20 לחיצות דולפין', check: () => state.clicks >= 20 },
+    { id: 'score_100', icon: '💯', name: 'מאה!', desc: 'הגעת ל-100 נקודות', check: () => state.score >= 100 },
+    { id: 'score_500', icon: '🏆', name: 'אלוף/ה!', desc: '500 נקודות', check: () => state.score >= 500 },
+    { id: 'level_3', icon: '🐢', name: 'צב חכם', desc: 'הגעת לשלב 3', check: () => state.level >= 3 },
+    { id: 'level_5', icon: '🌊', name: 'גלישה!', desc: 'הגעת לשלב 5', check: () => state.level >= 5 },
+    { id: 'names_3', icon: '👨‍👩‍👧', name: 'חברים', desc: 'לחצת על 3 שמות שונים', check: () => Object.values(state.nameScores).filter(v => v > 0).length >= 3 },
+    { id: 'weeks_2', icon: '📅', name: 'שבועיים!', desc: 'שבוע חדש פעמיים', check: () => state.weeks >= 2 },
+  ];
+
+  function checkAchievements(e) {
+    if (!state) return;
+    achievementDefs.forEach(a => {
+      if (!state.achievements.includes(a.id) && a.check()) {
+        state.achievements.push(a.id);
+        saveState();
+        playAchievement();
+        showAchievementUnlock(a);
+        renderAchievements();
+      }
+    });
+  }
+
+  function showAchievementUnlock(a) {
+    const div = document.createElement('div');
+    div.className = 'achievement-unlock';
+    div.innerHTML = `<div class="au-title">🏆 הישג חדש!</div><span class="au-icon">${a.icon}</span><div class="au-name">${a.name}</div><div class="au-desc">${a.desc}</div>`;
+    document.body.appendChild(div);
+    createConfetti();
+    setTimeout(() => { div.style.transition = 'opacity 0.5s'; div.style.opacity = '0'; setTimeout(() => div.remove(), 500); }, 2500);
+  }
+
+  function renderAchievements() {
+    const c = document.getElementById('achievementsContainer');
+    c.innerHTML = '';
+    achievementDefs.forEach(a => {
+      const unlocked = state.achievements.includes(a.id);
+      const div = document.createElement('div');
+      div.className = 'achievement ' + (unlocked ? 'unlocked' : 'locked');
+      div.innerHTML = `<div class="ach-icon">${a.icon}</div><span class="ach-name">${a.name}</span><span class="ach-desc">${unlocked ? a.desc : '???'}</span>`;
+      div.title = unlocked ? a.desc : 'עדיין נעול...';
+      c.appendChild(div);
+    });
+  }
+
+  // === COMPLIMENTS ===
+  const compliments = [
+    '🌟 אלוף/ה!', '💪 כבוד!', '🐬 באמת דולפין!',
+    '💖 מחמם/ת את הלב!', '🎉 סופר!', '🕊️ שלום ואחווה!',
+    '😍 כוכב/ת!', '⭐ וואו!', '🚀 להמשיך!', '🌈 נהדר!',
+    '❤️ אהבה גדולה!', '👑 הכי טוב/ה בעולם!',
+  ];
+  function showCompliment(e, customText) {
+    const div = document.createElement('div');
+    div.className = 'compliment';
+    div.textContent = customText || compliments[Math.floor(Math.random() * compliments.length)];
+    div.style.left = ((e && e.clientX) || window.innerWidth/2) + 'px';
+    div.style.top = ((e && e.clientY) || 300) + 'px';
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 2000);
+  }
+
+  // === FUN FACTS ===
+  const facts = [
+    '🐬 דולפינים ישנים עם חצי מוח ער - כדי לזכור לנשום!',
+    '🐬 דולפינים נותנים שמות זה לזה עם שריקות ייחודיות!',
+    '🐬 דולפינים עוזרים לחברים פצועים לעלות לנשום!',
+    '🐬 דולפינים משחקים עם בועות אוויר בשביל כיף!',
+    '🌊 דולפינים יכולים לשחות 60 קמ"ש!',
+    '🐬 דולפינים מזהים את עצמם במראה - הם חכמים מאוד!',
+    '💖 דולפינים חיים בקבוצות כי הם אוהבים חברה!',
+    '🧠 למוח של דולפין יש יותר קפלים מלמוח אנושי!',
+    '🐬 דולפינים מלמדים את הילדים שלהם לדוג - כמו בית ספר!',
+    '🎵 דולפינים שרים! הם משתמשים בצלילים כדי לדבר!',
+  ];
+  let factIndex = Math.floor(Math.random() * facts.length);
+  function nextFact() {
+    factIndex = (factIndex + 1) % facts.length;
+    document.getElementById('factText').textContent = facts[factIndex];
+    addXP(2, event);
+    playClick();
+    checkAchievements(event);
+  }
+
+  // === QUIZ ===
+  const quizzes = [
+    { q: 'מה עושים דולפינים כשחבר פצוע?', opts: ['בורחים', 'עוזרים לו לנשום', 'מתעלמים'], correct: 1 },
+    { q: 'איך דולפינים קוראים זה לזה?', opts: ['בשריקות', 'בנביחות', 'בצעקות'], correct: 0 },
+    { q: 'כמה קמ"ש דולפין יכול לשחות?', opts: ['20', '40', '60'], correct: 2 },
+    { q: 'למה דולפינים חיים בקבוצות?', opts: ['כי הם אוהבים חברה', 'כי הם מפחדים', 'כי הם חייבים'], correct: 0 },
+    { q: 'מה עדיף - להיות דולפין או כריש?', opts: ['כריש', 'דולפין!', 'סרדין'], correct: 1 },
+    { q: 'מה הדבר הכי חשוב במשפחה?', opts: ['צעצועים', 'שלום ואחווה', 'טלוויזיה'], correct: 1 },
+  ];
+  let currentQuiz = -1;
+  let quizCooldown = false;
+
+  function showQuiz() {
+    if (quizCooldown) return;
+    currentQuiz = Math.floor(Math.random() * quizzes.length);
+    const q = quizzes[currentQuiz];
+    const game = document.getElementById('miniGame');
+    game.classList.add('visible');
+    document.getElementById('quizQ').textContent = q.q;
+    const optsDiv = document.getElementById('quizOpts');
+    optsDiv.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.textContent = opt;
+      btn.onclick = (e) => answerQuiz(i, btn, e);
+      optsDiv.appendChild(btn);
+    });
+  }
+
+  function answerQuiz(idx, btn, e) {
+    const q = quizzes[currentQuiz];
+    document.querySelectorAll('.quiz-opt').forEach(b => b.style.pointerEvents = 'none');
+    if (idx === q.correct) {
+      btn.classList.add('correct');
+      addXP(15, e);
+      playHappy();
+      showCompliment(e, '🎉 נכון! +15 נ"ק');
+    } else {
+      btn.classList.add('wrong');
+      document.querySelectorAll('.quiz-opt')[q.correct].classList.add('correct');
+      playTone(200, 0.3, 'sawtooth');
+      showCompliment(e, '🤔 לא נורא, בפעם הבאה!');
+    }
+    checkAchievements(e);
+    quizCooldown = true;
+    setTimeout(() => {
+      document.getElementById('miniGame').classList.remove('visible');
+      quizCooldown = false;
+    }, 2000);
+  }
+
+  function maybeShowQuiz() {
+    if (Math.random() < 0.4 && !quizCooldown) showQuiz();
+  }
+
+  // === NAME BADGES (dynamic) ===
+  function renderNames() {
+    const container = document.getElementById('namesContainer');
+    container.innerHTML = '';
+    const users = getUsers();
+    users.forEach(name => {
+      const badge = document.createElement('div');
+      badge.className = 'name-badge';
+      badge.setAttribute('data-name', name);
+      badge.onclick = function() { clickName(this, name); };
+      const score = state.nameScores[name] || 0;
+      badge.innerHTML = `🐬 ${name}<span class="name-score" id="score-${CSS.escape(name)}">⭐ ${score}</span>`;
+      container.appendChild(badge);
+    });
+  }
+
+  function clickName(el, name) {
+    el.classList.remove('celebrating');
+    void el.offsetWidth;
+    el.classList.add('celebrating');
+    playClick();
+
+    state.nameScores[name] = (state.nameScores[name] || 0) + 1;
+    addXP(3, event);
+    const scoreEl = el.querySelector('.name-score');
+    if (scoreEl) scoreEl.textContent = '⭐ ' + state.nameScores[name];
+    createSparkles(event);
+    showCompliment(event);
+    checkAchievements(event);
+    saveState();
+
+    setTimeout(() => el.classList.remove('celebrating'), 800);
+  }
+
+  // === DAYS ===
+  function getDaysCount() {
+    return ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'].filter(d => state[d]).length;
+  }
+
+  function toggleDay(card, e) {
+    const day = card.dataset.day;
+    card.classList.toggle('active');
+    const isActive = card.classList.contains('active');
+    state[day] = isActive;
+    card.querySelector('.day-status').textContent = isActive ? '🕊️ יום של שלום!' : 'לחצו לסמן שלום!';
+
+    if (isActive) {
+      addXP(10, e);
+      playHappy();
+      createSparkles(e);
+      rainHearts();
+      maybeShowQuiz();
+    } else {
+      state.score = Math.max(0, state.score - 5);
+    }
+    updateUI();
+    checkAchievements(e);
+    saveState();
+  }
+
+  function clickDolphin(el, e) {
+    el.classList.remove('clicked');
+    void el.offsetWidth;
+    el.classList.add('clicked');
+    state.clicks++;
+
+    document.getElementById('sardine').classList.add('crossed');
+    document.getElementById('shark').classList.add('crossed');
+    state.sardine = true;
+    state.shark = true;
+
+    addXP(5, e);
+    playHappy();
+    createConfetti();
+    createSparkles(e);
+    showCompliment(e);
+    checkAchievements(e);
+    saveState();
+
+    setTimeout(() => el.classList.remove('clicked'), 800);
+  }
+
+  function crossCreature(el, type, e) {
+    el.classList.toggle('crossed');
+    state[type] = el.classList.contains('crossed');
+    if (el.classList.contains('crossed')) {
+      addXP(3, e);
+      playClick();
+      createSparkles(e);
+    }
+    checkAchievements(e);
+    saveState();
+  }
+
+  // === UI UPDATE ===
+  function updateUI() {
+    if (!state) return;
+    document.getElementById('totalScore').textContent = '⭐ ' + state.score;
+    const lvl = levels[state.level - 1];
+    document.getElementById('levelBadge').textContent = lvl.icon + ' שלב ' + state.level + ' - ' + lvl.name;
+    const pct = Math.min(100, (state.xp / lvl.xpNeeded) * 100);
+    document.getElementById('xpFill').style.width = pct + '%';
+    document.getElementById('xpText').textContent = state.xp + ' / ' + lvl.xpNeeded + ' נ"ק לשלב הבא';
+    const daysCount = getDaysCount();
+    document.getElementById('peaceCount').textContent = daysCount;
+    document.getElementById('weekCount').textContent = state.weeks;
+    document.getElementById('clickCount').textContent = state.clicks;
+    const stars = ['☆','☆','☆','☆','☆','☆','☆'].map((s, i) => i < daysCount ? '⭐' : '☆').join(' ');
+    document.getElementById('goalStars').textContent = stars;
+    const streakSection = document.getElementById('streakSection');
+    if (daysCount >= 2) {
+      streakSection.classList.add('visible');
+      document.getElementById('streakText').textContent = daysCount + ' ימים רצוף של שלום!';
+    } else {
+      streakSection.classList.remove('visible');
+    }
+  }
+
+  // === EFFECTS ===
+  function createSparkles(e) {
+    const emojis = ['⭐','✨','💫','🌟','💖','🐬'];
+    for (let i = 0; i < 8; i++) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      s.style.left = ((e?.clientX || window.innerWidth/2) + (Math.random()-0.5)*100) + 'px';
+      s.style.top = ((e?.clientY || 300) + (Math.random()-0.5)*100) + 'px';
+      s.style.fontSize = (Math.random()*20+15) + 'px';
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 800);
+    }
+  }
+  function createConfetti() {
+    const colors = ['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#5f27cd','#00d2d3','#55efc4'];
+    for (let i = 0; i < 40; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.cssText = `left:${Math.random()*100}vw;top:-10px;width:${Math.random()*10+5}px;height:${Math.random()*10+5}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>0.5?'50%':'0'};animation-duration:${Math.random()*2+1.5}s;animation-delay:${Math.random()*0.5}s`;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 4000);
+    }
+  }
+  function rainHearts() {
+    const hearts = ['💖','💕','🕊️','☮️','🤗','💚'];
+    for (let i = 0; i < 15; i++) {
+      const h = document.createElement('div');
+      h.className = 'heart-rain';
+      h.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+      h.style.cssText = `left:${Math.random()*100}vw;top:${Math.random()*20}%;font-size:${Math.random()*20+20}px;animation-delay:${Math.random()}s`;
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 3000);
+    }
+  }
+
+  // === RESET ===
+  function resetAll() {
+    state.weeks++;
+    addXP(20, {clientX: window.innerWidth/2, clientY: 400});
+    showCompliment({clientX: window.innerWidth/2, clientY: 300}, '🎉 שבוע חדש! +20 נ"ק בונוס!');
+    ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'].forEach(d => state[d] = false);
+    state.sardine = false;
+    state.shark = false;
+    saveState();
+
+    document.querySelectorAll('.day-card').forEach(c => {
+      c.classList.remove('active');
+      c.querySelector('.day-status').textContent = 'לחצו לסמן שלום!';
+    });
+    document.getElementById('sardine').classList.remove('crossed');
+    document.getElementById('shark').classList.remove('crossed');
+    checkAchievements();
+    updateUI();
+  }
+
+  // === INIT GAME (after login) ===
+  function initGame() {
+    // Restore days
+    document.querySelectorAll('.day-card').forEach(card => {
+      if (state[card.dataset.day]) {
+        card.classList.add('active');
+        card.querySelector('.day-status').textContent = '🕊️ יום של שלום!';
+      } else {
+        card.classList.remove('active');
+        card.querySelector('.day-status').textContent = 'לחצו לסמן שלום!';
+      }
+    });
+    if (state.sardine) document.getElementById('sardine').classList.add('crossed');
+    else document.getElementById('sardine').classList.remove('crossed');
+    if (state.shark) document.getElementById('shark').classList.add('crossed');
+    else document.getElementById('shark').classList.remove('crossed');
+
+    renderNames();
+    renderAchievements();
+    updateUI();
+    document.getElementById('factText').textContent = facts[factIndex];
+  }
+
+  // === AUTO-LOGIN if returning user ===
+  (function() {
+    const lastUser = localStorage.getItem(ACTIVE_KEY);
+    if (lastUser && getUsers().includes(lastUser)) {
+      loginAs(lastUser);
+    } else {
+      renderEntryScreen();
+    }
+  })();
+</script>
+</body>
+</html>
