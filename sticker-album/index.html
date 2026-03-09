@@ -2281,7 +2281,16 @@ async function studentLogin() {
   globalState.activeSpace = code;
   state.student = {name, joinCode: code, completedTasks: member.completedTasks || []};
 
-  // Restore collected pieces from member stickers
+  // Restore collected pieces from member.collected (primary source — has ALL stickers)
+  if (member.collected) {
+    for (const theme in member.collected) {
+      if (!state.collected[theme]) state.collected[theme] = [];
+      member.collected[theme].forEach(id => {
+        if (!state.collected[theme].includes(id)) state.collected[theme].push(id);
+      });
+    }
+  }
+  // Also restore from member.stickers (fallback — older format / teacher gifts)
   if (member.stickers?.length) {
     const allMap = {};
     ALBUMS.forEach(a => STICKERS[a].forEach(s => { allMap[s.id] = a; }));
