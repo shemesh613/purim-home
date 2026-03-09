@@ -2198,6 +2198,11 @@ async function joinWithCode() {
   }
 
   // Restore collected stickers from member data (student may be re-joining)
+  console.log('🔑 joinWithCode restore — member data:', JSON.stringify({
+    name: member.name,
+    stickers: member.stickers,
+    collected: member.collected
+  }));
   if (member.collected) {
     for (const theme in member.collected) {
       if (!state.collected[theme]) state.collected[theme] = [];
@@ -2281,6 +2286,13 @@ async function studentLogin() {
   globalState.activeSpace = code;
   state.student = {name, joinCode: code, completedTasks: member.completedTasks || []};
 
+  console.log('🔑 studentLogin restore — member data:', JSON.stringify({
+    name: member.name,
+    stickers: member.stickers,
+    collected: member.collected
+  }));
+  console.log('🔑 state.collected BEFORE restore:', JSON.stringify(state.collected));
+
   // Restore collected pieces from member.collected (primary source — has ALL stickers)
   if (member.collected) {
     for (const theme in member.collected) {
@@ -2302,6 +2314,10 @@ async function studentLogin() {
       }
     });
   }
+
+  console.log('🔑 state.collected AFTER restore:', JSON.stringify(state.collected));
+  const totalRestored = Object.values(state.collected).reduce((s,a) => s+a.length, 0);
+  console.log('🔑 Total stickers restored:', totalRestored);
 
   saveState();
   renderAllPuzzles();
