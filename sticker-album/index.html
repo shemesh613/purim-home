@@ -2243,12 +2243,11 @@ async function joinWithCode() {
     member.pin = pin;
   }
 
-  // Restore collected stickers from member data (student may be re-joining)
-  console.log('🔑 joinWithCode restore — member data:', JSON.stringify({
-    name: member.name,
-    stickers: member.stickers,
-    collected: member.collected
-  }));
+  // RESET collected — must start clean for THIS student (not inherit from previous student on same device)
+  state.collected = {purim:[],pesach:[],heroes:[],relaxation:[],military:[],gooddeeds:[]};
+  state.placed = {purim:[],pesach:[],heroes:[],relaxation:[],military:[],gooddeeds:[]};
+
+  // Restore ONLY this student's stickers from member data
   if (member.collected) {
     for (const theme in member.collected) {
       if (!state.collected[theme]) state.collected[theme] = [];
@@ -2268,6 +2267,7 @@ async function joinWithCode() {
       }
     });
   }
+  console.log('🔑 joinWithCode — restored for', name, ':', JSON.stringify(state.collected));
 
   state.student = {name, joinCode: code, completedTasks: member.completedTasks || []};
   saveState();
@@ -2330,16 +2330,14 @@ async function studentLogin() {
   // Switch to this space and restore student state
   state = spaceData;
   globalState.activeSpace = code;
+
+  // RESET collected — must start clean for THIS student (not inherit from previous student on same device)
+  state.collected = {purim:[],pesach:[],heroes:[],relaxation:[],military:[],gooddeeds:[]};
+  state.placed = {purim:[],pesach:[],heroes:[],relaxation:[],military:[],gooddeeds:[]};
+
   state.student = {name, joinCode: code, completedTasks: member.completedTasks || []};
 
-  console.log('🔑 studentLogin restore — member data:', JSON.stringify({
-    name: member.name,
-    stickers: member.stickers,
-    collected: member.collected
-  }));
-  console.log('🔑 state.collected BEFORE restore:', JSON.stringify(state.collected));
-
-  // Restore collected pieces from member.collected (primary source — has ALL stickers)
+  // Restore ONLY this student's stickers from member data
   if (member.collected) {
     for (const theme in member.collected) {
       if (!state.collected[theme]) state.collected[theme] = [];
@@ -2348,7 +2346,6 @@ async function studentLogin() {
       });
     }
   }
-  // Also restore from member.stickers (fallback — older format / teacher gifts)
   if (member.stickers?.length) {
     const allMap = {};
     ALBUMS.forEach(a => STICKERS[a].forEach(s => { allMap[s.id] = a; }));
@@ -2360,10 +2357,7 @@ async function studentLogin() {
       }
     });
   }
-
-  console.log('🔑 state.collected AFTER restore:', JSON.stringify(state.collected));
-  const totalRestored = Object.values(state.collected).reduce((s,a) => s+a.length, 0);
-  console.log('🔑 Total stickers restored:', totalRestored);
+  console.log('🔑 studentLogin — restored for', name, ':', JSON.stringify(state.collected));
 
   saveState();
   renderAllPuzzles();
