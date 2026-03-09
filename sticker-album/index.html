@@ -963,19 +963,42 @@ async function studentCloudSync(joinCode) {
     const cloud = await cloudLoadSpace(joinCode);
     const cloudMembers = cloud?.admin?.members || [];
 
-    // Save this student's collected stickers into their member record
+    // Save this student's collected stickers into their member record (MERGE, never overwrite)
     const myName = state.student.name;
     const localMember = state.admin.members.find(m => m.name === myName);
     if (localMember && state.collected) {
-      localMember.collected = state.collected;
+      // Merge local collected INTO member (union, not replace)
+      if (!localMember.collected) localMember.collected = {};
+      for (const theme in state.collected) {
+        if (!localMember.collected[theme]) localMember.collected[theme] = [];
+        state.collected[theme].forEach(id => {
+          if (!localMember.collected[theme].includes(id)) localMember.collected[theme].push(id);
+        });
+      }
+      // Keep stickers array in sync too
+      if (!localMember.stickers) localMember.stickers = [];
+      Object.values(state.collected).flat().forEach(id => {
+        if (!localMember.stickers.includes(id)) localMember.stickers.push(id);
+      });
     }
 
     // Merge: start with cloud members, then update THIS student's entry only
     let merged = [...cloudMembers];
     const cloudIdx = merged.findIndex(m => m.name === myName);
     if (cloudIdx >= 0) {
-      // Preserve cloud data, overlay local student data
-      merged[cloudIdx] = {...merged[cloudIdx], ...localMember};
+      const cloudMember = merged[cloudIdx];
+      const mergedMember = {...cloudMember, ...localMember};
+      // Deep merge collected: union of sticker IDs per theme (NEVER lose stickers)
+      if (cloudMember.collected || localMember?.collected) {
+        mergedMember.collected = {};
+        const allThemes = new Set([...Object.keys(cloudMember.collected||{}), ...Object.keys(localMember?.collected||{})]);
+        allThemes.forEach(theme => {
+          mergedMember.collected[theme] = [...new Set([...(cloudMember.collected?.[theme]||[]), ...(localMember?.collected?.[theme]||[])])];
+        });
+      }
+      // Merge stickers array too (union)
+      mergedMember.stickers = [...new Set([...(cloudMember.stickers||[]), ...(localMember?.stickers||[])])];
+      merged[cloudIdx] = mergedMember;
     } else if (localMember) {
       merged.push(localMember);
     }
@@ -1651,6 +1674,12 @@ function revealSticker() {
   // Collect sticker to tray
   if (!state.collected[theme].includes(stickerId)) {
     state.collected[theme].push(stickerId);
+    // Also update member.stickers so it stays in sync for restoration
+    const curMember = state.admin?.members?.find(m => m.name === state.student?.name);
+    if (curMember) {
+      if (!curMember.stickers) curMember.stickers = [];
+      if (!curMember.stickers.includes(stickerId)) curMember.stickers.push(stickerId);
+    }
     state.points += 5;
     saveState();
     renderPuzzle(theme);
@@ -2166,6 +2195,27 @@ async function joinWithCode() {
     state.admin.members.push(member);
   } else {
     member.pin = pin;
+  }
+
+  // Restore collected stickers from member data (student may be re-joining)
+  if (member.collected) {
+    for (const theme in member.collected) {
+      if (!state.collected[theme]) state.collected[theme] = [];
+      member.collected[theme].forEach(id => {
+        if (!state.collected[theme].includes(id)) state.collected[theme].push(id);
+      });
+    }
+  }
+  if (member.stickers?.length) {
+    const allMap = {};
+    ALBUMS.forEach(a => STICKERS[a].forEach(s => { allMap[s.id] = a; }));
+    member.stickers.forEach(sid => {
+      const theme = allMap[sid];
+      if (theme && !state.collected[theme]?.includes(sid)) {
+        if (!state.collected[theme]) state.collected[theme] = [];
+        state.collected[theme].push(sid);
+      }
+    });
   }
 
   state.student = {name, joinCode: code, completedTasks: member.completedTasks || []};
