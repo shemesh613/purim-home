@@ -1078,6 +1078,48 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+// Last-chance sync when page is closing or hidden
+function emergencySync() {
+  if (!state.student?.joinCode) return;
+  const member = state.admin?.members?.find(m => m.name === state.student.name);
+  if (member && state.collected) {
+    if (!member.collected) member.collected = {};
+    for (const theme in state.collected) {
+      if (!member.collected[theme]) member.collected[theme] = [];
+      state.collected[theme].forEach(id => {
+        if (!member.collected[theme].includes(id)) member.collected[theme].push(id);
+      });
+    }
+    if (!member.stickers) member.stickers = [];
+    Object.values(state.collected).flat().forEach(id => {
+      if (!member.stickers.includes(id)) member.stickers.push(id);
+    });
+  }
+  if (globalState.activeSpace) {
+    localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
+  }
+  // Use fetch with keepalive (supports PUT, works during unload)
+  const joinCode = state.student.joinCode;
+  const memberData = state.admin?.members;
+  if (memberData) {
+    try {
+      fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/members.json`, {
+        method: 'PUT', keepalive: true,
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(memberData)
+      });
+    } catch(e) {}
+  }
+}
+window.addEventListener('beforeunload', emergencySync);
+// Also sync when tab becomes hidden (mobile: switching apps)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && state.student?.joinCode) {
+    console.log('Tab hidden (student) — emergency sync...');
+    emergencySync();
+  }
+});
+
 // Pending writes queue — retry failed saves on page load
 const PENDING_KEY = 'sticker-pending-writes';
 function addPendingWrite(joinCode, data) {
@@ -1682,6 +1724,10 @@ function revealSticker() {
     }
     state.points += 5;
     saveState();
+    // IMMEDIATE cloud sync for sticker (don't risk losing it to debounce)
+    if (state.student?.joinCode) {
+      studentCloudSync(state.student.joinCode);
+    }
     renderPuzzle(theme);
     updateStats();
     document.getElementById('scratchHint').textContent = '🎉 ' + sticker.name + ' — גררו למקום הנכון בפאזל!';
@@ -2368,6 +2414,13 @@ async function showStudentView() {
   renderStudentTasks();
   renderMyStickers();
   processTeacherGifts();
+
+  // IMMEDIATE cloud sync — push local data to cloud right after page load
+  // This ensures stickers from localStorage make it to cloud ASAP
+  if (state.student?.joinCode) {
+    console.log('🔄 Immediate student sync on page load...');
+    studentCloudSync(state.student.joinCode);
+  }
 }
 
 function resetDailyTasks() {
