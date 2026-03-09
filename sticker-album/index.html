@@ -1062,7 +1062,7 @@ document.addEventListener('visibilitychange', () => {
     console.log('Tab visible (teacher) — pushing to cloud...');
     cloudSaveSpace(globalState.activeSpace, getSharedData());
   }
-  // Student: pull latest tasks from cloud (read only! never overwrite)
+  // Student: pull latest tasks + member data from cloud
   if (state.student?.joinCode) {
     console.log('Tab visible (student) — pulling from cloud...');
     cloudLoadSpace(state.student.joinCode).then(cloud => {
@@ -1070,8 +1070,10 @@ document.addEventListener('visibilitychange', () => {
         state.admin.tasks = cloud.admin.tasks;
         if (cloud.admin.members) state.admin.members = cloud.admin.members;
         if (cloud.taskCompletions) state.taskCompletions = {...state.taskCompletions, ...cloud.taskCompletions};
-        // Save locally only — not to cloud (student never overwrites cloud)
+        restoreStudentCollected();
         localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
+        renderAllPuzzles();
+        updateStats();
         if (typeof renderStudentTasks === 'function') renderStudentTasks();
       }
     }).catch(e => console.warn('Student visibility sync failed:', e));
@@ -1175,6 +1177,40 @@ function saveGlobal() {
 }
 
 function spaceKey(code) { return 'space-' + code; }
+
+// === CENTRAL sticker restore — ALWAYS call this when loading/switching students ===
+// Resets state.collected and rebuilds ONLY from current student's member data
+function restoreStudentCollected() {
+  // Reset to empty — prevent cross-student bleed
+  state.collected = {purim:[],pesach:[],heroes:[],relaxation:[],military:[],gooddeeds:[]};
+  state.placed = {purim:[],pesach:[],heroes:[],relaxation:[],military:[],gooddeeds:[]};
+  if (!state.student) return;
+  const member = state.admin?.members?.find(m => m.name === state.student.name);
+  if (!member) return;
+  // Primary source: member.collected (theme-keyed object)
+  if (member.collected) {
+    for (const theme in member.collected) {
+      if (!state.collected[theme]) state.collected[theme] = [];
+      member.collected[theme].forEach(id => {
+        if (!state.collected[theme].includes(id)) state.collected[theme].push(id);
+      });
+    }
+  }
+  // Fallback: member.stickers (flat array — older format / teacher gifts)
+  if (member.stickers?.length) {
+    const allMap = {};
+    ALBUMS.forEach(a => STICKERS[a].forEach(s => { allMap[s.id] = a; }));
+    member.stickers.forEach(sid => {
+      const theme = allMap[sid];
+      if (theme && !state.collected[theme]?.includes(sid)) {
+        if (!state.collected[theme]) state.collected[theme] = [];
+        state.collected[theme].push(sid);
+      }
+    });
+  }
+  const total = Object.values(state.collected).reduce((s,a) => s+a.length, 0);
+  console.log('🔑 restoreStudentCollected:', state.student.name, '→', total, 'stickers');
+}
 
 function loadSpace(code) {
   try {
@@ -2243,33 +2279,8 @@ async function joinWithCode() {
     member.pin = pin;
   }
 
-  // RESET collected — must start clean for THIS student (not inherit from previous student on same device)
-  state.collected = {purim:[],pesach:[],heroes:[],relaxation:[],military:[],gooddeeds:[]};
-  state.placed = {purim:[],pesach:[],heroes:[],relaxation:[],military:[],gooddeeds:[]};
-
-  // Restore ONLY this student's stickers from member data
-  if (member.collected) {
-    for (const theme in member.collected) {
-      if (!state.collected[theme]) state.collected[theme] = [];
-      member.collected[theme].forEach(id => {
-        if (!state.collected[theme].includes(id)) state.collected[theme].push(id);
-      });
-    }
-  }
-  if (member.stickers?.length) {
-    const allMap = {};
-    ALBUMS.forEach(a => STICKERS[a].forEach(s => { allMap[s.id] = a; }));
-    member.stickers.forEach(sid => {
-      const theme = allMap[sid];
-      if (theme && !state.collected[theme]?.includes(sid)) {
-        if (!state.collected[theme]) state.collected[theme] = [];
-        state.collected[theme].push(sid);
-      }
-    });
-  }
-  console.log('🔑 joinWithCode — restored for', name, ':', JSON.stringify(state.collected));
-
   state.student = {name, joinCode: code, completedTasks: member.completedTasks || []};
+  restoreStudentCollected();
   saveState();
   renderAllPuzzles();
   updateStats();
@@ -2330,34 +2341,8 @@ async function studentLogin() {
   // Switch to this space and restore student state
   state = spaceData;
   globalState.activeSpace = code;
-
-  // RESET collected — must start clean for THIS student (not inherit from previous student on same device)
-  state.collected = {purim:[],pesach:[],heroes:[],relaxation:[],military:[],gooddeeds:[]};
-  state.placed = {purim:[],pesach:[],heroes:[],relaxation:[],military:[],gooddeeds:[]};
-
   state.student = {name, joinCode: code, completedTasks: member.completedTasks || []};
-
-  // Restore ONLY this student's stickers from member data
-  if (member.collected) {
-    for (const theme in member.collected) {
-      if (!state.collected[theme]) state.collected[theme] = [];
-      member.collected[theme].forEach(id => {
-        if (!state.collected[theme].includes(id)) state.collected[theme].push(id);
-      });
-    }
-  }
-  if (member.stickers?.length) {
-    const allMap = {};
-    ALBUMS.forEach(a => STICKERS[a].forEach(s => { allMap[s.id] = a; }));
-    member.stickers.forEach(sid => {
-      const theme = allMap[sid];
-      if (theme && !state.collected[theme]?.includes(sid)) {
-        if (!state.collected[theme]) state.collected[theme] = [];
-        state.collected[theme].push(sid);
-      }
-    });
-  }
-  console.log('🔑 studentLogin — restored for', name, ':', JSON.stringify(state.collected));
+  restoreStudentCollected();
 
   saveState();
   renderAllPuzzles();
@@ -2378,28 +2363,16 @@ async function showStudentView() {
       const cloud = await cloudLoadSpace(state.student.joinCode);
       if (cloud?.admin?.tasks) {
         state.admin.tasks = cloud.admin.tasks;
-        // Also update members list & taskCompletions from cloud
+        // Update members & taskCompletions from cloud
         if (cloud.admin.members) state.admin.members = cloud.admin.members;
         if (cloud.taskCompletions) state.taskCompletions = {...state.taskCompletions, ...cloud.taskCompletions};
-        // Restore collected stickers from cloud if local is empty
-        const myMember = (cloud.admin?.members || cloud.members || []).find(m => m.name === state.student.name);
-        if (myMember?.collected) {
-          const localTotal = Object.values(state.collected).reduce((s,a) => s+a.length, 0);
-          const cloudTotal = Object.values(myMember.collected).reduce((s,a) => s+a.length, 0);
-          if (cloudTotal > localTotal) {
-            // Cloud has more stickers — merge (take union)
-            for (const theme in myMember.collected) {
-              if (!state.collected[theme]) state.collected[theme] = [];
-              myMember.collected[theme].forEach(id => {
-                if (!state.collected[theme].includes(id)) state.collected[theme].push(id);
-              });
-            }
-            console.log('Restored stickers from cloud ✅', cloudTotal, 'pieces');
-          }
-        }
-        // Save locally only (student never overwrites cloud admin data)
+        // Re-restore stickers from updated cloud member data (may have more than local)
+        restoreStudentCollected();
+        renderAllPuzzles();
+        updateStats();
+        // Save locally
         localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
-        console.log('Student synced tasks from cloud ✅', state.admin.tasks.length, 'tasks');
+        console.log('Student synced from cloud ✅', state.admin.tasks.length, 'tasks');
       }
     } catch(e) { console.warn('Student cloud sync failed:', e); }
   }
@@ -2647,6 +2620,10 @@ function renderMyStickers() {
 
 function checkAdminState() {
   if (state.student) {
+    // Restore THIS student's stickers (localStorage may have stale cross-student data)
+    restoreStudentCollected();
+    renderAllPuzzles();
+    updateStats();
     showStudentView();
   }
   // Admin requires re-login each time for security
