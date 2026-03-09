@@ -1100,17 +1100,20 @@ function emergencySync() {
   if (globalState.activeSpace) {
     localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
   }
-  // Use fetch with keepalive (supports PUT, works during unload)
+  // Write ONLY this student's member entry to cloud (not entire array — avoids overwriting others)
   const joinCode = state.student.joinCode;
-  const memberData = state.admin?.members;
-  if (memberData) {
-    try {
-      fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/members.json`, {
-        method: 'PUT', keepalive: true,
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(memberData)
-      });
-    } catch(e) {}
+  const members = state.admin?.members;
+  if (members && member) {
+    const idx = members.indexOf(member);
+    if (idx >= 0) {
+      try {
+        fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/members/${idx}.json`, {
+          method: 'PUT', keepalive: true,
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(member)
+        });
+      } catch(e) {}
+    }
   }
 }
 window.addEventListener('beforeunload', emergencySync);
@@ -1752,11 +1755,14 @@ function revealSticker() {
   // Collect sticker to tray
   if (!state.collected[theme].includes(stickerId)) {
     state.collected[theme].push(stickerId);
-    // Also update member.stickers so it stays in sync for restoration
+    // Also update member record so it stays in sync for restoration
     const curMember = state.admin?.members?.find(m => m.name === state.student?.name);
     if (curMember) {
       if (!curMember.stickers) curMember.stickers = [];
       if (!curMember.stickers.includes(stickerId)) curMember.stickers.push(stickerId);
+      if (!curMember.collected) curMember.collected = {};
+      if (!curMember.collected[theme]) curMember.collected[theme] = [];
+      if (!curMember.collected[theme].includes(stickerId)) curMember.collected[theme].push(stickerId);
     }
     state.points += 5;
     saveState();
@@ -2446,6 +2452,11 @@ function processTeacherGifts() {
 }
 
 function studentLogout() {
+  // Flush pending sync BEFORE clearing student state
+  clearTimeout(_studentTimer);
+  if (state.student?.joinCode) {
+    studentCloudSync(state.student.joinCode); // immediate, not debounced
+  }
   state.student = null;
   saveState();
   globalState.activeSpace = null;
