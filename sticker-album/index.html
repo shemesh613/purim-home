@@ -959,28 +959,53 @@ function debouncedStudentSync(joinCode) {
 async function studentCloudSync(joinCode) {
   if (!state.student || !state.admin?.members) return;
   try {
+    // FIRST: fetch latest members from cloud to avoid overwriting other students
+    const cloud = await cloudLoadSpace(joinCode);
+    const cloudMembers = cloud?.admin?.members || [];
+
     // Save this student's collected stickers into their member record
-    const member = state.admin.members.find(m => m.name === state.student.name);
-    if (member && state.collected) {
-      member.collected = state.collected;
+    const myName = state.student.name;
+    const localMember = state.admin.members.find(m => m.name === myName);
+    if (localMember && state.collected) {
+      localMember.collected = state.collected;
     }
-    // Write members INSIDE admin.members (not top-level) to avoid corrupting structure
-    const memberData = state.admin.members;
-    const completions = state.taskCompletions || {};
+
+    // Merge: start with cloud members, then update THIS student's entry only
+    let merged = [...cloudMembers];
+    const cloudIdx = merged.findIndex(m => m.name === myName);
+    if (cloudIdx >= 0) {
+      // Preserve cloud data, overlay local student data
+      merged[cloudIdx] = {...merged[cloudIdx], ...localMember};
+    } else if (localMember) {
+      merged.push(localMember);
+    }
+
+    // Also pull any new members from cloud into local state (so UI stays updated)
+    cloudMembers.forEach(cm => {
+      if (!state.admin.members.find(lm => lm.name === cm.name)) {
+        state.admin.members.push(cm);
+      }
+    });
+
+    // Merge taskCompletions: cloud + local (union, not overwrite)
+    const cloudCompletions = cloud?.taskCompletions || {};
+    const localCompletions = state.taskCompletions || {};
+    const mergedCompletions = {...cloudCompletions, ...localCompletions};
+
     // Use separate PUTs to specific paths — safe, no overwrite of admin.tasks
     const [r1, r2] = await Promise.all([
       fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/members.json`, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(memberData)
+        body: JSON.stringify(merged)
       }),
       fetch(`${FIREBASE_URL}/spaces/${joinCode}/taskCompletions.json`, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(completions)
+        body: JSON.stringify(mergedCompletions)
       })
     ]);
-    if (r1.ok && r2.ok) console.log('Student sync ✅ (admin/members + taskCompletions)');
+    if (r1.ok && r2.ok) console.log('Student sync ✅ (merged members + taskCompletions)');
     else console.warn('Student sync partial fail:', r1.status, r2.status);
   } catch(e) { console.warn('Student sync error:', e); }
 }
