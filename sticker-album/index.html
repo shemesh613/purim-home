@@ -1104,7 +1104,7 @@ function emergencySync() {
   const joinCode = state.student.joinCode;
   const members = state.admin?.members;
   if (members && member) {
-    const idx = members.indexOf(member);
+    const idx = members.findIndex(m => m.name === member.name);
     if (idx >= 0) {
       try {
         fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/members/${idx}.json`, {
@@ -1224,6 +1224,19 @@ function loadSpace(code) {
 }
 
 function saveState() {
+  // Always sync state.collected into member.collected before saving (prevents data loss on reload)
+  if (state.student && state.admin?.members) {
+    const _m = state.admin.members.find(m => m.name === state.student.name);
+    if (_m && state.collected) {
+      if (!_m.collected) _m.collected = {};
+      for (const t in state.collected) {
+        if (!_m.collected[t]) _m.collected[t] = [];
+        state.collected[t].forEach(id => { if (!_m.collected[t].includes(id)) _m.collected[t].push(id); });
+      }
+      if (!_m.stickers) _m.stickers = [];
+      Object.values(state.collected).flat().forEach(id => { if (!_m.stickers.includes(id)) _m.stickers.push(id); });
+    }
+  }
   if (globalState.activeSpace) {
     localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
   }
@@ -2451,11 +2464,25 @@ function processTeacherGifts() {
   }
 }
 
-function studentLogout() {
+async function studentLogout() {
   // Flush pending sync BEFORE clearing student state
   clearTimeout(_studentTimer);
   if (state.student?.joinCode) {
-    studentCloudSync(state.student.joinCode); // immediate, not debounced
+    // Sync member.collected from state.collected BEFORE clearing
+    const _m = state.admin?.members?.find(m => m.name === state.student.name);
+    if (_m && state.collected) {
+      if (!_m.collected) _m.collected = {};
+      for (const t in state.collected) {
+        if (!_m.collected[t]) _m.collected[t] = [];
+        state.collected[t].forEach(id => { if (!_m.collected[t].includes(id)) _m.collected[t].push(id); });
+      }
+      if (!_m.stickers) _m.stickers = [];
+      Object.values(state.collected).flat().forEach(id => { if (!_m.stickers.includes(id)) _m.stickers.push(id); });
+    }
+    // Save synced data to localStorage
+    if (globalState.activeSpace) localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
+    // Push to cloud and WAIT for it
+    try { await studentCloudSync(state.student.joinCode); } catch(e) {}
   }
   state.student = null;
   saveState();
