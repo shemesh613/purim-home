@@ -184,6 +184,58 @@
     100% { transform: scale(1) rotate(0); }
   }
   @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  /* Name management */
+  .names-section { margin-bottom: 25px; }
+  .names-header { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  .names-header h3 { color: #ffeaa7; font-size: 1.1em; margin: 0; }
+  .add-name-btn {
+    background: linear-gradient(135deg, #00b894, #00cec9); color: #fff;
+    border: none; padding: 6px 16px; border-radius: 25px; font-size: 0.9em;
+    font-family: 'Rubik', sans-serif; font-weight: 700; cursor: pointer;
+    transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,184,148,0.3);
+  }
+  .add-name-btn:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,184,148,0.5); }
+  .manage-names-btn {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: #b2bec3; padding: 6px 14px; border-radius: 25px; font-size: 0.85em;
+    font-family: 'Rubik', sans-serif; cursor: pointer; transition: all 0.3s;
+  }
+  .manage-names-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+  .manage-names-btn.active { background: rgba(255,56,56,0.2); border-color: rgba(255,56,56,0.4); color: #ff6b6b; }
+  .add-name-inline {
+    display: none; justify-content: center; gap: 8px; margin-bottom: 12px;
+    animation: fadeIn 0.3s ease;
+  }
+  .add-name-inline.visible { display: flex; }
+  .add-name-inline input {
+    background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3);
+    color: #fff; padding: 8px 15px; border-radius: 12px; font-size: 1em;
+    font-family: 'Rubik', sans-serif; text-align: center; width: 160px; outline: none;
+  }
+  .add-name-inline input:focus { border-color: #00b894; box-shadow: 0 0 15px rgba(0,184,148,0.3); }
+  .add-name-inline input::placeholder { color: rgba(255,255,255,0.4); }
+  .add-name-inline button {
+    background: linear-gradient(135deg, #00b894, #00cec9); color: #fff;
+    border: none; padding: 8px 18px; border-radius: 12px; font-size: 1em;
+    font-family: 'Rubik', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.3s;
+  }
+  .add-name-inline button:hover { transform: scale(1.05); }
+  .name-badge .delete-name-btn {
+    display: none; position: absolute; top: -6px; right: -6px;
+    background: #ff3838; color: #fff; border: 2px solid #fff;
+    border-radius: 50%; width: 24px; height: 24px; font-size: 0.5em;
+    cursor: pointer; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(255,56,56,0.5); z-index: 10;
+    line-height: 1; padding: 0;
+  }
+  .names.manage-mode .name-badge .delete-name-btn { display: flex; }
+  .names.manage-mode .name-badge { animation: shake 0.4s ease infinite !important; cursor: default; }
+  @keyframes shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-2deg); }
+    75% { transform: rotate(2deg); }
+  }
+
 
   /* Compliment popup */
   .compliment {
@@ -482,7 +534,19 @@
     <div class="achievements" id="achievementsContainer"></div>
 
     <!-- Names (dynamic!) -->
-    <div class="names" id="namesContainer"></div>
+    <div class="names-section">
+      <div class="names-header">
+        <h3>השמות שלנו 👨‍👩‍👧‍👦</h3>
+        <button class="add-name-btn" onclick="toggleAddName()">➕ הוסף שם</button>
+        <button class="manage-names-btn" id="manageBtn" onclick="toggleManageMode()">🗑️ ניהול</button>
+      </div>
+      <div class="add-name-inline" id="addNameInline">
+        <input type="text" id="newNameInput" placeholder="שם חדש..." maxlength="20"
+               onkeydown="if(event.key==='Enter')addNewName()">
+        <button onclick="addNewName()">✅ הוסף</button>
+      </div>
+      <div class="names" id="namesContainer"></div>
+    </div>
 
     <!-- Streak -->
     <div class="streak-section" id="streakSection">
@@ -1000,6 +1064,65 @@
   }
 
   // === NAME BADGES (dynamic) ===
+  let manageMode = false;
+
+  function toggleAddName() {
+    const el = document.getElementById('addNameInline');
+    el.classList.toggle('visible');
+    if (el.classList.contains('visible')) {
+      document.getElementById('newNameInput').focus();
+    }
+  }
+
+  function addNewName() {
+    const input = document.getElementById('newNameInput');
+    const name = input.value.trim();
+    if (!name) return;
+    const users = getUsers();
+    if (!users.includes(name)) {
+      users.push(name);
+      saveUsers(users);
+      saveUserState(name, createDefaultState());
+    }
+    input.value = '';
+    renderNames();
+    playHappy();
+    showCompliment(event, '✅ ' + name + ' התווסף!');
+  }
+
+  function toggleManageMode() {
+    manageMode = !manageMode;
+    const container = document.getElementById('namesContainer');
+    const btn = document.getElementById('manageBtn');
+    if (manageMode) {
+      container.classList.add('manage-mode');
+      btn.classList.add('active');
+      btn.textContent = '✅ סיום ניהול';
+    } else {
+      container.classList.remove('manage-mode');
+      btn.classList.remove('active');
+      btn.textContent = '🗑️ ניהול';
+    }
+  }
+
+  function removeName(name, e) {
+    e.stopPropagation();
+    if (!confirm('להסיר את ' + name + '?')) return;
+    const users = getUsers().filter(u => u !== name);
+    saveUsers(users);
+    localStorage.removeItem(STATE_PREFIX + name);
+    if (state && state.nameScores && state.nameScores[name]) {
+      delete state.nameScores[name];
+      saveState();
+    }
+    if (currentUser === name) {
+      switchUser();
+      return;
+    }
+    renderNames();
+    playClick();
+  }
+
   function renderNames() {
     const container = document.getElementById('namesContainer');
     container.innerHTML = '';
@@ -1008,11 +1131,19 @@
       const badge = document.createElement('div');
       badge.className = 'name-badge';
       badge.setAttribute('data-name', name);
-      badge.onclick = function() { clickName(this, name); };
+      badge.onclick = function() {
+        if (!manageMode) clickName(this, name);
+      };
       const score = state.nameScores[name] || 0;
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-name-btn';
+      deleteBtn.textContent = '✖';
+      deleteBtn.onclick = function(ev) { removeName(name, ev); };
       badge.innerHTML = `🐬 ${name}<span class="name-score" id="score-${CSS.escape(name)}">⭐ ${score}</span>`;
+      badge.appendChild(deleteBtn);
       container.appendChild(badge);
     });
+    if (manageMode) container.classList.add('manage-mode');
   }
 
   function clickName(el, name) {
