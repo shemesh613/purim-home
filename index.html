@@ -1101,6 +1101,17 @@
       position: relative;
       overflow: hidden;
     }
+    .game-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--card-border, #c084fc), transparent);
+      border-radius: 20px 20px 0 0;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .game-card:hover::after { opacity: 1; }
     .game-card::before {
       content: '';
       position: absolute; inset: 0;
@@ -1235,31 +1246,31 @@
     </div>
 
     <div class="games-grid">
-      <a href="games/stations/index.html" class="game-card" style="--card-shadow: rgba(124,58,237,0.2); --card-border: #c084fc; background:linear-gradient(135deg,#faf5ff,#ede9fe);">
+      <a href="games/stations/index.html" class="game-card" style="--card-shadow: rgba(124,58,237,0.2); --card-border: #c084fc; background:linear-gradient(135deg,#f3e8ff,#e9d5ff);">
         <span class="card-emoji">🏰</span>
         <h3 class="card-title">חדרי בריחה</h3>
         <p class="card-desc">6 חדרים מהמגילה עם חידות, ניקוד ומדליות!</p>
         <span class="card-badge" style="background:#7c3aed;color:#fff;">🗝️ 6 חדרים</span>
       </a>
-      <a href="games/trivia.html" class="game-card" style="--card-shadow: rgba(59,130,246,0.2); --card-border: #93c5fd; background:linear-gradient(135deg,#eff6ff,#dbeafe);">
+      <a href="games/trivia.html" class="game-card" style="--card-shadow: rgba(59,130,246,0.2); --card-border: #93c5fd; background:linear-gradient(135deg,#dbeafe,#bfdbfe);">
         <span class="card-emoji">❓</span>
         <h3 class="card-title">חידון מגילה</h3>
         <p class="card-desc">4 שלבים, מדליות ואפקטים מטורפים!</p>
         <span class="card-badge badge-popular">🔥 להיט</span>
       </a>
-      <a href="games/memory.html" class="game-card" style="--card-shadow: rgba(236,72,153,0.2); --card-border: #f9a8d4; background:linear-gradient(135deg,#fdf2f8,#fce7f3);">
+      <a href="games/memory.html" class="game-card" style="--card-shadow: rgba(236,72,153,0.2); --card-border: #f9a8d4; background:linear-gradient(135deg,#fce7f3,#fbcfe8);">
         <span class="card-emoji">🧩</span>
         <h3 class="card-title">זיכרון פורים</h3>
         <p class="card-desc">מצאו את דמויות המגילה!</p>
         <span class="card-badge badge-fun">⭐ כיפי</span>
       </a>
-      <a href="games/grogger.html" class="game-card" style="--card-shadow: rgba(249,115,22,0.2); --card-border: #fdba74; background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+      <a href="games/grogger.html" class="game-card" style="--card-shadow: rgba(249,115,22,0.2); --card-border: #fdba74; background:linear-gradient(135deg,#ffedd5,#fed7aa);">
         <span class="card-emoji">📢</span>
         <h3 class="card-title">רעשן דיגיטלי</h3>
         <p class="card-desc">נערו את הטלפון — רעשן פורים!</p>
         <span class="card-badge badge-fun">🎉 כיפי</span>
       </a>
-      <a href="sticker-album/" class="game-card" style="--card-shadow: rgba(124,58,237,0.2); --card-border: #c084fc; background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+      <a href="sticker-album/" class="game-card" style="--card-shadow: rgba(124,58,237,0.2); --card-border: #c084fc; background:linear-gradient(135deg,#ede9fe,#ddd6fe);">
         <span class="card-emoji">🧩</span>
         <h3 class="card-title">אלבום מדבקות פאזל</h3>
         <p class="card-desc">השלימו משימות, אספו חלקים והרכיבו 6 פאזלים!</p>
@@ -1529,13 +1540,13 @@
         <p class="card-desc">20 שאלות עם אפקטים מטורפים!</p>
         <span class="card-badge badge-popular">🔥 להיט</span>
       </a>
-      <a href="games/memory.html" class="game-card" style="--card-shadow: rgba(236,72,153,0.2); --card-border: #f9a8d4; background:linear-gradient(135deg,#fdf2f8,#fce7f3);">
+      <a href="games/memory.html" class="game-card" style="--card-shadow: rgba(236,72,153,0.2); --card-border: #f9a8d4; background:linear-gradient(135deg,#fce7f3,#fbcfe8);">
         <span class="card-emoji">🧩</span>
         <h3 class="card-title">זיכרון פורים</h3>
         <p class="card-desc">מצאו את הזוגות של דמויות המגילה</p>
         <span class="card-badge badge-fun">3 רמות</span>
       </a>
-      <a href="games/grogger.html" class="game-card" style="--card-shadow: rgba(249,115,22,0.2); --card-border: #fdba74; background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+      <a href="games/grogger.html" class="game-card" style="--card-shadow: rgba(249,115,22,0.2); --card-border: #fdba74; background:linear-gradient(135deg,#ffedd5,#fed7aa);">
         <span class="card-emoji">📢</span>
         <h3 class="card-title">רעשן דיגיטלי</h3>
         <p class="card-desc">נערו את הטלפון או לחצו!</p>
