@@ -158,9 +158,8 @@
       display: flex; justify-content: center;
       gap: 5px; padding: 10px 15px;
       background: rgba(255,255,255,0.9);
-      backdrop-filter: blur(16px) saturate(180%);
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-      box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid rgba(251,191,36,0.2);
     }
     .tab-btn {
       font-family: 'Heebo', sans-serif;
@@ -168,9 +167,8 @@
       padding: 8px 20px;
       border: 2px solid rgba(124,58,237,0.2);
       background: rgba(124,58,237,0.05);
-      color: #6b21a8; border-radius: 24px;
-      cursor: pointer; transition: all 0.25s;
-      white-space: nowrap;
+      color: #6b21a8; border-radius: 12px;
+      cursor: pointer; transition: all 0.3s;
     }
     .tab-btn:hover { background: rgba(124,58,237,0.1); }
     .tab-btn.active {
@@ -182,7 +180,6 @@
     @keyframes badgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    .tab-content { scroll-margin-top: 60px; }
 
     /* ══ Section ══ */
     .section {
@@ -213,40 +210,35 @@
     .games-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      grid-auto-rows: 1fr;
-      gap: 18px;
-      align-items: stretch;
+      gap: 16px;
     }
     .game-card {
       background: #fff;
       border: 2px solid rgba(0,0,0,0.06);
-      border-radius: 20px;
-      padding: 22px 18px 18px;
+      border-radius: 18px;
+      padding: 20px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
       text-decoration: none;
-      color: inherit;
-      display: flex; flex-direction: column; align-items: center;
-      position: relative; overflow: hidden;
+      color: inherit; display: block;
     }
     .game-card:hover {
-      transform: translateY(-7px) scale(1.02);
-      box-shadow: 0 16px 38px var(--card-shadow, rgba(124,58,237,0.18));
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px var(--card-shadow, rgba(124,58,237,0.15));
       border-color: var(--card-border, #c084fc);
     }
-    .card-emoji { font-size: 2.8rem; margin-bottom: 10px; display: block; transition: transform 0.3s ease; }
+    .card-emoji { font-size: 2.5rem; margin-bottom: 8px; display: block; }
     .card-title {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: 1.15rem; color: #1e1b4b; margin-bottom: 4px;
     }
-    .card-desc { font-size: 0.82rem; color: #6b7280; line-height: 1.5; flex: 1; }
+    .card-desc { font-size: 0.8rem; color: #6b7280; line-height: 1.4; }
     .card-badge {
       display: inline-block;
-      padding: 3px 12px; border-radius: 12px;
-      font-size: 0.72rem; font-weight: 700; margin-top: 10px;
-      letter-spacing: 0.3px;
+      padding: 2px 10px; border-radius: 10px;
+      font-size: 0.7rem; font-weight: 700; margin-top: 8px;
     }
     .badge-popular { background: #fef3c7; color: #b45309; }
     .badge-fun { background: #fce7f3; color: #be185d; }
@@ -351,7 +343,7 @@
       background: linear-gradient(135deg, #78350f 0%, #92400e 30%, #b45309 60%, #d97706 100%);
       color: #fff;
     }
-    .pesach-card { border-color: rgba(217,119,6,0.25); }
+    .pesach-card { background: linear-gradient(135deg, #fffbeb, #fef9e7) !important; }
     .pesach-card:hover { border-color: #d97706 !important; }
 
     /* ══ How It Works ══ */
@@ -387,7 +379,6 @@
     .hiw-btn-parent { background: linear-gradient(135deg, #ec4899, #f472b6); color: #fff; }
 
     @media (max-width: 600px) {
-      .tab-btn { font-size: 0.8rem; padding: 6px 12px; }
       .album-hero-bg { padding: 24px 16px; }
       .album-hero-title { font-size: 1.3rem; }
       .album-hero-stats { gap: 10px; }
@@ -1092,58 +1083,6 @@
       .parent-hero { padding: 22px 16px; }
       .parent-cards { grid-template-columns: 1fr; }
     }
-  
-    /* ══ Design Upgrades ══ */
-    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-    
-    /* Smoother card transitions */
-    .game-card { 
-      position: relative;
-      overflow: hidden;
-    }
-    .game-card::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
-      transform: translateX(-100%);
-      transition: transform 0.6s;
-    }
-    .game-card:hover::before { transform: translateX(100%); }
-    .game-card:hover .card-emoji { transform: scale(1.12) rotate(-4deg); }
-    
-    /* Better footer */
-    .footer {
-      background: linear-gradient(180deg, transparent, rgba(124,58,237,0.03), rgba(124,58,237,0.06));
-      padding: 30px 20px 20px;
-      border-top: 1px solid rgba(124,58,237,0.08);
-    }
-    
-    /* Improved section spacing */
-    .section { padding: 28px 20px 32px; }
-    
-    /* Better game card hover shadow by theme */
-    .pesach-zone .game-card:hover { box-shadow: 0 12px 30px rgba(217,119,6,0.15); }
-    
-    /* Smooth page load */
-    body { animation: pageLoad 0.5s ease-out; }
-    @keyframes pageLoad { from { opacity: 0; } to { opacity: 1; } }
-    
-    /* Better sticky tabs shadow */
-    .tabs { box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    
-    /* Improve accessibility - larger touch targets on mobile */
-    @media (max-width: 600px) {
-      .tab-btn { min-height: 44px; display: flex; align-items: center; justify-content: center; }
-      .game-card { padding: 18px 16px; }
-      .share-fab { width: 52px; height: 52px; font-size: 1.4rem; }
-    }
-    
-    /* Print styles */
-    @media print {
-      .confetti-bg, .sparkle, .share-fab, .share-fab-label, .tabs, .corner-logo { display: none !important; }
-      body { background: white !important; }
-    }
-
   </style>
 </head>
 <body>
@@ -1247,13 +1186,13 @@
         <p class="card-desc">4 שלבים, מדליות ואפקטים מטורפים!</p>
         <span class="card-badge badge-popular">🔥 להיט</span>
       </a>
-      <a href="games/memory.html" class="game-card" style="--card-shadow: rgba(236,72,153,0.2); --card-border: #f9a8d4; background:linear-gradient(135deg,#fdf2f8,#fce7f3);">
+      <a href="games/memory.html" class="game-card" style="--card-shadow: rgba(236,72,153,0.2); --card-border: #f9a8d4;">
         <span class="card-emoji">🧩</span>
         <h3 class="card-title">זיכרון פורים</h3>
         <p class="card-desc">מצאו את דמויות המגילה!</p>
         <span class="card-badge badge-fun">⭐ כיפי</span>
       </a>
-      <a href="games/grogger.html" class="game-card" style="--card-shadow: rgba(249,115,22,0.2); --card-border: #fdba74; background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+      <a href="games/grogger.html" class="game-card" style="--card-shadow: rgba(249,115,22,0.2); --card-border: #fdba74;">
         <span class="card-emoji">📢</span>
         <h3 class="card-title">רעשן דיגיטלי</h3>
         <p class="card-desc">נערו את הטלפון — רעשן פורים!</p>
@@ -1328,37 +1267,37 @@
     </div>
 
     <div class="games-grid">
-      <a href="sticker-album/" class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b; background:linear-gradient(135deg,#fffbeb,#fef3c7);">
+      <a href="sticker-album/" class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b;">
         <span class="card-emoji">❓</span>
         <h3 class="card-title">חידון פסח</h3>
         <p class="card-desc">שאלות על יציאת מצרים, ליל הסדר והאגדתא — עם מדבקות!</p>
         <span class="card-badge" style="background:#92400e;color:#fef3c7;">🏅 מדבקות</span>
       </a>
-      <a href="games/seder-plate.html" class="game-card pesach-card" style="--card-shadow: rgba(185,60,20,0.2); --card-border: #ef6c00; background:linear-gradient(135deg,#fff3e0,#ffe0b2);">
+      <a href="games/seder-plate.html" class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b;">
         <span class="card-emoji">🍽️</span>
         <h3 class="card-title">קערת הסדר</h3>
         <p class="card-desc">למדו את ששת הסימנים בקערת הסדר — אינטראקטיבי!</p>
         <span class="card-badge" style="background:#059669;color:#fff;">🎯 שחקו!</span>
       </a>
-      <a href="games/plagues.html" class="game-card pesach-card" style="--card-shadow: rgba(56,142,60,0.2); --card-border: #66bb6a; background:linear-gradient(135deg,#f1f8e9,#dcedc8);">
+      <a href="games/plagues.html" class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b;">
         <span class="card-emoji">🐸</span>
         <h3 class="card-title">עשר המכות</h3>
         <p class="card-desc">סדרו את עשר המכות בסדר הנכון — עם עובדות מגניבות!</p>
         <span class="card-badge" style="background:#059669;color:#fff;">⚡ שחקו!</span>
       </a>
-      <div class="game-card pesach-card" style="--card-shadow: rgba(30,136,229,0.2); --card-border: #64b5f6; background:linear-gradient(135deg,#e3f2fd,#bbdefb); cursor:default; opacity:0.8;">
+      <div class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b; cursor:default;">
         <span class="card-emoji">🎤</span>
         <h3 class="card-title">מה נשתנה</h3>
         <p class="card-desc">תרגלו את ארבע הקושיות — הקלטה, טקסט והתאמה!</p>
         <span class="card-badge" style="background:#d97706;color:#fff;">🔜 בקרוב</span>
       </div>
-      <div class="game-card pesach-card" style="--card-shadow: rgba(255,152,0,0.2); --card-border: #ffb300; background:linear-gradient(135deg,#fff8e1,#ffecb3); cursor:default; opacity:0.8;">
+      <div class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b; cursor:default;">
         <span class="card-emoji">🔦</span>
         <h3 class="card-title">בדיקת חמץ</h3>
         <p class="card-desc">חפשו את החמץ המוסתר ברחבי הבית הווירטואלי!</p>
         <span class="card-badge" style="background:#d97706;color:#fff;">🔜 בקרוב</span>
       </div>
-      <div class="game-card pesach-card" style="--card-shadow: rgba(136,14,79,0.18); --card-border: #ec407a; background:linear-gradient(135deg,#fce4ec,#f8bbd0); cursor:default; opacity:0.8;">
+      <div class="game-card pesach-card" style="--card-shadow: rgba(180,83,9,0.2); --card-border: #f59e0b; cursor:default;">
         <span class="card-emoji">📜</span>
         <h3 class="card-title">אתגר ההגדה</h3>
         <p class="card-desc">כמה חלקים מההגדה אתם מכירים? סדרו את הסדר!</p>
@@ -1529,13 +1468,13 @@
         <p class="card-desc">20 שאלות עם אפקטים מטורפים!</p>
         <span class="card-badge badge-popular">🔥 להיט</span>
       </a>
-      <a href="games/memory.html" class="game-card" style="--card-shadow: rgba(236,72,153,0.2); --card-border: #f9a8d4; background:linear-gradient(135deg,#fdf2f8,#fce7f3);">
+      <a href="games/memory.html" class="game-card" style="--card-shadow: rgba(236,72,153,0.2); --card-border: #f9a8d4;">
         <span class="card-emoji">🧩</span>
         <h3 class="card-title">זיכרון פורים</h3>
         <p class="card-desc">מצאו את הזוגות של דמויות המגילה</p>
         <span class="card-badge badge-fun">3 רמות</span>
       </a>
-      <a href="games/grogger.html" class="game-card" style="--card-shadow: rgba(249,115,22,0.2); --card-border: #fdba74; background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+      <a href="games/grogger.html" class="game-card" style="--card-shadow: rgba(249,115,22,0.2); --card-border: #fdba74;">
         <span class="card-emoji">📢</span>
         <h3 class="card-title">רעשן דיגיטלי</h3>
         <p class="card-desc">נערו את הטלפון או לחצו!</p>
@@ -2047,24 +1986,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
-
-// ══ HTML Escape Utility ══
-function escapeHtml(str) {
-  if (!str) return '';
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-
-// HTML Escape Utility
-function escapeHtml(str) {
-  if (!str) return '';
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
 // ══ Tabs ══
 document.getElementById('tabsNav').addEventListener('click', function(e) {
   const btn = e.target.closest('.tab-btn');
@@ -2133,7 +2054,7 @@ function showUserMenu() {
   menu.id = 'userMenuPopup';
   menu.style.cssText = 'position:fixed;top:50px;left:14px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.15);padding:16px;z-index:100;min-width:220px;direction:rtl;text-align:right;';
   menu.innerHTML = `
-    <div style="font-weight:700;color:#1e1b4b;margin-bottom:8px;">👤 ${escapeHtml(saved.studentName)}</div>
+    <div style="font-weight:700;color:#1e1b4b;margin-bottom:8px;">👤 ${saved.studentName}</div>
     <div style="font-size:0.8rem;color:#6b7280;margin-bottom:12px;">🔑 ${saved.classCode}</div>
     <button onclick="window.location.href='sticker-album/'" style="width:100%;font-family:'Heebo',sans-serif;padding:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:6px;">🏅 לאלבום המדבקות</button>
     <button onclick="openTeacherPanel()" style="width:100%;font-family:'Heebo',sans-serif;padding:8px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:6px;">🏫 ניהול כיתה (מורה)</button>
@@ -2173,7 +2094,7 @@ function openTeacherPanel() {
   const c = document.getElementById('confettiBg');
   const colors = ['#fbbf24','#ec4899','#7c3aed','#3b82f6','#22c55e','#ef4444','#f97316','#2dd4bf','#e879f9','#06b6d4'];
   const shapes = ['circle','star','rect',''];
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 50; i++) {
     const p = document.createElement('div');
     const shape = shapes[Math.floor(Math.random() * shapes.length)];
     p.className = `conf ${shape}`;
@@ -2192,7 +2113,7 @@ function openTeacherPanel() {
 
 // ══ Sparkles ══
 (function() {
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 25; i++) {
     const s = document.createElement('div');
     s.className = 'sparkle';
     s.style.cssText = `
@@ -2222,7 +2143,7 @@ function firework(x, y) {
   document.body.appendChild(fw);
   setTimeout(() => fw.remove(), 1500);
 }
-setInterval(() => firework(Math.random()*window.innerWidth, Math.random()*window.innerHeight*0.6), 5000);
+setInterval(() => firework(Math.random()*window.innerWidth, Math.random()*window.innerHeight*0.6), 3000);
 setTimeout(() => firework(window.innerWidth/2, 200), 500);
 setTimeout(() => firework(window.innerWidth*0.3, 300), 1000);
 setTimeout(() => firework(window.innerWidth*0.7, 250), 1500);
@@ -2267,8 +2188,6 @@ function showGallery() {
 
 async function syncGallery() {
   if (!galleryCode) return;
-  const syncBtn = document.querySelector('.gallery-section button[onclick*="syncGallery"]');
-  if (syncBtn) { syncBtn.disabled = true; syncBtn.textContent = '⏳'; }
   const grid = document.getElementById('costumeGrid');
   const empty = document.getElementById('costumeEmpty');
   grid.innerHTML = '<div class="gallery-loading">⏳ טוען תמונות...</div>';
@@ -2290,9 +2209,9 @@ function renderClassDropdowns() {
   const mainSelect = document.getElementById('classSelect');
   const uploadSelect = document.getElementById('uploadClass');
   mainSelect.innerHTML = '<option value="all">כל הכיתות</option>';
-  classes.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; mainSelect.appendChild(o); });
+  classes.forEach(c => { mainSelect.innerHTML += `<option value="${c}">${c}</option>`; });
   uploadSelect.innerHTML = '<option value="">בחרו כיתה</option>';
-  classes.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; uploadSelect.appendChild(o); });
+  classes.forEach(c => { uploadSelect.innerHTML += `<option value="${c}">${c}</option>`; });
 }
 
 function addNewClass() {
@@ -2332,8 +2251,6 @@ function compressImage(dataUrl) {
 function handleUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
-  if (!file.type.startsWith("image/")) { alert("please select image"); return; }
-  if (!file.type.startsWith('image/')) { alert('נא לבחור קובץ תמונה בלבד!'); return; }
   const reader = new FileReader();
   reader.onload = async (ev) => {
     uploadedImage = await compressImage(ev.target.result);
@@ -2354,8 +2271,6 @@ async function savePhoto() {
 
   // Save to Firebase
   const btn = document.querySelector('.upload-btn');
-  if (btn.disabled) return;
-  if (btn.disabled) return;
   btn.textContent = '⏳ מעלה...';
   btn.disabled = true;
   try {
@@ -2398,7 +2313,7 @@ function renderGallery() {
   grid.innerHTML = filtered.map(c => `
     <div class="costume-item">
       <img src="${c.image}" alt="${c.name}" loading="lazy">
-      <div class="name">${escapeHtml(c.name)}${c.cls ? ' | ' + escapeHtml(c.cls) : ''}</div>
+      <div class="name">${c.name}${c.cls ? ' | ' + c.cls : ''}</div>
     </div>
   `).join('');
   // Gallery count
@@ -2577,7 +2492,7 @@ const Notes = {
       const i = start + idx;
       const isLiked = likedSet.includes(note._id || i);
       const el = document.createElement('div'); el.className = 'sticky-note ' + colors[i % colors.length];
-      el.innerHTML = '<div class="nf">' + escapeHtml(note.f) + '</div><div class="nh">💡 מה עוזר לי? ' + escapeHtml(note.h) + '</div><div class="na">— ' + escapeHtml(note.n) + (note.c ? ', ' + escapeHtml(note.c) : '') + '</div><span class="nl' + (isLiked ? ' liked' : '') + '" onclick="Notes.like(' + i + ')">' + (isLiked ? '❤️' : '🤍') + ' ' + (note.likes || 0) + '</span>';
+      el.innerHTML = '<div class="nf">' + note.f + '</div><div class="nh">💡 מה עוזר לי? ' + note.h + '</div><div class="na">— ' + note.n + (note.c ? ', ' + note.c : '') + '</div><span class="nl' + (isLiked ? ' liked' : '') + '" onclick="Notes.like(' + i + ')">' + (isLiked ? '❤️' : '🤍') + ' ' + (note.likes || 0) + '</span>';
       wall.appendChild(el);
     });
     // Pager
@@ -2632,6 +2547,7 @@ Notes.init();
 
 // Wizard Enter key handlers removed
 </script>
+<script src="js/auth-bridge.js"></script>
 
 </body>
 </html>
