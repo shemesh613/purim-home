@@ -329,6 +329,7 @@ a{color:inherit;text-decoration:none}
       .bg-blob { animation-duration: 30s !important; opacity: 0.3 !important; }
       .bg-grid { display: none; }
     }
+.not-logged-banner{display:none;background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px solid rgba(217,119,6,0.2);border-radius:14px;padding:12px 20px;margin:8px 16px;text-align:center;font-size:.9rem;color:#92400e;font-weight:600;align-items:center;justify-content:center;gap:10px}.not-logged-banner a{color:#7c3aed;font-weight:900;text-decoration:underline}.not-logged-banner.show{display:flex}
 </style>
 </head>
 <body>
@@ -347,6 +348,7 @@ a{color:inherit;text-decoration:none}
 <div class="app" id="mainApp">
 
   <!-- HEADER -->
+  <div class="not-logged-banner" id="notLoggedBanner">⚠️ עדיין לא נכנסת לאלבום שלך — <a href="../">כניסה דרך העמוד הראשי</a></div>
   <header class="main-header">
     <div class="header-actions">
       <button class="icon-btn" onclick="showAuthModal()" title="כניסה / ניהול">👤</button>
@@ -361,9 +363,6 @@ a{color:inherit;text-decoration:none}
 
   <!-- MAIN TABS -->
   <div class="tabs-wrapper">
-    <div class="login-tab-row">
-      <button class="login-tab" data-tab="admin" onclick="switchTab('admin')">👤 כניסה / ניהול מרחב</button>
-    </div>
     <nav class="main-tabs" id="mainTabs">
       <button class="main-tab active" data-tab="purim" onclick="switchTab('purim')">🎭 פורים</button>
       <button class="main-tab" data-tab="pesach" onclick="switchTab('pesach')">🫓 פסח</button>
@@ -1227,6 +1226,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAllChecklists();
   updateStats();
   checkAdminState();
+  checkMainPageLogin();
   checkQuizReward();
   startTabRotation();
 });
@@ -2585,6 +2585,24 @@ function renderMyStickers() {
       <div style="font-size:.65rem;color:var(--text-soft);margin-top:4px">${info.s.name}</div>
     </div>`;
   }).join('');
+}
+
+// ===== AUTO-DETECT MAIN PAGE LOGIN =====
+function checkMainPageLogin() {
+  const banner = document.getElementById("notLoggedBanner");
+  if (state.student) { if(banner) banner.classList.remove("show"); return; }
+  // Try to auto-fill from main page login
+  try {
+    const saved = JSON.parse(localStorage.getItem("purim_student_login") || "{}");
+    if (saved.classCode) {
+      const codeEl = document.getElementById("joinCode");
+      const nameEl = document.getElementById("joinName");
+      if (codeEl) codeEl.value = saved.classCode;
+      if (nameEl && saved.studentName) nameEl.value = saved.studentName;
+    }
+  } catch(e) {}
+  // Show banner if not in a space
+  if (!globalState.activeSpace && banner) banner.classList.add("show");
 }
 
 function checkAdminState() {
