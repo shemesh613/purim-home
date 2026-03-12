@@ -1179,6 +1179,7 @@
   <button class="tab-btn" data-tab="games" role="tab" aria-selected="false">🎮 משחקים</button>
   <button class="tab-btn" data-tab="videos" role="tab" aria-selected="false" style="position:relative">🎬 סרטונים<span id="videosNewBadge" class="new-badge">חדש!</span></button>
   <button class="tab-btn" data-tab="feelings" role="tab" aria-selected="false">💛 קיר הרגשות</button>
+  <button class="tab-btn" data-tab="student" role="tab" aria-selected="false">🎒 כניסה לתלמיד</button>
 </nav>
 
 <!-- ══ Role Sidebar ══ -->
@@ -1192,7 +1193,7 @@
     <span class="role-label">הורה</span>
   </a>
   <div class="role-divider"></div>
-  <a href="sticker-album/" title="תלמיד — כניסה לאלבום מדבקות">
+  <a href="#" onclick="event.preventDefault();switchTab('student')" title="תלמיד — כניסה לאלבום מדבקות">
     <span class="role-icon">🎒</span>
     <span class="role-label">תלמיד</span>
   </a>
@@ -2027,6 +2028,59 @@
   </div>
 </div>
 
+
+<div class="tab-content" id="tab-student">
+  <div class="section" style="max-width:480px;margin:0 auto;padding:32px 16px">
+
+    <!-- Hero -->
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:3.5rem;margin-bottom:8px">🎒</div>
+      <h2 style="font-family:var(--font-title,serif);font-size:1.8rem;color:#7c3aed;margin-bottom:6px">כניסה לאלבום המדבקות</h2>
+      <p style="color:#6b7280;font-size:.9rem">הכניסו את הפרטים שקיבלתם מהמורה / ההורה</p>
+    </div>
+
+    <!-- Form -->
+    <div id="studentLoginCard" style="background:#fff;border-radius:20px;padding:28px;box-shadow:0 4px 24px rgba(0,0,0,0.08);border:1px solid rgba(124,58,237,0.1)">
+      <div style="margin-bottom:16px">
+        <label style="font-weight:700;font-size:.85rem;color:#4b5563;display:block;margin-bottom:6px">🔑 קוד כיתה / משפחה</label>
+        <input type="text" id="mainStudentCode" placeholder="למשל: שמשון-1234" dir="ltr"
+          style="width:100%;padding:12px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:1rem;text-align:center;letter-spacing:2px;font-weight:700;font-family:inherit;outline:none;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-weight:700;font-size:.85rem;color:#4b5563;display:block;margin-bottom:6px">👤 שם מלא</label>
+        <input type="text" id="mainStudentName" placeholder="השם שלך"
+          style="width:100%;padding:12px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:1rem;font-family:inherit;outline:none;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:24px">
+        <label style="font-weight:700;font-size:.85rem;color:#4b5563;display:block;margin-bottom:6px">🔢 קוד אישי (4 ספרות)</label>
+        <input type="number" id="mainStudentPin" placeholder="1234" maxlength="4" dir="ltr"
+          style="width:100%;padding:12px 14px;border:2px solid rgba(124,58,237,0.2);border-radius:12px;font-size:1.2rem;text-align:center;letter-spacing:4px;font-weight:900;font-family:inherit;outline:none;box-sizing:border-box">
+      </div>
+      <div id="mainStudentError" style="display:none;background:#fff1f2;border:1px solid #fca5a5;border-radius:10px;padding:10px 14px;color:#b91c1c;font-size:.85rem;margin-bottom:16px;text-align:center"></div>
+      <button onclick="mainStudentLogin()" 
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;border-radius:14px;font-size:1.05rem;font-weight:900;cursor:pointer;font-family:inherit;transition:all 0.3s;box-shadow:0 4px 16px rgba(124,58,237,0.3)">
+        🚀 כניסה לאלבום
+      </button>
+    </div>
+
+    <!-- Already logged in -->
+    <div id="studentAlreadyIn" style="display:none;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid rgba(5,150,105,0.2);border-radius:20px;padding:24px;text-align:center;margin-top:16px">
+      <div style="font-size:2rem;margin-bottom:8px">✅</div>
+      <div id="studentAlreadyName" style="font-weight:900;color:#065f46;font-size:1.1rem;margin-bottom:4px"></div>
+      <div id="studentAlreadyCode" style="font-size:.8rem;color:#6b7280;margin-bottom:16px"></div>
+      <button onclick="window.location='sticker-album/'"
+        style="padding:12px 28px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px;box-shadow:0 4px 16px rgba(5,150,105,0.3)">
+        🧩 כניסה לאלבום שלי
+      </button>
+      <br>
+      <button onclick="mainStudentLogout()"
+        style="padding:8px 20px;background:transparent;color:#9ca3af;border:1px solid #e5e7eb;border-radius:10px;font-size:.85rem;cursor:pointer;font-family:inherit;margin-top:6px">
+        יציאה / החלפת משתמש
+      </button>
+    </div>
+
+  </div>
+</div>
 </main>
 <!-- Gate removed — direct access to sticker-album -->
 
@@ -2642,6 +2696,74 @@ Notes.init();
 // Wizard functions removed — direct access only
 
 // Wizard Enter key handlers removed
+
+// ===== STUDENT LOGIN (main page → sticker album) =====
+const ALBUM_FB = 'https://album-bea15-default-rtdb.firebaseio.com';
+
+function mainStudentLogin() {
+  const code = (document.getElementById('mainStudentCode').value || '').trim();
+  const name = (document.getElementById('mainStudentName').value || '').trim();
+  const pin  = (document.getElementById('mainStudentPin').value || '').trim();
+  const err  = document.getElementById('mainStudentError');
+
+  err.style.display = 'none';
+  if (!code || !name || pin.length < 4) {
+    err.textContent = 'נא למלא קוד, שם וקוד אישי (4 ספרות)';
+    err.style.display = 'block';
+    return;
+  }
+
+  // Try Firebase lookup
+  fetch(`${ALBUM_FB}/spaces/${encodeURIComponent(code)}.json`)
+    .then(r => r.json())
+    .then(space => {
+      if (!space || !space.admin || space.admin.joinCode !== code) {
+        err.textContent = 'קוד כיתה/משפחה לא נמצא — בקשו קוד מהמורה/הורה';
+        err.style.display = 'block';
+        return;
+      }
+      // Check name+pin
+      const members = space.admin?.members || space.members || [];
+      const member = members.find(m => m.name === name);
+      if (member && member.pin && member.pin !== pin) {
+        err.textContent = 'הקוד האישי שגוי — נסו שוב';
+        err.style.display = 'block';
+        return;
+      }
+      // Save session and redirect
+      localStorage.setItem('purim_student_login', JSON.stringify({ studentName: name, classCode: code, pin }));
+      window.location = 'sticker-album/';
+    })
+    .catch(() => {
+      // Offline fallback — trust the user, redirect anyway
+      localStorage.setItem('purim_student_login', JSON.stringify({ studentName: name, classCode: code, pin }));
+      window.location = 'sticker-album/';
+    });
+}
+
+function mainStudentLogout() {
+  localStorage.removeItem('purim_student_login');
+  document.getElementById('studentAlreadyIn').style.display = 'none';
+  document.getElementById('studentLoginCard').style.display = 'block';
+}
+
+// On student tab open, check if already logged in
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem('purim_student_login') || '{}');
+    if (saved.studentName && saved.classCode) {
+      document.getElementById('studentLoginCard').style.display = 'none';
+      document.getElementById('studentAlreadyIn').style.display = 'block';
+      document.getElementById('studentAlreadyName').textContent = '👋 שלום, ' + saved.studentName + '!';
+      document.getElementById('studentAlreadyCode').textContent = '🔑 קוד: ' + saved.classCode;
+    }
+  } catch(e) {}
+  // Enter key support
+  ['mainStudentCode','mainStudentName','mainStudentPin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') mainStudentLogin(); });
+  });
+});
 </script>
 
 </body>

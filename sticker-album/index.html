@@ -2591,18 +2591,55 @@ function renderMyStickers() {
 function checkMainPageLogin() {
   const banner = document.getElementById("notLoggedBanner");
   if (state.student) { if(banner) banner.classList.remove("show"); return; }
-  // Try to auto-fill from main page login
   try {
     const saved = JSON.parse(localStorage.getItem("purim_student_login") || "{}");
-    if (saved.classCode) {
-      const codeEl = document.getElementById("joinCode");
-      const nameEl = document.getElementById("joinName");
-      if (codeEl) codeEl.value = saved.classCode;
-      if (nameEl && saved.studentName) nameEl.value = saved.studentName;
+    if (saved.classCode && saved.studentName && saved.pin) {
+      // Auto-login with full credentials from main page
+      autoLoginFromMainPage(saved.classCode, saved.studentName, saved.pin);
+      return;
     }
   } catch(e) {}
-  // Show banner if not in a space
   if (!globalState.activeSpace && banner) banner.classList.add("show");
+}
+
+async function autoLoginFromMainPage(code, name, pin) {
+  const banner = document.getElementById("notLoggedBanner");
+  let spaceData = loadSpace(code);
+  if (!spaceData.admin || spaceData.admin.joinCode !== code) {
+    const cloud = await cloudLoadSpace(code);
+    if (cloud?.admin) {
+      spaceData = {...defaultState()};
+      spaceData.admin = cloud.admin;
+      spaceData.taskCompletions = cloud.taskCompletions || {};
+      spaceData.admin.members = cloud.members || cloud.admin.members || [];
+      localStorage.setItem(spaceKey(code), JSON.stringify(spaceData));
+      if (!globalState.mySpaces.includes(code)) { globalState.mySpaces.push(code); saveGlobal(); }
+    }
+  }
+  if (!spaceData.admin || spaceData.admin.joinCode !== code) {
+    if (banner) banner.classList.add("show");
+    return;
+  }
+  if (!spaceData.admin.members) spaceData.admin.members = [];
+  let member = spaceData.admin.members.find(m => m.name === name);
+  if (member && member.pin && member.pin !== pin) {
+    if (banner) banner.classList.add("show");
+    return;
+  }
+  if (!member) {
+    member = { name, pin, stickers: [], completedTasks: [], teacherGifts: [] };
+    spaceData.admin.members.push(member);
+  }
+  state = spaceData;
+  state.student = { name, pin, joinCode: code };
+  globalState.activeSpace = code;
+  saveState(); saveGlobal();
+  if (banner) banner.classList.remove("show");
+  restoreStudentCollected();
+  renderAllPuzzles();
+  updateStats();
+  showStudentView();
+  showToast("✅ שלום " + name + "! האלבום שלך נטען", "success");
 }
 
 function checkAdminState() {
