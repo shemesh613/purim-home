@@ -395,9 +395,16 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('active'), 3000);
 }
 
+let knownCodes = new Set();
+
 function generateCode() {
-  const num = Math.floor(1000 + Math.random() * 9000);
-  return 'שמשון-' + num;
+  let code, attempts = 0;
+  do {
+    const num = Math.floor(1000 + Math.random() * 9000);
+    code = 'שמשון-' + num;
+    attempts++;
+  } while (knownCodes.has(code) && attempts < 20);
+  return code;
 }
 
 // Admin checklist
@@ -494,6 +501,7 @@ async function loadSpaces() {
     }
 
     const spaces = Object.entries(data);
+    knownCodes = new Set(spaces.map(([code]) => code));
     let totalStudents = 0, classes = 0, families = 0;
 
     list.innerHTML = spaces.map(([code, s]) => {
@@ -508,22 +516,22 @@ async function loadSpaces() {
       return `
         <div class="space-card">
           <div class="space-header">
-            <span class="space-title">${typeLabel} | ${s.name}${s.school ? ' — ' + s.school : ''}</span>
-            <span class="space-code">${code}</span>
+            <span class="space-title">${typeLabel} | ${escapeHtml(s.name)}${s.school ? ' — ' + escapeHtml(s.school) : ''}</span>
+            <span class="space-code">${escapeHtml(code)}</span>
           </div>
           <div class="space-meta">
             📋 ${taskCount} משימות | 🏅 ${totalStickers} מדבקות | 👨‍🎓 ${studentCount} תלמידים
           </div>
           <div class="space-tasks">
-            ${s.checklist ? s.checklist.map(t => `${t.emoji} ${t.name}`).join(' · ') : 'אין משימות'}
+            ${s.checklist ? s.checklist.map(t => escapeHtml(t.emoji + ' ' + t.name)).join(' · ') : 'אין משימות'}
           </div>
           ${studentCount > 0 ? `<div class="space-students">תלמידים: ${Object.values(s.students).map(st => {
             const stk = st.stickers || 0;
             const lvl = getLevel(stk);
-            return (st.name || '?') + ' ' + lvl.icon + stk;
+            return escapeHtml(st.name || '?') + ' ' + lvl.icon + stk;
           }).join(' · ')}</div>` : ''}
           <div style="margin-top:8px;">
-            <button class="btn btn-sm btn-danger" onclick="deleteSpace('${code}')">🗑️ מחיקה</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteSpace(${JSON.stringify(code)})">🗑️ מחיקה (${studentCount} תלמידים)</button>
           </div>
         </div>
       `;
@@ -543,7 +551,18 @@ function updateStats(spaces, students, classes, families) {
 }
 
 async function deleteSpace(code) {
-  if (!confirm('למחוק את המרחב ' + code + '?')) return;
+  try {
+    const res = await fetch(`${FB}/${encodeURIComponent(code)}.json`);
+    const space = await res.json();
+    const studentCount = space && space.students ? Object.keys(space.students).length : 0;
+    const msg = studentCount > 0
+      ? `למחוק את המרחב ${code}?
+⚠️ יש ${studentCount} תלמידים — כל הנתונים שלהם יימחקו לצמיתות!`
+      : `למחוק את המרחב ${code}?`;
+    if (!confirm(msg)) return;
+  } catch (e) {
+    if (!confirm('למחוק את המרחב ' + code + '?')) return;
+  }
   try {
     await fetch(`${FB}/${encodeURIComponent(code)}.json`, { method: 'DELETE' });
     toast('🗑️ נמחק: ' + code);
