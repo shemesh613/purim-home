@@ -180,6 +180,7 @@
     @keyframes badgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+    .tab-content { scroll-margin-top: 60px; }
 
     /* ══ Section ══ */
     .section {
@@ -379,6 +380,7 @@
     .hiw-btn-parent { background: linear-gradient(135deg, #ec4899, #f472b6); color: #fff; }
 
     @media (max-width: 600px) {
+      .tab-btn { font-size: 0.8rem; padding: 6px 12px; }
       .album-hero-bg { padding: 24px 16px; }
       .album-hero-title { font-size: 1.3rem; }
       .album-hero-stats { gap: 10px; }
@@ -1083,6 +1085,57 @@
       .parent-hero { padding: 22px 16px; }
       .parent-cards { grid-template-columns: 1fr; }
     }
+  
+    /* ══ Design Upgrades ══ */
+    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    
+    /* Smoother card transitions */
+    .game-card { 
+      position: relative;
+      overflow: hidden;
+    }
+    .game-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+      transform: translateX(-100%);
+      transition: transform 0.6s;
+    }
+    .game-card:hover::before { transform: translateX(100%); }
+    
+    /* Better footer */
+    .footer {
+      background: linear-gradient(180deg, transparent, rgba(124,58,237,0.03), rgba(124,58,237,0.06));
+      padding: 30px 20px 20px;
+      border-top: 1px solid rgba(124,58,237,0.08);
+    }
+    
+    /* Improved section spacing */
+    .section { padding: 28px 20px 32px; }
+    
+    /* Better game card hover shadow by theme */
+    .pesach-zone .game-card:hover { box-shadow: 0 12px 30px rgba(217,119,6,0.15); }
+    
+    /* Smooth page load */
+    body { animation: pageLoad 0.5s ease-out; }
+    @keyframes pageLoad { from { opacity: 0; } to { opacity: 1; } }
+    
+    /* Better sticky tabs shadow */
+    .tabs { box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    
+    /* Improve accessibility - larger touch targets on mobile */
+    @media (max-width: 600px) {
+      .tab-btn { min-height: 44px; display: flex; align-items: center; justify-content: center; }
+      .game-card { padding: 18px 16px; }
+      .share-fab { width: 52px; height: 52px; font-size: 1.4rem; }
+    }
+    
+    /* Print styles */
+    @media print {
+      .confetti-bg, .sparkle, .share-fab, .share-fab-label, .tabs, .corner-logo { display: none !important; }
+      body { background: white !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -1986,6 +2039,24 @@
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
+
+// ══ HTML Escape Utility ══
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+
+// HTML Escape Utility
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 // ══ Tabs ══
 document.getElementById('tabsNav').addEventListener('click', function(e) {
   const btn = e.target.closest('.tab-btn');
@@ -2054,7 +2125,7 @@ function showUserMenu() {
   menu.id = 'userMenuPopup';
   menu.style.cssText = 'position:fixed;top:50px;left:14px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.15);padding:16px;z-index:100;min-width:220px;direction:rtl;text-align:right;';
   menu.innerHTML = `
-    <div style="font-weight:700;color:#1e1b4b;margin-bottom:8px;">👤 ${saved.studentName}</div>
+    <div style="font-weight:700;color:#1e1b4b;margin-bottom:8px;">👤 ${escapeHtml(saved.studentName)}</div>
     <div style="font-size:0.8rem;color:#6b7280;margin-bottom:12px;">🔑 ${saved.classCode}</div>
     <button onclick="window.location.href='sticker-album/'" style="width:100%;font-family:'Heebo',sans-serif;padding:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:6px;">🏅 לאלבום המדבקות</button>
     <button onclick="openTeacherPanel()" style="width:100%;font-family:'Heebo',sans-serif;padding:8px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:6px;">🏫 ניהול כיתה (מורה)</button>
@@ -2094,7 +2165,7 @@ function openTeacherPanel() {
   const c = document.getElementById('confettiBg');
   const colors = ['#fbbf24','#ec4899','#7c3aed','#3b82f6','#22c55e','#ef4444','#f97316','#2dd4bf','#e879f9','#06b6d4'];
   const shapes = ['circle','star','rect',''];
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 30; i++) {
     const p = document.createElement('div');
     const shape = shapes[Math.floor(Math.random() * shapes.length)];
     p.className = `conf ${shape}`;
@@ -2113,7 +2184,7 @@ function openTeacherPanel() {
 
 // ══ Sparkles ══
 (function() {
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < 15; i++) {
     const s = document.createElement('div');
     s.className = 'sparkle';
     s.style.cssText = `
@@ -2143,7 +2214,7 @@ function firework(x, y) {
   document.body.appendChild(fw);
   setTimeout(() => fw.remove(), 1500);
 }
-setInterval(() => firework(Math.random()*window.innerWidth, Math.random()*window.innerHeight*0.6), 3000);
+setInterval(() => firework(Math.random()*window.innerWidth, Math.random()*window.innerHeight*0.6), 5000);
 setTimeout(() => firework(window.innerWidth/2, 200), 500);
 setTimeout(() => firework(window.innerWidth*0.3, 300), 1000);
 setTimeout(() => firework(window.innerWidth*0.7, 250), 1500);
@@ -2188,6 +2259,8 @@ function showGallery() {
 
 async function syncGallery() {
   if (!galleryCode) return;
+  const syncBtn = document.querySelector('.gallery-section button[onclick*="syncGallery"]');
+  if (syncBtn) { syncBtn.disabled = true; syncBtn.textContent = '⏳'; }
   const grid = document.getElementById('costumeGrid');
   const empty = document.getElementById('costumeEmpty');
   grid.innerHTML = '<div class="gallery-loading">⏳ טוען תמונות...</div>';
@@ -2209,9 +2282,9 @@ function renderClassDropdowns() {
   const mainSelect = document.getElementById('classSelect');
   const uploadSelect = document.getElementById('uploadClass');
   mainSelect.innerHTML = '<option value="all">כל הכיתות</option>';
-  classes.forEach(c => { mainSelect.innerHTML += `<option value="${c}">${c}</option>`; });
+  classes.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; mainSelect.appendChild(o); });
   uploadSelect.innerHTML = '<option value="">בחרו כיתה</option>';
-  classes.forEach(c => { uploadSelect.innerHTML += `<option value="${c}">${c}</option>`; });
+  classes.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; uploadSelect.appendChild(o); });
 }
 
 function addNewClass() {
@@ -2251,6 +2324,8 @@ function compressImage(dataUrl) {
 function handleUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
+  if (!file.type.startsWith("image/")) { alert("please select image"); return; }
+  if (!file.type.startsWith('image/')) { alert('נא לבחור קובץ תמונה בלבד!'); return; }
   const reader = new FileReader();
   reader.onload = async (ev) => {
     uploadedImage = await compressImage(ev.target.result);
@@ -2271,6 +2346,8 @@ async function savePhoto() {
 
   // Save to Firebase
   const btn = document.querySelector('.upload-btn');
+  if (btn.disabled) return;
+  if (btn.disabled) return;
   btn.textContent = '⏳ מעלה...';
   btn.disabled = true;
   try {
@@ -2313,7 +2390,7 @@ function renderGallery() {
   grid.innerHTML = filtered.map(c => `
     <div class="costume-item">
       <img src="${c.image}" alt="${c.name}" loading="lazy">
-      <div class="name">${c.name}${c.cls ? ' | ' + c.cls : ''}</div>
+      <div class="name">${escapeHtml(c.name)}${c.cls ? ' | ' + escapeHtml(c.cls) : ''}</div>
     </div>
   `).join('');
   // Gallery count
@@ -2492,7 +2569,7 @@ const Notes = {
       const i = start + idx;
       const isLiked = likedSet.includes(note._id || i);
       const el = document.createElement('div'); el.className = 'sticky-note ' + colors[i % colors.length];
-      el.innerHTML = '<div class="nf">' + note.f + '</div><div class="nh">💡 מה עוזר לי? ' + note.h + '</div><div class="na">— ' + note.n + (note.c ? ', ' + note.c : '') + '</div><span class="nl' + (isLiked ? ' liked' : '') + '" onclick="Notes.like(' + i + ')">' + (isLiked ? '❤️' : '🤍') + ' ' + (note.likes || 0) + '</span>';
+      el.innerHTML = '<div class="nf">' + escapeHtml(note.f) + '</div><div class="nh">💡 מה עוזר לי? ' + escapeHtml(note.h) + '</div><div class="na">— ' + escapeHtml(note.n) + (note.c ? ', ' + escapeHtml(note.c) : '') + '</div><span class="nl' + (isLiked ? ' liked' : '') + '" onclick="Notes.like(' + i + ')">' + (isLiked ? '❤️' : '🤍') + ' ' + (note.likes || 0) + '</span>';
       wall.appendChild(el);
     });
     // Pager
@@ -2547,7 +2624,6 @@ Notes.init();
 
 // Wizard Enter key handlers removed
 </script>
-<script src="js/auth-bridge.js"></script>
 
 </body>
 </html>
