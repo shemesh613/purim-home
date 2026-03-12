@@ -343,25 +343,8 @@ a{color:inherit;text-decoration:none}
   <div class="bg-blob"></div>
   <div class="bg-grid"></div>
 </div>
-
-<!-- ===== WELCOME SCREEN ===== -->
-<div class="welcome-screen" id="welcomeScreen">
-  <div class="welcome-logo">🏅</div>
-  <h1>אלבום מדבקות — גיבורי ישראל</h1>
-  <p>השלימו משימות → קבלו מדבקות → פאזל מלא! 🏅</p>
-  <div class="welcome-features">
-    <div class="welcome-feature"><span class="feat-emoji">🎭</span>פורים</div>
-    <div class="welcome-feature"><span class="feat-emoji">🫓</span>פסח</div>
-    <div class="welcome-feature"><span class="feat-emoji">🎖️</span>גיבורים</div>
-    <div class="welcome-feature"><span class="feat-emoji">🌿</span>הרגעות</div>
-    <div class="welcome-feature"><span class="feat-emoji">🪖</span>צבאי</div>
-    <div class="welcome-feature"><span class="feat-emoji">💝</span>מעשים טובים</div>
-  </div>
-  <button class="welcome-btn" onclick="enterApp()">!בואו נתחיל</button>
-</div>
-
 <!-- ===== MAIN APP ===== -->
-<div class="app" id="mainApp" style="display:none">
+<div class="app" id="mainApp">
 
   <!-- HEADER -->
   <header class="main-header">
@@ -1240,10 +1223,6 @@ function getAllSpaces() {
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
   generateStars();
-  if (globalState.seenWelcome || state.seenWelcome) {
-    document.getElementById('welcomeScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'flex';
-  }
   renderAllPuzzles();
   renderAllChecklists();
   updateStats();
@@ -1281,20 +1260,7 @@ function checkQuizReward() {
   }
 }
 
-function enterApp() {
-  state.seenWelcome = true;
-  globalState.seenWelcome = true;
-  saveState();
-  const welcome = document.getElementById('welcomeScreen');
-  welcome.classList.add('hiding');
-  setTimeout(() => {
-    welcome.style.display = 'none';
-    const app = document.getElementById('mainApp');
-    app.style.display = 'flex';
-    app.classList.add('animate-in');
-    setTimeout(() => app.classList.remove('animate-in'), 1500);
-  }, 600);
-}
+function enterApp() {}
 
 // ===== BACKGROUND (no-op, blobs are pure CSS) =====
 function generateStars() { /* blobs in CSS only */ }
