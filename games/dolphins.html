@@ -501,7 +501,7 @@
   <!-- Entry Screen -->
   <div class="entry-screen" id="entryScreen">
     <h2>🐬 ברוכים הבאים!</h2>
-    <p>הזינו את השם שלכם כדי להתחיל</p>
+    <p>בחרו שם או הזינו שם חדש</p>
     <div class="entry-input-wrap">
       <input class="entry-input" id="nameInput" type="text" placeholder="השם שלי..." maxlength="20"
              onkeydown="if(event.key==='Enter')joinGame()">
@@ -681,6 +681,7 @@
   function debouncedCloudSave(j,nm,d){clearTimeout(_ct);_ct=setTimeout(async()=>{try{await fetch(FIREBASE_URL+'/spaces/'+j+'/dolphins/'+encodeURIComponent(nm)+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(e){}},1500);}
   function getWeekKey(){const d=new Date();const j1=new Date(d.getFullYear(),0,1);const w=Math.ceil(((d-j1)/86400000+j1.getDay()+1)/7);return d.getFullYear()+'-W'+String(w).padStart(2,'0');}
   function getAlbumJoinCode(){try{const s=JSON.parse(localStorage.getItem('purim_student_login')||'{}');return s.classCode||null;}catch(e){return null;}}
+  function getAlbumStudentName(){try{const s=JSON.parse(localStorage.getItem('purim_student_login')||'{}');return s.studentName||null;}catch(e){return null;}}
 
     // === STORAGE KEYS ===
   const USERS_KEY = 'dolphin_users';     // list of user names
@@ -737,18 +738,33 @@
   }
 
   function renderEntryScreen() {
+    const albumName = getAlbumStudentName();
+    const nameInput = document.getElementById('nameInput');
 
-    const lastUser = localStorage.getItem(ACTIVE_KEY);
+    // Pre-fill name input from album login
+    if (albumName && nameInput && !nameInput.value) {
+      nameInput.value = albumName;
+    }
+
+    // Auto-login if album name is already a known user
+    if (albumName && getUsers().includes(albumName)) {
+      loginAs(albumName);
+      return;
+    }
+
+    const users = getUsers();
     const existingDiv = document.getElementById('existingUsers');
     const listDiv = document.getElementById('userList');
-    if (!lastUser || !getUsers().includes(lastUser)) { existingDiv.style.display = 'none'; return; }
+    if (!users.length) { existingDiv.style.display = 'none'; return; }
     existingDiv.style.display = '';
     listDiv.innerHTML = '';
-    const chip = document.createElement('div');
-    chip.className = 'user-chip';
-    chip.innerHTML = `<span class="chip-emoji">🐬</span> ${lastUser}`;
-    chip.onclick = () => loginAs(lastUser);
-    listDiv.appendChild(chip);
+    users.forEach(name => {
+      const chip = document.createElement('div');
+      chip.className = 'user-chip';
+      chip.innerHTML = `<span class="chip-emoji">🐬</span> ${name}`;
+      chip.onclick = () => loginAs(name);
+      listDiv.appendChild(chip);
+    });
   }
 
   function forgetMe() {
