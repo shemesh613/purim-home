@@ -680,7 +680,7 @@
   let _ct=null;
   function debouncedCloudSave(j,nm,d){clearTimeout(_ct);_ct=setTimeout(async()=>{try{await fetch(FIREBASE_URL+'/spaces/'+j+'/dolphins/'+encodeURIComponent(nm)+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(e){}},1500);}
   function getWeekKey(){const d=new Date();const j1=new Date(d.getFullYear(),0,1);const w=Math.ceil(((d-j1)/86400000+j1.getDay()+1)/7);return d.getFullYear()+'-W'+String(w).padStart(2,'0');}
-  function getAlbumJoinCode(){try{const g=JSON.parse(localStorage.getItem('sticker-album-global')||'{}');return g.activeSpace||null;}catch(e){return null;}}
+  function getAlbumJoinCode(){try{const s=JSON.parse(localStorage.getItem('purim_student_login')||'{}');return s.classCode||null;}catch(e){return null;}}
 
     // === STORAGE KEYS ===
   const USERS_KEY = 'dolphin_users';     // list of user names
