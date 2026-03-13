@@ -502,10 +502,15 @@
   <div class="entry-screen" id="entryScreen">
     <h2>🐬 ברוכים הבאים!</h2>
     <p>הזינו את השם שלכם כדי להתחיל</p>
-    <div class="entry-input-wrap">
-      <input class="entry-input" id="nameInput" type="text" placeholder="השם שלי..." maxlength="20"
-             onkeydown="if(event.key==='Enter')joinGame()">
-      <button class="entry-btn" onclick="joinGame()">🐬 כניסה</button>
+    <div class="entry-input-wrap" style="flex-direction:column;align-items:center;gap:10px;">
+      <input class="entry-input" id="joinCodeInput" type="text" placeholder="קוד כיתה..." maxlength="20"
+             style="width:220px;text-transform:uppercase;letter-spacing:3px;font-weight:900"
+             onkeydown="if(event.key==='Enter')document.getElementById('nameInput').focus()" autocomplete="off">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+        <input class="entry-input" id="nameInput" type="text" placeholder="השם שלי..." maxlength="20"
+               onkeydown="if(event.key==='Enter')joinGame()">
+        <button class="entry-btn" onclick="joinGame()">🐬 כניסה</button>
+      </div>
     </div>
     <div class="existing-users" id="existingUsers" style="display:none">
       <h3>🔄 כניסה חוזרת:</h3>
@@ -674,12 +679,20 @@
     bubblesContainer.appendChild(b);
   }
 
-  // === STORAGE KEYS ===
+  // === FIREBASE ===
+  const FIREBASE_URL = 'https://album-bea15-default-rtdb.firebaseio.com';
+  async function cloudLoadDolphin(j,nm){try{const r=await fetch(FIREBASE_URL+'/spaces/'+j+'/dolphins/'+encodeURIComponent(nm)+'.json');if(r.ok){const d=await r.json();return d||null;}}catch(e){}return null;}
+  let _ct=null;
+  function debouncedCloudSave(j,nm,d){clearTimeout(_ct);_ct=setTimeout(async()=>{try{await fetch(FIREBASE_URL+'/spaces/'+j+'/dolphins/'+encodeURIComponent(nm)+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(e){}},1500);}
+  function getWeekKey(){const d=new Date();const j1=new Date(d.getFullYear(),0,1);const w=Math.ceil(((d-j1)/86400000+j1.getDay()+1)/7);return d.getFullYear()+'-W'+String(w).padStart(2,'0');}
+
+    // === STORAGE KEYS ===
   const USERS_KEY = 'dolphin_users';     // list of user names
   const STATE_PREFIX = 'dolphin_user_';  // per-user state prefix
   const ACTIVE_KEY = 'dolphin_active';   // last active user
 
   let currentUser = null;
+  let currentJoinCode = null;
   let state = null;
 
   // === USER MANAGEMENT ===
@@ -728,14 +741,13 @@
   }
 
   function renderEntryScreen() {
+    const savedCode = localStorage.getItem('dolphin_joinCode') || '';
+    const codeInput = document.getElementById('joinCodeInput');
+    if (codeInput && savedCode) codeInput.value = savedCode;
     const lastUser = localStorage.getItem(ACTIVE_KEY);
     const existingDiv = document.getElementById('existingUsers');
     const listDiv = document.getElementById('userList');
-    // Only show quick login for the last user on this device
-    if (!lastUser || !getUsers().includes(lastUser)) {
-      existingDiv.style.display = 'none';
-      return;
-    }
+    if (!lastUser || !getUsers().includes(lastUser)) { existingDiv.style.display = 'none'; return; }
     existingDiv.style.display = '';
     listDiv.innerHTML = '';
     const chip = document.createElement('div');
@@ -754,42 +766,59 @@
     showEntryScreen();
   }
 
-  function joinGame() {
-    const input = document.getElementById('nameInput');
-    const name = input.value.trim();
-    if (!name) return;
-
-    const users = getUsers();
-    if (!users.includes(name)) {
-      users.push(name);
-      saveUsers(users);
-      saveUserState(name, createDefaultState());
-    }
-    loginAs(name);
+  async function joinGame() {
+    const btn = document.querySelector('.entry-btn');
+    const name = document.getElementById('nameInput').value.trim();
+    const joinCode = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+    if (!joinCode){document.getElementById('joinCodeInput').focus();document.getElementById('joinCodeInput').style.borderColor='#ff6b6b';setTimeout(()=>document.getElementById('joinCodeInput').style.borderColor='',1500);return;}
+    if (!name){document.getElementById('nameInput').focus();document.getElementById('nameInput').style.borderColor='#ff6b6b';setTimeout(()=>document.getElementById('nameInput').style.borderColor='',1500);return;}
+    if(btn){btn.disabled=true;btn.textContent='⏳...';}
+    localStorage.setItem('dolphin_joinCode',joinCode);
+    const cloudState=await cloudLoadDolphin(joinCode,name);
+    const users=getUsers();if(!users.includes(name)){users.push(name);saveUsers(users);}
+    const localState=getUserState(name);
+    let merged;
+    if(cloudState&&localState){merged=(cloudState.score||0)>=(localState.score||0)?cloudState:localState;}
+    else{merged=cloudState||localState||createDefaultState();}
+    saveUserState(name,merged);
+    if(btn){btn.disabled=false;btn.textContent='🐬 כניסה';}
+    loginAs(name,joinCode);
   }
 
-  function loginAs(name) {
+  function loginAs(name, joinCode) {
     currentUser = name;
+    currentJoinCode = joinCode || localStorage.getItem('dolphin_joinCode') || null;
     localStorage.setItem(ACTIVE_KEY, name);
     state = getUserState(name) || createDefaultState();
 
-    // Ensure state has all fields
     if (!state.nameScores) state.nameScores = {};
     if (!state.achievements) state.achievements = [];
     if (state.soundOn === undefined) state.soundOn = true;
     if (!state.clicks) state.clicks = 0;
     if (!state.weeks) state.weeks = 0;
 
+    // Auto-weekly-reset: only clear days, keep accumulated score/xp/level
+    const currentWeek = getWeekKey();
+    if (state.lastWeekKey && state.lastWeekKey !== currentWeek) {
+      state.weeks++;
+      ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'].forEach(d => state[d] = false);
+      state.sardine = false; state.shark = false;
+    }
+    state.lastWeekKey = currentWeek;
+
     document.getElementById('entryScreen').style.display = 'none';
     document.getElementById('gameArea').classList.add('visible');
-    document.getElementById('currentUserName').textContent = '🐬 שלום, ' + name + '!';
+    const codeLabel = currentJoinCode ? ' (' + currentJoinCode + ')' : '';
+    document.getElementById('currentUserName').textContent = '🐬 שלום, ' + name + codeLabel + '!';
     document.getElementById('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
 
+    saveState();
     initGame();
   }
 
   function switchUser() {
     currentUser = null;
+    currentJoinCode = null;
     state = null;
     localStorage.removeItem(ACTIVE_KEY);
     showEntryScreen();
@@ -875,6 +904,7 @@
   function saveState() {
     if (currentUser && state) {
       saveUserState(currentUser, state);
+      if (currentJoinCode) debouncedCloudSave(currentJoinCode, currentUser, state);
     }
   }
 
