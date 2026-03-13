@@ -1156,6 +1156,109 @@
     }
 
   </style>
+    /* ── Feedback FAB ── */
+    .feedback-fab {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      z-index: 100;
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: #fff;
+      border: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.45);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s;
+      animation: fbPulse 4s ease-in-out infinite;
+    }
+    .feedback-fab:hover { transform: scale(1.12); box-shadow: 0 8px 30px rgba(124,58,237,0.6); }
+    @keyframes fbPulse {
+      0%,100% { box-shadow: 0 4px 20px rgba(124,58,237,0.45); }
+      50% { box-shadow: 0 4px 30px rgba(236,72,153,0.55), 0 0 60px rgba(124,58,237,0.2); }
+    }
+    .feedback-fab-label {
+      position: fixed;
+      bottom: 90px; right: 14px;
+      z-index: 100;
+      background: #fff;
+      color: #7c3aed;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      pointer-events: none;
+      opacity: 0;
+      animation: fbLabelShow 6s ease-in-out infinite;
+    }
+    @keyframes fbLabelShow {
+      0%,60%,100% { opacity:0; transform:translateY(5px); }
+      70%,90% { opacity:1; transform:translateY(0); }
+    }
+    /* ── Feedback Modal ── */
+    .feedback-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(4px);
+      z-index: 9990;
+      align-items: center; justify-content: center;
+    }
+    .feedback-overlay.open { display: flex; }
+    .feedback-modal {
+      background: #fff;
+      border-radius: 20px;
+      padding: 28px 24px;
+      max-width: 420px; width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      direction: rtl;
+      text-align: right;
+      position: relative;
+    }
+    .feedback-modal h3 {
+      margin: 0 0 6px;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg,#7c3aed,#ec4899);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .feedback-modal p.sub { color:#6b7280; font-size:.85rem; margin:0 0 16px; }
+    .feedback-modal input,
+    .feedback-modal textarea {
+      width: 100%; box-sizing: border-box;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'Segoe UI', Heebo, sans-serif;
+      font-size: .9rem;
+      color: #1e1b4b;
+      margin-bottom: 10px;
+      direction: rtl;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .feedback-modal input:focus,
+    .feedback-modal textarea:focus { border-color: #a78bfa; }
+    .feedback-modal textarea { resize: vertical; min-height: 90px; }
+    .feedback-modal .fb-submit {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg,#7c3aed,#ec4899);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .feedback-modal .fb-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+    .feedback-close {
+      position: absolute; top: 14px; left: 16px;
+      background: none; border: none;
+      font-size: 1.3rem; cursor: pointer; color: #9ca3af;
+    }
 </head>
 <body>
 
@@ -2088,6 +2191,22 @@
 <button class="share-fab" onclick="shareWA(event)" title="שתפו בוואטסאפ!">📲</button>
 <div class="share-fab-label">שתפו! 📲</div>
 
+<!-- ── Feedback FAB ── -->
+<button class="feedback-fab" onclick="openFeedback()" title="שיפורים ורעיונות">💡</button>
+<div class="feedback-fab-label">רעיונות 💡</div>
+
+<!-- ── Feedback Modal ── -->
+<div class="feedback-overlay" id="feedbackOverlay" onclick="if(event.target===this)closeFeedback()">
+  <div class="feedback-modal">
+    <button class="feedback-close" onclick="closeFeedback()">✕</button>
+    <h3>💡 רעיונות ושיפורים</h3>
+    <p class="sub">יש לך רעיון? משהו שאפשר לשפר? ספרו לנו!</p>
+    <input id="fbName" type="text" placeholder="שם (לא חובה)" maxlength="40">
+    <textarea id="fbText" placeholder="הרעיון / השיפור שלך..." maxlength="500"></textarea>
+    <button class="fb-submit" onclick="submitFeedback()">📤 שליחה</button>
+  </div>
+</div>
+
 <!-- ══ Footer ══ -->
 <footer class="footer">
   <a class="share-btn" href="#" onclick="shareWA(event)">
@@ -2764,6 +2883,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') mainStudentLogin(); });
   });
 });
+
+// ── Feedback ──
+function openFeedback() {
+  document.getElementById('feedbackOverlay').classList.add('open');
+  document.getElementById('fbText').focus();
+}
+function closeFeedback() {
+  document.getElementById('feedbackOverlay').classList.remove('open');
+}
+async function submitFeedback() {
+  const name = document.getElementById('fbName').value.trim() || 'אנונימי';
+  const text = document.getElementById('fbText').value.trim();
+  if (!text) { document.getElementById('fbText').focus(); return; }
+  const btn = document.querySelector('.fb-submit');
+  btn.disabled = true; btn.textContent = '⏳ שולח...';
+  try {
+    await fetch('https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim-feedback.json', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, text, ts: Date.now(), page: 'index' })
+    });
+    closeFeedback();
+    document.getElementById('fbName').value = '';
+    document.getElementById('fbText').value = '';
+    showToast('✅ תודה! הרעיון שלך נשמר 🙏');
+  } catch(e) {
+    showToast('❌ שגיאה בשליחה, נסו שוב');
+  }
+  btn.disabled = false; btn.textContent = '📤 שליחה';
+}
 </script>
 
 </body>
