@@ -843,8 +843,8 @@ async function cloudSaveSpace(joinCode, data, retries=2) {
         method: 'PATCH', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(adminBase)
       });
-      // Save members too (teacher gifts must reach students via cloud)
-      if (data.admin.members) {
+      // Save members only when teacher explicitly modified them (gifts/awards)
+      if (data.admin.members && data._teacherModifiedMembers) {
         await fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/members.json`, {
           method: 'PUT', headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(data.admin.members)
@@ -1097,15 +1097,12 @@ function emergencySync() {
     try {
       const payload = JSON.stringify(member);
       const beaconUrl = FIREBASE_URL + '/spaces/' + joinCode + '/studentSync/' + encodeURIComponent(member.name) + '.json';
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(beaconUrl, new Blob([payload], {type: 'application/json'}));
-      } else {
-        fetch(beaconUrl, {
-          method: 'PUT', keepalive: true,
-          headers: {'Content-Type': 'application/json'},
-          body: payload
-        });
-      }
+      // fetch+keepalive supports PUT (sendBeacon only does POST which breaks Firebase)
+      fetch(beaconUrl, {
+        method: 'PUT', keepalive: true,
+        headers: {'Content-Type': 'application/json'},
+        body: payload
+      });
     } catch(e) {}
   }
 }
@@ -1133,12 +1130,14 @@ function processPendingWrites() {
     if (!q.length) return;
     console.log('Processing', q.length, 'pending writes...');
     const remaining = [];
-    q.forEach(async (w) => {
-      if (Date.now() - w.time > 86400000) return; // skip writes older than 24h
+    const promises = q.map(async (w) => {
+      if (Date.now() - w.time > 86400000) return;
       const ok = await cloudSaveSpace(w.joinCode, w.data, 1);
       if (!ok) remaining.push(w);
     });
-    setTimeout(() => localStorage.setItem(PENDING_KEY, JSON.stringify(remaining)), 5000);
+    Promise.allSettled(promises).then(() => {
+      localStorage.setItem(PENDING_KEY, JSON.stringify(remaining));
+    });
   } catch(e){}
 }
 setTimeout(processPendingWrites, 3000); // process on page load after 3s
@@ -1246,11 +1245,16 @@ function saveState() {
 
 // Shared data = what teacher and students both see (no local UI state)
 function getSharedData() {
-  return {
+  const data = {
     admin: state.admin,
     taskCompletions: state.taskCompletions,
     members: state.admin?.members || []
   };
+  if (state._teacherModifiedMembers) {
+    data._teacherModifiedMembers = true;
+    delete state._teacherModifiedMembers;
+  }
+  return data;
 }
 
 // Load active space or default
@@ -1288,7 +1292,7 @@ function checkQuizReward() {
   if (!reward || reward < 1 || reward > 5) return;
   if (!state.student) return;
   // Prevent double-reward on page refresh
-  const rewardKey = 'quiz-reward-' + Date.now().toString().slice(0,-4);
+  const rewardKey = 'quiz-reward-' + reward;
   if (sessionStorage.getItem(rewardKey)) return;
   sessionStorage.setItem(rewardKey, '1');
 
@@ -1999,8 +2003,32 @@ async function showAdminDashboard() {
     if (cloud?.admin?.members?.length) {
       const localMembers = state.admin.members || [];
       cloud.admin.members.forEach(cm => {
-        if (!localMembers.find(lm => lm.name === cm.name)) {
+        const existing = localMembers.find(lm => lm.name === cm.name);
+        if (!existing) {
           localMembers.push(cm);
+        } else {
+          // Merge stickers from cloud (union - never lose)
+          if (cm.collected) {
+            if (!existing.collected) existing.collected = {};
+            for (const theme in cm.collected) {
+              if (!existing.collected[theme]) existing.collected[theme] = [];
+              cm.collected[theme].forEach(id => {
+                if (!existing.collected[theme].includes(id)) existing.collected[theme].push(id);
+              });
+            }
+          }
+          if (cm.stickers) {
+            if (!existing.stickers) existing.stickers = [];
+            cm.stickers.forEach(id => {
+              if (!existing.stickers.includes(id)) existing.stickers.push(id);
+            });
+          }
+          if (cm.teacherGifts && cm.teacherGifts.length) {
+            if (!existing.teacherGifts) existing.teacherGifts = [];
+            cm.teacherGifts.forEach(g => {
+              if (!existing.teacherGifts.find(eg => eg.id === g.id)) existing.teacherGifts.push(g);
+            });
+          }
         }
       });
       state.admin.members = localMembers;
@@ -2021,10 +2049,8 @@ function resetDailyTasksAll() {
   const today = new Date().toISOString().slice(0, 10);
   if (state._lastAdminReset === today) return;
 
-  // Reset all members' completedTasks for today
-  if (state.admin?.members) {
-    state.admin.members.forEach(m => { m.completedTasks = []; });
-  }
+  // Only reset taskCompletions (daily tracking), NOT member.completedTasks
+  // Member completedTasks are managed per-student by resetDailyTasks()
   state.taskCompletions = {};
   state._lastAdminReset = today;
   saveState();
@@ -2219,6 +2245,7 @@ function awardBonusStickers(studentName) {
     given.push(albumName);
   }
 
+  state._teacherModifiedMembers = true;
   saveState();
   renderStudentGrid();
   showToast(`⭐ ${count} חלקי פאזל ניתנו ל${studentName}! (${[...new Set(given)].join(', ')})`, 'gold');
@@ -2410,7 +2437,7 @@ async function showStudentView() {
 }
 
 function resetDailyTasks() {
-  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const today = new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Jerusalem'})).toISOString().slice(0, 10);
   const studentName = state.student?.name;
   if (!studentName) return;
 
@@ -2606,6 +2633,11 @@ function awardRandomPiece() {
   if (!pick._duplicate) {
     if (!state.collected[pick.theme]) state.collected[pick.theme] = [];
     state.collected[pick.theme].push(pick.id);
+    if (member) {
+      if (!member.collected) member.collected = {};
+      if (!member.collected[pick.theme]) member.collected[pick.theme] = [];
+      if (!member.collected[pick.theme].includes(pick.id)) member.collected[pick.theme].push(pick.id);
+    }
   }
   state.points += 5;
 
@@ -2702,9 +2734,9 @@ async function autoLoginFromMainPage(code, name, pin) {
   state = spaceData;
   state.student = { name, pin, joinCode: code };
   globalState.activeSpace = code;
+  restoreStudentCollected();
   saveState(); saveGlobal();
   if (banner) banner.classList.remove("show");
-  restoreStudentCollected();
   renderAllPuzzles();
   updateStats();
   showStudentView();
