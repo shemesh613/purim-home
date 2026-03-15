@@ -843,6 +843,13 @@ async function cloudSaveSpace(joinCode, data, retries=2) {
         method: 'PATCH', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(adminBase)
       });
+      // Save members too (teacher gifts must reach students via cloud)
+      if (data.admin.members) {
+        await fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/members.json`, {
+          method: 'PUT', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data.admin.members)
+        });
+      }
 
       if (!r1.ok || !r2.ok) {
         console.error('Cloud save error:', r1.status, r2.status);
@@ -926,6 +933,29 @@ async function studentCloudSync(joinCode) {
       });
     }
 
+    // Recover emergency sync data saved via sendBeacon on page close
+    try {
+      const emergencyRes = await fetch(FIREBASE_URL + '/spaces/' + joinCode + '/studentSync/' + encodeURIComponent(myName) + '.json');
+      if (emergencyRes.ok) {
+        const emergencyData = await emergencyRes.json();
+        if (emergencyData && emergencyData.collected) {
+          for (const theme in emergencyData.collected) {
+            if (!localMember.collected[theme]) localMember.collected[theme] = [];
+            emergencyData.collected[theme].forEach(id => {
+              if (!localMember.collected[theme].includes(id)) localMember.collected[theme].push(id);
+            });
+          }
+        }
+        if (emergencyData && emergencyData.stickers) {
+          emergencyData.stickers.forEach(id => {
+            if (!localMember.stickers.includes(id)) localMember.stickers.push(id);
+          });
+        }
+        // Clean up after recovery
+        fetch(FIREBASE_URL + '/spaces/' + joinCode + '/studentSync/' + encodeURIComponent(myName) + '.json', {method: 'DELETE'});
+      }
+    } catch(e) {}
+
     // Merge: start with cloud members, then update THIS student's entry only
     let merged = [...cloudMembers];
     const cloudIdx = merged.findIndex(m => m.name === myName);
@@ -1006,19 +1036,36 @@ document.addEventListener('visibilitychange', () => {
     console.log('Tab visible (teacher) — pushing to cloud...');
     cloudSaveSpace(globalState.activeSpace, getSharedData());
   }
-  // Student: pull latest tasks + member data from cloud
+  // Student: pull latest tasks + MERGE with local stickers (never overwrite)
   if (state.student?.joinCode) {
     console.log('Tab visible (student) — pulling from cloud...');
+    const localCollectedBackup = JSON.parse(JSON.stringify(state.collected || {}));
     cloudLoadSpace(state.student.joinCode).then(cloud => {
       if (cloud?.admin?.tasks) {
         state.admin.tasks = cloud.admin.tasks;
-        if (cloud.admin.members) state.admin.members = cloud.admin.members;
+        if (cloud.admin.members) {
+          const myName = state.student.name;
+          state.admin.members = cloud.admin.members;
+          const myMember = state.admin.members.find(m => m.name === myName);
+          if (myMember) {
+            if (!myMember.collected) myMember.collected = {};
+            if (!myMember.stickers) myMember.stickers = [];
+            for (const theme in localCollectedBackup) {
+              if (!myMember.collected[theme]) myMember.collected[theme] = [];
+              localCollectedBackup[theme].forEach(id => {
+                if (!myMember.collected[theme].includes(id)) myMember.collected[theme].push(id);
+                if (!myMember.stickers.includes(id)) myMember.stickers.push(id);
+              });
+            }
+          }
+        }
         if (cloud.taskCompletions) state.taskCompletions = {...state.taskCompletions, ...cloud.taskCompletions};
         restoreStudentCollected();
         localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
         renderAllPuzzles();
         updateStats();
         if (typeof renderStudentTasks === 'function') renderStudentTasks();
+        studentCloudSync(state.student.joinCode);
       }
     }).catch(e => console.warn('Student visibility sync failed:', e));
   }
@@ -1044,20 +1091,22 @@ function emergencySync() {
   if (globalState.activeSpace) {
     localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
   }
-  // Write ONLY this student's member entry to cloud (not entire array — avoids overwriting others)
+  // Write student data to dedicated per-student path (safe, no index mismatch)
   const joinCode = state.student.joinCode;
-  const members = state.admin?.members;
-  if (members && member) {
-    const idx = members.findIndex(m => m.name === member.name);
-    if (idx >= 0) {
-      try {
-        fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/members/${idx}.json`, {
+  if (member) {
+    try {
+      const payload = JSON.stringify(member);
+      const beaconUrl = FIREBASE_URL + '/spaces/' + joinCode + '/studentSync/' + encodeURIComponent(member.name) + '.json';
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(beaconUrl, new Blob([payload], {type: 'application/json'}));
+      } else {
+        fetch(beaconUrl, {
           method: 'PUT', keepalive: true,
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(member)
+          body: payload
         });
-      } catch(e) {}
-    }
+      }
+    } catch(e) {}
   }
 }
 window.addEventListener('beforeunload', emergencySync);
@@ -2128,6 +2177,9 @@ function awardStickerToStudent(studentName) {
 
   const pick = uncollected[Math.floor(Math.random() * uncollected.length)];
   member.stickers.push(pick.id);
+  if (!member.collected) member.collected = {};
+  if (!member.collected[pick.theme]) member.collected[pick.theme] = [];
+  if (!member.collected[pick.theme].includes(pick.id)) member.collected[pick.theme].push(pick.id);
 
   // Track teacher gift so student sees notification on next load
   if (!member.teacherGifts) member.teacherGifts = [];
@@ -2159,6 +2211,9 @@ function awardBonusStickers(studentName) {
     const idx = Math.floor(Math.random() * uncollected.length);
     const pick = uncollected.splice(idx, 1)[0];
     member.stickers.push(pick.id);
+    if (!member.collected) member.collected = {};
+    if (!member.collected[pick.theme]) member.collected[pick.theme] = [];
+    if (!member.collected[pick.theme].includes(pick.id)) member.collected[pick.theme].push(pick.id);
     const albumName = ALBUM_META[pick.theme].name;
     member.teacherGifts.push({ id: pick.id, theme: pick.theme, albumName, from: state.admin.name });
     given.push(albumName);
@@ -2310,13 +2365,27 @@ async function showStudentView() {
   // Always fetch latest tasks from cloud (teacher may have added new ones)
   if (state.student?.joinCode) {
     try {
+      const localCollectedBackup = JSON.parse(JSON.stringify(state.collected || {}));
       const cloud = await cloudLoadSpace(state.student.joinCode);
       if (cloud?.admin?.tasks) {
         state.admin.tasks = cloud.admin.tasks;
-        // Update members & taskCompletions from cloud
-        if (cloud.admin.members) state.admin.members = cloud.admin.members;
+        // MERGE cloud members with local sticker data (never lose local stickers)
+        if (cloud.admin.members) {
+          state.admin.members = cloud.admin.members;
+          const myMember = state.admin.members.find(m => m.name === state.student.name);
+          if (myMember) {
+            if (!myMember.collected) myMember.collected = {};
+            if (!myMember.stickers) myMember.stickers = [];
+            for (const theme in localCollectedBackup) {
+              if (!myMember.collected[theme]) myMember.collected[theme] = [];
+              localCollectedBackup[theme].forEach(id => {
+                if (!myMember.collected[theme].includes(id)) myMember.collected[theme].push(id);
+                if (!myMember.stickers.includes(id)) myMember.stickers.push(id);
+              });
+            }
+          }
+        }
         if (cloud.taskCompletions) state.taskCompletions = {...state.taskCompletions, ...cloud.taskCompletions};
-        // Re-restore stickers from updated cloud member data (may have more than local)
         restoreStudentCollected();
         renderAllPuzzles();
         updateStats();
