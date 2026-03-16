@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>חדר הפסח - משימת חירות</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700;900&display=swap");
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Heebo",sans-serif;background:linear-gradient(180deg,#fef9ef,#e0f2fe);color:#1e1b4b;min-height:100vh}
+.back-link{position:fixed;top:12px;right:12px;color:#2563eb;text-decoration:none;font-size:.85rem;background:#fff;padding:5px 12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);z-index:100}
+.container{max-width:700px;margin:0 auto;padding:20px}
+h1{font-family:"Frank Ruhl Libre",serif;text-align:center;font-size:2rem;color:#1d4ed8;margin:10px 0 5px}
+.subtitle{text-align:center;color:#6b7280;margin-bottom:20px}
+.phase{display:none;text-align:center}
+.phase.active{display:block;animation:fadeIn .5s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.phase-card{background:#fff;border-radius:20px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,.08);margin:20px 0}
+.phase-title{font-family:"Frank Ruhl Libre",serif;font-size:1.4rem;color:#1d4ed8;margin-bottom:12px}
+.phase-desc{color:#6b7280;margin-bottom:20px;line-height:1.7}
+.game-frame{width:100%;height:70vh;border:3px solid #bfdbfe;border-radius:16px;background:#f0f9ff}
+.btn{font-family:"Heebo",sans-serif;padding:12px 32px;border:none;border-radius:14px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s}
+.btn-primary{background:linear-gradient(135deg,#2563eb,#60a5fa);color:#fff}
+.btn-success{background:linear-gradient(135deg,#059669,#34d399);color:#fff}
+#cameraView{width:100%;max-width:400px;border-radius:16px;margin:12px auto;display:block}
+.color-feedback{font-size:1.1rem;font-weight:700;margin:12px 0;min-height:30px}
+.success-section{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid #6ee7b7;border-radius:20px;padding:30px;text-align:center}
+.success-section h2{font-family:"Frank Ruhl Libre",serif;color:#059669;font-size:1.8rem;margin-bottom:12px}
+.clue-code{font-size:2rem;font-weight:900;color:#7c3aed;letter-spacing:4px;background:#fff;padding:12px 24px;border-radius:12px;display:inline-block;border:2px dashed #c084fc;margin:12px 0}
+.progress-dots{display:flex;justify-content:center;gap:8px;margin:16px 0}
+.dot{width:12px;height:12px;border-radius:50%;background:#e5e7eb;transition:all .3s}
+.dot.active{background:#2563eb;transform:scale(1.3)}
+.dot.done{background:#059669}
+@media(max-width:600px){.container{padding:15px 10px}.game-frame{height:60vh}}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-link" id="backLink">חזרה לחדרים</a>
+<div class="container">
+<h1>חדר הפסח - משימת חירות</h1>
+<p class="subtitle">עברו את כל השלבים כדי לצאת לחירות!</p>
+<div class="progress-dots"><div class="dot active" id="dot1"></div><div class="dot" id="dot2"></div><div class="dot" id="dot3"></div></div>
+<div class="phase active" id="phase1">
+<div class="phase-card">
+<div class="phase-title">שלב 1: צבע החירות</div>
+<div class="phase-desc">צבעו דף בצבע <strong>ירוק</strong> (כמו הכרפס בליל הסדר) והרימו למצלמה!</div>
+<video id="cameraView" autoplay playsinline muted></video>
+<div class="color-feedback" id="colorFeedback"></div>
+<button class="btn btn-primary" id="startCameraBtn" onclick="startCamera()">הפעל מצלמה</button>
+</div></div>
+<div class="phase" id="phase2">
+<div class="phase-card" style="padding:16px">
+<div class="phase-title">שלב 2: משחק הפסח</div>
+<div class="phase-desc">שחקו את משחק הפסח והשלימו את כל השלבים!</div>
+<iframe src="https://shemesh613.github.io/pesach-game/" class="game-frame" id="pesachFrame" allow="camera;microphone"></iframe>
+<button class="btn btn-success" onclick="completePesachGame()" style="margin-top:16px">סיימתי את המשחק!</button>
+</div></div>
+<div class="phase" id="phase3">
+<div class="success-section">
+<h2>יצאתם לחירות!</h2>
+<p style="font-size:1.1rem;color:#065f46;margin-bottom:16px">כל הכבוד! השלמתם את משימת הפסח!</p>
+<div style="font-size:4rem;margin:16px 0">&#x1FAD3;&#x1F377;&#x2728;</div>
+<p style="color:#047857;margin-bottom:8px">הרמז לחדר הבא:</p>
+<div class="clue-code">חירות</div>
+<p style="font-size:.85rem;color:#6b7280;margin-top:16px">שתפו עם הקבוצה וממשיכים לחדר הבא!</p>
+</div></div>
+</div>
+<script>
+var ROOM=new URLSearchParams(window.location.search).get("room")||"";
+var K=ROOM?ROOM+"_":"";
+var STATION_ID=7;
+var bl=document.getElementById("backLink");
+if(ROOM)bl.href="index.html?room="+encodeURIComponent(ROOM);
+var FB="https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim";
+function fbPut(p,v){if(!ROOM)return;fetch(FB+"/"+encodeURIComponent(ROOM)+"/"+p+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(v)}).catch(function(){});}
+var currentPhase=1;
+function showPhase(n){currentPhase=n;document.querySelectorAll(".phase").forEach(function(p){p.classList.remove("active")});document.getElementById("phase"+n).classList.add("active");for(var i=1;i<=3;i++){document.getElementById("dot"+i).classList.toggle("active",i===n);document.getElementById("dot"+i).classList.toggle("done",i<n)}}
+var stream=null,detecting=false;
+function startCamera(){navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(function(s){stream=s;document.getElementById("cameraView").srcObject=stream;document.getElementById("startCameraBtn").style.display="none";detecting=true;detectColor()}).catch(function(){document.getElementById("colorFeedback").textContent="camera error";setTimeout(function(){var b=document.createElement("button");b.className="btn btn-primary";b.style.marginTop="12px";b.textContent="דלגו";b.onclick=passPhase1;document.getElementById("phase1").querySelector(".phase-card").appendChild(b)},1500)})}
+function detectColor(){if(!detecting)return;var video=document.getElementById("cameraView");var canvas=document.createElement("canvas");canvas.width=video.videoWidth||320;canvas.height=video.videoHeight||240;var ctx=canvas.getContext("2d");ctx.drawImage(video,0,0,canvas.width,canvas.height);var cx=Math.floor(canvas.width/2),cy=Math.floor(canvas.height/2),sz=60;var data=ctx.getImageData(cx-sz/2,cy-sz/2,sz,sz).data;var r=0,g=0,b=0,c=0;for(var i=0;i<data.length;i+=4){r+=data[i];g+=data[i+1];b+=data[i+2];c++}r=Math.round(r/c);g=Math.round(g/c);b=Math.round(b/c);if(g>80&&g>r*1.2&&g>b*1.2){document.getElementById("colorFeedback").innerHTML="<span style=color:#059669>ירוק מזוהה!</span>";detecting=false;if(stream)stream.getTracks().forEach(function(t){t.stop()});setTimeout(passPhase1,1500)}else{document.getElementById("colorFeedback").textContent="מחפש ירוק... הרימו דף ירוק";requestAnimationFrame(detectColor)}}
+function passPhase1(){if(stream)stream.getTracks().forEach(function(t){t.stop()});showPhase(2)}
+function completePesachGame(){showPhase(3);saveProgress()}
+function saveProgress(){var progress=JSON.parse(localStorage.getItem(K+"purim_progress")||"{}");var group=localStorage.getItem(K+"purim_group")||"1";var member=localStorage.getItem(K+"purim_member")||"guest";if(!progress[group])progress[group]={};if(!progress[group][member])progress[group][member]=[];if(progress[group][member].indexOf(STATION_ID)===-1)progress[group][member].push(STATION_ID);localStorage.setItem(K+"purim_progress",JSON.stringify(progress));if(ROOM)fbPut("progress/"+group+"/"+encodeURIComponent(member)+"/"+STATION_ID,true)}
+</script>
+</body>
+</html>
