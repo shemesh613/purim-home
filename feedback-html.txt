@@ -1,0 +1,16 @@
+
+<!-- ── Feedback FAB ── -->
+<button class="feedback-fab" onclick="openFeedback()" title="שיפורים ורעיונות">💡</button>
+<div class="feedback-fab-label">רעיונות 💡</div>
+
+<!-- ── Feedback Modal ── -->
+<div class="feedback-overlay" id="feedbackOverlay" onclick="if(event.target===this)closeFeedback()">
+  <div class="feedback-modal">
+    <button class="feedback-close" onclick="closeFeedback()">✕</button>
+    <h3>💡 רעיונות ושיפורים</h3>
+    <p class="sub">יש לך רעיון? משהו שאפשר לשפר? ספרו לנו!</p>
+    <input id="fbName" type="text" placeholder="שם (לא חובה)" maxlength="40">
+    <textarea id="fbText" placeholder="הרעיון / השיפור שלך..." maxlength="500"></textarea>
+    <button class="fb-submit" onclick="submitFeedback()">📤 שליחה</button>
+  </div>
+</div>

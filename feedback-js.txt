@@ -1,0 +1,30 @@
+
+// ── Feedback ──
+function openFeedback() {
+  document.getElementById('feedbackOverlay').classList.add('open');
+  document.getElementById('fbText').focus();
+}
+function closeFeedback() {
+  document.getElementById('feedbackOverlay').classList.remove('open');
+}
+async function submitFeedback() {
+  const name = document.getElementById('fbName').value.trim() || 'אנונימי';
+  const text = document.getElementById('fbText').value.trim();
+  if (!text) { document.getElementById('fbText').focus(); return; }
+  const btn = document.querySelector('.fb-submit');
+  btn.disabled = true; btn.textContent = '⏳ שולח...';
+  try {
+    await fetch('https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim-feedback.json', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, text, ts: Date.now(), page: 'index' })
+    });
+    closeFeedback();
+    document.getElementById('fbName').value = '';
+    document.getElementById('fbText').value = '';
+    showToast('✅ תודה! הרעיון שלך נשמר 🙏');
+  } catch(e) {
+    showToast('❌ שגיאה בשליחה, נסו שוב');
+  }
+  btn.disabled = false; btn.textContent = '📤 שליחה';
+}

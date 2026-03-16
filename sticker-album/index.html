@@ -330,6 +330,38 @@ a{color:inherit;text-decoration:none}
       .bg-grid { display: none; }
     }
 .not-logged-banner{display:none;background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px solid rgba(217,119,6,0.2);border-radius:14px;padding:12px 20px;margin:8px 16px;text-align:center;font-size:.9rem;color:#92400e;font-weight:600;align-items:center;justify-content:center;gap:10px}.not-logged-banner a{color:#7c3aed;font-weight:900;text-decoration:underline}.not-logged-banner.show{display:flex}
+
+/* ===== TRADING ===== */
+.trade-modal{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.5);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.trade-modal.show{opacity:1;pointer-events:all}
+.trade-content{background:#fff;border-radius:24px;padding:24px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);transform:scale(.9);transition:transform .3s}
+.trade-modal.show .trade-content{transform:scale(1)}
+.trade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;margin:12px 0}
+.trade-piece{width:70px;height:70px;border-radius:10px;background-size:cover;background-position:center;cursor:pointer;border:2px solid transparent;transition:all .2s;position:relative}
+.trade-piece:hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.trade-piece.selected{border-color:#7c3aed;box-shadow:0 0 20px rgba(124,58,237,0.3)}
+.trade-piece .dup-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;display:flex;align-items:center;justify-content:center;font-weight:900}
+.trade-partner{padding:12px;background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.06);border-radius:12px;margin-bottom:10px}
+.trade-partner-name{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.trade-btn{padding:10px 24px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;border-radius:12px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font-body)}
+.trade-btn:hover{transform:scale(1.05);box-shadow:0 4px 16px rgba(124,58,237,0.3)}
+.trade-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* ===== TRADING ===== */
+.trade-modal{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.5);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.trade-modal.show{opacity:1;pointer-events:all}
+.trade-content{background:#fff;border-radius:24px;padding:24px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);transform:scale(.9);transition:transform .3s}
+.trade-modal.show .trade-content{transform:scale(1)}
+.trade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;margin:12px 0}
+.trade-piece{width:70px;height:70px;border-radius:10px;background-size:cover;background-position:center;cursor:pointer;border:2px solid transparent;transition:all .2s;position:relative}
+.trade-piece:hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.trade-piece.selected{border-color:#7c3aed;box-shadow:0 0 20px rgba(124,58,237,0.3)}
+.trade-piece .dup-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;display:flex;align-items:center;justify-content:center;font-weight:900}
+.trade-partner{padding:12px;background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.06);border-radius:12px;margin-bottom:10px}
+.trade-partner-name{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.trade-btn{padding:10px 24px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;border-radius:12px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font-body)}
+.trade-btn:hover{transform:scale(1.05);box-shadow:0 4px 16px rgba(124,58,237,0.3)}
+.trade-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 </style>
 </head>
 <body>
@@ -644,6 +676,16 @@ a{color:inherit;text-decoration:none}
         <h3>🏅 המדבקות שלי</h3>
         <div id="myStickersGrid" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center"></div>
       </div>
+      <div class="auth-card" style="margin-top:16px;text-align:center">
+        <h3>🔄 החלפת קלפים עם חברים</h3>
+        <p style="font-size:.85rem;color:var(--text-soft);margin:8px 0">יש לך קלפים כפולים? החליפו עם חברים מהכיתה!</p>
+        <button class="trade-btn" onclick="openTradeModal()">🔄 פתח שוק החלפות</button>
+      </div>
+      <div class="auth-card" style="margin-top:16px;text-align:center">
+        <h3>🔄 החלפת קלפים עם חברים</h3>
+        <p style="font-size:.85rem;color:var(--text-soft);margin:8px 0">יש לך קלפים כפולים? החליפו עם חברים מהכיתה!</p>
+        <button class="trade-btn" onclick="openTradeModal()">🔄 פתח שוק החלפות</button>
+      </div>
     </div>
   </section>
 
@@ -695,6 +737,29 @@ a{color:inherit;text-decoration:none}
       <button class="btn-primary" style="flex:1;background:linear-gradient(135deg,#059669,#34d399)" id="confirmYes">✅ אישור</button>
       <button class="btn-primary" style="flex:1;background:linear-gradient(135deg,#6b7280,#9ca3af)" id="confirmNo">ביטול</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== TRADE MODAL ===== -->
+<div class="trade-modal" id="tradeModal">
+  <div class="trade-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-family:var(--font-title);color:#7c3aed">🔄 החלפת קלפים</h3>
+      <button style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-soft)" onclick="closeTradeModal()">✕</button>
+    </div>
+    <div id="tradeContent"></div>
+  </div>
+</div>
+
+
+<!-- ===== TRADE MODAL ===== -->
+<div class="trade-modal" id="tradeModal">
+  <div class="trade-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-family:var(--font-title);color:#7c3aed">f504 החלפת קלפים</h3>
+      <button style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-soft)" onclick="closeTradeModal()">✕</button>
+    </div>
+    <div id="tradeContent"></div>
   </div>
 </div>
 
@@ -843,8 +908,8 @@ async function cloudSaveSpace(joinCode, data, retries=2) {
         method: 'PATCH', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(adminBase)
       });
-      // Save members only when teacher explicitly modified them (gifts/awards)
-      if (data.admin.members && data._teacherModifiedMembers) {
+      // Save members too (needed for teacher gifts to reach students)
+      if (data.admin.members) {
         await fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/members.json`, {
           method: 'PUT', headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(data.admin.members)
@@ -933,12 +998,13 @@ async function studentCloudSync(joinCode) {
       });
     }
 
-    // Recover emergency sync data saved via sendBeacon on page close
+    // Check for emergency sync data saved via sendBeacon
     try {
-      const emergencyRes = await fetch(FIREBASE_URL + '/spaces/' + joinCode + '/studentSync/' + encodeURIComponent(myName) + '.json');
+      const emergencyRes = await fetch(`${FIREBASE_URL}/spaces/${joinCode}/studentSync/${encodeURIComponent(myName)}.json`);
       if (emergencyRes.ok) {
         const emergencyData = await emergencyRes.json();
-        if (emergencyData && emergencyData.collected) {
+        if (emergencyData?.collected) {
+          // Merge emergency data into localMember
           for (const theme in emergencyData.collected) {
             if (!localMember.collected[theme]) localMember.collected[theme] = [];
             emergencyData.collected[theme].forEach(id => {
@@ -946,13 +1012,13 @@ async function studentCloudSync(joinCode) {
             });
           }
         }
-        if (emergencyData && emergencyData.stickers) {
+        if (emergencyData?.stickers) {
           emergencyData.stickers.forEach(id => {
             if (!localMember.stickers.includes(id)) localMember.stickers.push(id);
           });
         }
-        // Clean up after recovery
-        fetch(FIREBASE_URL + '/spaces/' + joinCode + '/studentSync/' + encodeURIComponent(myName) + '.json', {method: 'DELETE'});
+        // Clean up emergency data after merging
+        fetch(`${FIREBASE_URL}/spaces/${joinCode}/studentSync/${encodeURIComponent(myName)}.json`, {method: 'DELETE'});
       }
     } catch(e) {}
 
@@ -1036,18 +1102,21 @@ document.addEventListener('visibilitychange', () => {
     console.log('Tab visible (teacher) — pushing to cloud...');
     cloudSaveSpace(globalState.activeSpace, getSharedData());
   }
-  // Student: pull latest tasks + MERGE with local stickers (never overwrite)
+  // Student: pull latest tasks + member data from cloud (MERGE, never overwrite stickers)
   if (state.student?.joinCode) {
     console.log('Tab visible (student) — pulling from cloud...');
+    // CRITICAL: Save local stickers BEFORE loading cloud data
     const localCollectedBackup = JSON.parse(JSON.stringify(state.collected || {}));
     cloudLoadSpace(state.student.joinCode).then(cloud => {
       if (cloud?.admin?.tasks) {
         state.admin.tasks = cloud.admin.tasks;
         if (cloud.admin.members) {
+          // MERGE cloud members with local sticker data (never lose stickers)
           const myName = state.student.name;
           state.admin.members = cloud.admin.members;
           const myMember = state.admin.members.find(m => m.name === myName);
           if (myMember) {
+            // Re-inject local stickers into cloud member (union merge)
             if (!myMember.collected) myMember.collected = {};
             if (!myMember.stickers) myMember.stickers = [];
             for (const theme in localCollectedBackup) {
@@ -1065,6 +1134,7 @@ document.addEventListener('visibilitychange', () => {
         renderAllPuzzles();
         updateStats();
         if (typeof renderStudentTasks === 'function') renderStudentTasks();
+        // Push merged data back to cloud
         studentCloudSync(state.student.joinCode);
       }
     }).catch(e => console.warn('Student visibility sync failed:', e));
@@ -1091,18 +1161,24 @@ function emergencySync() {
   if (globalState.activeSpace) {
     localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
   }
-  // Write student data to dedicated per-student path (safe, no index mismatch)
+  // Write this student's member entry to cloud — use PATCH by name to avoid index mismatch
   const joinCode = state.student.joinCode;
   if (member) {
     try {
+      // First: try to find correct index from cloud (async with keepalive)
+      // Fallback: use sendBeacon for reliable delivery on page close
       const payload = JSON.stringify(member);
-      const beaconUrl = FIREBASE_URL + '/spaces/' + joinCode + '/studentSync/' + encodeURIComponent(member.name) + '.json';
-      // fetch+keepalive supports PUT (sendBeacon only does POST which breaks Firebase)
-      fetch(beaconUrl, {
-        method: 'PUT', keepalive: true,
-        headers: {'Content-Type': 'application/json'},
-        body: payload
-      });
+      const beaconUrl = `${FIREBASE_URL}/spaces/${joinCode}/studentSync/${encodeURIComponent(member.name)}.json`;
+      // Save to a dedicated per-student path (safe, no index issues)
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(beaconUrl, new Blob([payload], {type: 'application/json'}));
+      } else {
+        fetch(beaconUrl, {
+          method: 'PUT', keepalive: true,
+          headers: {'Content-Type': 'application/json'},
+          body: payload
+        });
+      }
     } catch(e) {}
   }
 }
@@ -1130,14 +1206,12 @@ function processPendingWrites() {
     if (!q.length) return;
     console.log('Processing', q.length, 'pending writes...');
     const remaining = [];
-    const promises = q.map(async (w) => {
-      if (Date.now() - w.time > 86400000) return;
+    q.forEach(async (w) => {
+      if (Date.now() - w.time > 86400000) return; // skip writes older than 24h
       const ok = await cloudSaveSpace(w.joinCode, w.data, 1);
       if (!ok) remaining.push(w);
     });
-    Promise.allSettled(promises).then(() => {
-      localStorage.setItem(PENDING_KEY, JSON.stringify(remaining));
-    });
+    setTimeout(() => localStorage.setItem(PENDING_KEY, JSON.stringify(remaining)), 5000);
   } catch(e){}
 }
 setTimeout(processPendingWrites, 3000); // process on page load after 3s
@@ -1245,16 +1319,11 @@ function saveState() {
 
 // Shared data = what teacher and students both see (no local UI state)
 function getSharedData() {
-  const data = {
+  return {
     admin: state.admin,
     taskCompletions: state.taskCompletions,
     members: state.admin?.members || []
   };
-  if (state._teacherModifiedMembers) {
-    data._teacherModifiedMembers = true;
-    delete state._teacherModifiedMembers;
-  }
-  return data;
 }
 
 // Load active space or default
@@ -1292,7 +1361,7 @@ function checkQuizReward() {
   if (!reward || reward < 1 || reward > 5) return;
   if (!state.student) return;
   // Prevent double-reward on page refresh
-  const rewardKey = 'quiz-reward-' + reward;
+  const rewardKey = 'quiz-reward-' + Date.now().toString().slice(0,-4);
   if (sessionStorage.getItem(rewardKey)) return;
   sessionStorage.setItem(rewardKey, '1');
 
@@ -2003,32 +2072,8 @@ async function showAdminDashboard() {
     if (cloud?.admin?.members?.length) {
       const localMembers = state.admin.members || [];
       cloud.admin.members.forEach(cm => {
-        const existing = localMembers.find(lm => lm.name === cm.name);
-        if (!existing) {
+        if (!localMembers.find(lm => lm.name === cm.name)) {
           localMembers.push(cm);
-        } else {
-          // Merge stickers from cloud (union - never lose)
-          if (cm.collected) {
-            if (!existing.collected) existing.collected = {};
-            for (const theme in cm.collected) {
-              if (!existing.collected[theme]) existing.collected[theme] = [];
-              cm.collected[theme].forEach(id => {
-                if (!existing.collected[theme].includes(id)) existing.collected[theme].push(id);
-              });
-            }
-          }
-          if (cm.stickers) {
-            if (!existing.stickers) existing.stickers = [];
-            cm.stickers.forEach(id => {
-              if (!existing.stickers.includes(id)) existing.stickers.push(id);
-            });
-          }
-          if (cm.teacherGifts && cm.teacherGifts.length) {
-            if (!existing.teacherGifts) existing.teacherGifts = [];
-            cm.teacherGifts.forEach(g => {
-              if (!existing.teacherGifts.find(eg => eg.id === g.id)) existing.teacherGifts.push(g);
-            });
-          }
         }
       });
       state.admin.members = localMembers;
@@ -2049,8 +2094,10 @@ function resetDailyTasksAll() {
   const today = new Date().toISOString().slice(0, 10);
   if (state._lastAdminReset === today) return;
 
-  // Only reset taskCompletions (daily tracking), NOT member.completedTasks
-  // Member completedTasks are managed per-student by resetDailyTasks()
+  // Reset all members' completedTasks for today
+  if (state.admin?.members) {
+    state.admin.members.forEach(m => { m.completedTasks = []; });
+  }
   state.taskCompletions = {};
   state._lastAdminReset = today;
   saveState();
@@ -2169,23 +2216,81 @@ function renderStudentGrid() {
   }
   noStudents.style.display = 'none';
 
-  grid.innerHTML = members.map(m => {
+  // Add search + bulk controls
+  let html = '<div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">';
+  html += '<input type="text" class="form-input" id="studentSearch" placeholder="🔍 חפש תלמיד..." oninput="filterStudents()" style="flex:1;min-width:150px;padding:8px 12px;font-size:.85rem">';
+  html += '<button class="award-sticker-btn" style="padding:8px 16px;white-space:nowrap" onclick="awardAllStudents()">🎁 הענק לכולם</button>';
+  html += '<span style="font-size:.8rem;color:var(--text-soft);font-weight:700">👨‍🎓 ' + members.length + ' תלמידים</span>';
+  html += '</div>';
+
+  html += '<div id="studentCardsContainer" class="student-grid">';
+  html += members.map((m, idx) => {
     const totalStickers = (m.stickers || []).length;
     const totalTasks = (m.completedTasks || []).length;
-    return `
-      <div class="student-card">
-        <div class="student-avatar">🧒</div>
-        <div class="student-name">${m.name}</div>
-        <div class="student-stats">
-          <span>🏅 ${totalStickers}</span>
-          <span>✅ ${totalTasks}</span>
-        </div>
-        <button class="award-sticker-btn" onclick="awardStickerToStudent('${m.name}')">🎁 הענק מדבקה</button>
-        <button class="award-sticker-btn" style="background:linear-gradient(135deg,rgba(147,51,234,0.2),rgba(147,51,234,0.08));border-color:rgba(147,51,234,0.3);color:#7c3aed;margin-top:4px" onclick="awardBonusStickers('${m.name}')">⭐ בונוס (3 מדבקות)</button>
-      </div>
-    `;
+    const dupCount = (m.duplicates || []).length;
+    // Per-album breakdown
+    const albumCounts = {};
+    ALBUMS.forEach(a => {
+      albumCounts[a] = (m.collected?.[a] || []).length;
+    });
+    const albumBreakdown = ALBUMS.map(a => {
+      const count = albumCounts[a];
+      const meta = ALBUM_META[a];
+      return count > 0 ? '<span style="font-size:.65rem;color:' + meta.color + ';font-weight:700">' + meta.name + ':' + count + '/9</span>' : '';
+    }).filter(Boolean).join(' ');
+
+    return '<div class="student-card" data-name="' + escapeHtml(m.name) + '" style="padding:16px;border:1.5px solid rgba(0,0,0,0.06)">' +
+      '<div class="student-avatar" style="font-size:2.5rem">🧒</div>' +
+      '<div class="student-name" style="font-size:1.05rem;margin-bottom:4px">' + escapeHtml(m.name) + '</div>' +
+      '<div class="student-stats" style="flex-wrap:wrap;gap:8px;margin-bottom:6px">' +
+        '<span>🏅 ' + totalStickers + '</span>' +
+        '<span>✅ ' + totalTasks + '</span>' +
+        (dupCount > 0 ? '<span>🔄 ' + dupCount + ' כפולים</span>' : '') +
+      '</div>' +
+      (albumBreakdown ? '<div style="font-size:.65rem;color:var(--text-soft);margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px;justify-content:center">' + albumBreakdown + '</div>' : '') +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">' +
+        '<button class="award-sticker-btn" onclick="awardStickerToStudent(\'' + escapeHtml(m.name).replace(/'/g,"\'") + '\')">🎁 מדבקה</button>' +
+        '<button class="award-sticker-btn" style="background:linear-gradient(135deg,rgba(147,51,234,0.2),rgba(147,51,234,0.08));border-color:rgba(147,51,234,0.3);color:#7c3aed" onclick="awardBonusStickers(\'' + escapeHtml(m.name).replace(/'/g,"\'") + '\')">⭐ x3</button>' +
+      '</div>' +
+    '</div>';
   }).join('');
+  html += '</div>';
+
+  grid.innerHTML = html;
 }
+
+function filterStudents() {
+  const q = (document.getElementById('studentSearch')?.value || '').trim().toLowerCase();
+  document.querySelectorAll('#studentCardsContainer .student-card').forEach(card => {
+    const name = (card.dataset.name || '').toLowerCase();
+    card.style.display = !q || name.includes(q) ? '' : 'none';
+  });
+}
+
+function awardAllStudents() {
+  const members = state.admin?.members || [];
+  if (members.length === 0) return;
+  if (!confirm('להעניק מדבקה לכל ' + members.length + ' התלמידים?')) return;
+  let count = 0;
+  members.forEach(m => {
+    if (!m.stickers) m.stickers = [];
+    const allPieces = ALBUMS.flatMap(a => STICKERS[a].map(s => ({id: s.id, theme: a, name: s.name})));
+    const uncollected = allPieces.filter(p => !m.stickers.includes(p.id));
+    if (uncollected.length === 0) return;
+    const pick = uncollected[Math.floor(Math.random() * uncollected.length)];
+    m.stickers.push(pick.id);
+    if (!m.collected) m.collected = {};
+    if (!m.collected[pick.theme]) m.collected[pick.theme] = [];
+    if (!m.collected[pick.theme].includes(pick.id)) m.collected[pick.theme].push(pick.id);
+    if (!m.teacherGifts) m.teacherGifts = [];
+    m.teacherGifts.push({ id: pick.id, theme: pick.theme, albumName: ALBUM_META[pick.theme].name, from: state.admin.name });
+    count++;
+  });
+  saveState();
+  renderStudentGrid();
+  showToast('🎁 ' + count + ' מדבקות חולקו לכל התלמידים!', 'gold');
+}
+
 
 function awardStickerToStudent(studentName) {
   const member = state.admin.members.find(m => m.name === studentName);
@@ -2203,6 +2308,7 @@ function awardStickerToStudent(studentName) {
 
   const pick = uncollected[Math.floor(Math.random() * uncollected.length)];
   member.stickers.push(pick.id);
+  // Also add to member.collected (so it persists correctly through sync)
   if (!member.collected) member.collected = {};
   if (!member.collected[pick.theme]) member.collected[pick.theme] = [];
   if (!member.collected[pick.theme].includes(pick.id)) member.collected[pick.theme].push(pick.id);
@@ -2245,7 +2351,6 @@ function awardBonusStickers(studentName) {
     given.push(albumName);
   }
 
-  state._teacherModifiedMembers = true;
   saveState();
   renderStudentGrid();
   showToast(`⭐ ${count} חלקי פאזל ניתנו ל${studentName}! (${[...new Set(given)].join(', ')})`, 'gold');
@@ -2392,11 +2497,12 @@ async function showStudentView() {
   // Always fetch latest tasks from cloud (teacher may have added new ones)
   if (state.student?.joinCode) {
     try {
+      // CRITICAL: Backup local stickers BEFORE cloud load (prevents overwrite)
       const localCollectedBackup = JSON.parse(JSON.stringify(state.collected || {}));
       const cloud = await cloudLoadSpace(state.student.joinCode);
       if (cloud?.admin?.tasks) {
         state.admin.tasks = cloud.admin.tasks;
-        // MERGE cloud members with local sticker data (never lose local stickers)
+        // Update members from cloud — but MERGE local stickers back in
         if (cloud.admin.members) {
           state.admin.members = cloud.admin.members;
           const myMember = state.admin.members.find(m => m.name === state.student.name);
@@ -2437,7 +2543,7 @@ async function showStudentView() {
 }
 
 function resetDailyTasks() {
-  const today = new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Jerusalem'})).toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
   const studentName = state.student?.name;
   if (!studentName) return;
 
@@ -2633,11 +2739,6 @@ function awardRandomPiece() {
   if (!pick._duplicate) {
     if (!state.collected[pick.theme]) state.collected[pick.theme] = [];
     state.collected[pick.theme].push(pick.id);
-    if (member) {
-      if (!member.collected) member.collected = {};
-      if (!member.collected[pick.theme]) member.collected[pick.theme] = [];
-      if (!member.collected[pick.theme].includes(pick.id)) member.collected[pick.theme].push(pick.id);
-    }
   }
   state.points += 5;
 
@@ -2734,9 +2835,9 @@ async function autoLoginFromMainPage(code, name, pin) {
   state = spaceData;
   state.student = { name, pin, joinCode: code };
   globalState.activeSpace = code;
-  restoreStudentCollected();
   saveState(); saveGlobal();
   if (banner) banner.classList.remove("show");
+  restoreStudentCollected();
   renderAllPuzzles();
   updateStats();
   showStudentView();
@@ -2833,6 +2934,22 @@ h1{font-family:'Frank Ruhl Libre',serif;font-size:2.5rem;color:${color};margin-b
       .bg-blob { animation-duration: 30s !important; opacity: 0.3 !important; }
       .bg-grid { display: none; }
     }
+
+/* ===== TRADING ===== */
+.trade-modal{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.5);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.trade-modal.show{opacity:1;pointer-events:all}
+.trade-content{background:#fff;border-radius:24px;padding:24px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);transform:scale(.9);transition:transform .3s}
+.trade-modal.show .trade-content{transform:scale(1)}
+.trade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;margin:12px 0}
+.trade-piece{width:70px;height:70px;border-radius:10px;background-size:cover;background-position:center;cursor:pointer;border:2px solid transparent;transition:all .2s;position:relative}
+.trade-piece:hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.trade-piece.selected{border-color:#7c3aed;box-shadow:0 0 20px rgba(124,58,237,0.3)}
+.trade-piece .dup-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;display:flex;align-items:center;justify-content:center;font-weight:900}
+.trade-partner{padding:12px;background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.06);border-radius:12px;margin-bottom:10px}
+.trade-partner-name{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.trade-btn{padding:10px 24px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;border-radius:12px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font-body)}
+.trade-btn:hover{transform:scale(1.05);box-shadow:0 4px 16px rgba(124,58,237,0.3)}
+.trade-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 </style></head>
 <body>
 <div class="cert">
@@ -2851,9 +2968,284 @@ h1{font-family:'Frank Ruhl Libre',serif;font-size:2.5rem;color:${color};margin-b
 </body></html>`);
   win.document.close();
 }
+
+// ===== CARD TRADING =====
+function openTradeModal() {
+  document.getElementById('tradeModal').classList.add('show');
+  renderTradeUI();
+}
+
+function closeTradeModal() {
+  document.getElementById('tradeModal').classList.remove('show');
+}
+
+async function renderTradeUI() {
+  const container = document.getElementById('tradeContent');
+  if (!state.student || !state.admin?.members) {
+    container.innerHTML = '<p style="text-align:center;color:#8a8aaa">לא ניתן לסחור כרגע</p>';
+    return;
+  }
+
+  const myName = state.student.name;
+  const myMember = state.admin.members.find(m => m.name === myName);
+  const myDups = myMember?.duplicates || [];
+
+  let cloudMembers = state.admin.members;
+  try {
+    const cloud = await cloudLoadSpace(state.student.joinCode);
+    if (cloud?.admin?.members) cloudMembers = cloud.admin.members;
+  } catch(e) {}
+
+  if (myDups.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:24px">
+        <div style="font-size:3rem;margin-bottom:12px">📭</div>
+        <p style="color:var(--text-soft)">אין לך קלפים כפולים להחלפה.</p>
+        <p style="font-size:.8rem;color:#8a8aaa;margin-top:8px">השלימו עוד משימות — 30% מהקלפים יהיו כפולים!</p>
+      </div>`;
+    return;
+  }
+
+  const allMap = {};
+  ALBUMS.forEach(a => STICKERS[a].forEach((s, i) => { allMap[s.id] = {s, theme: a, idx: i}; }));
+
+  let html = '<h4 style="margin-bottom:8px;color:var(--text)">🃏 הקלפים הכפולים שלך:</h4>';
+  html += '<div class="trade-grid" id="myTradeCards">';
+  const uniqueDups = [...new Set(myDups)];
+  uniqueDups.forEach(id => {
+    const info = allMap[id];
+    if (!info) return;
+    const row = Math.floor(info.idx / 3), col = info.idx % 3;
+    const count = myDups.filter(d => d === id).length;
+    html += `<div class="trade-piece" data-id="${id}" onclick="selectMyTradeCard('${id}')" style="background-image:url('images/${info.theme}-${row}-${col}.jpg')">
+      ${count > 1 ? `<div class="dup-badge">x${count}</div>` : ''}
+    </div>`;
+  });
+  html += '</div>';
+
+  const others = cloudMembers.filter(m => m.name !== myName && m.duplicates?.length > 0);
+  if (others.length === 0) {
+    html += '<p style="text-align:center;color:#8a8aaa;margin-top:16px">אין חברים עם קלפים כפולים כרגע</p>';
+  } else {
+    html += '<h4 style="margin:16px 0 8px;color:var(--text)">👥 קלפים כפולים של חברים:</h4>';
+    others.forEach(other => {
+      const otherDups = [...new Set(other.duplicates || [])];
+      const myCollected = new Set(ALBUMS.flatMap(a => state.collected[a] || []));
+      const interesting = otherDups.filter(id => !myCollected.has(id));
+      if (interesting.length === 0) return;
+
+      html += `<div class="trade-partner"><div class="trade-partner-name">🧒 ${escapeHtml(other.name)}</div>`;
+      html += '<div class="trade-grid">';
+      interesting.forEach(id => {
+        const info = allMap[id];
+        if (!info) return;
+        const row = Math.floor(info.idx / 3), col = info.idx % 3;
+        html += `<div class="trade-piece" data-id="${id}" data-from="${escapeHtml(other.name)}" onclick="selectPartnerCard('${id}','${other.name.replace(/'/g, "\\'")}')" style="background-image:url('images/${info.theme}-${row}-${col}.jpg')"></div>`;
+      });
+      html += '</div></div>';
+    });
+  }
+
+  html += `<div id="tradeAction" style="text-align:center;margin-top:16px;display:none">
+    <p style="margin-bottom:8px;font-weight:700;color:var(--text)" id="tradeSummary"></p>
+    <button class="trade-btn" onclick="executeTrade()">✅ בצע החלפה!</button>
+  </div>`;
+
+  container.innerHTML = html;
+}
+
+let _tradeMyCard = null;
+let _tradePartnerCard = null;
+let _tradePartnerName = null;
+
+function selectMyTradeCard(id) {
+  _tradeMyCard = id;
+  document.querySelectorAll('#myTradeCards .trade-piece').forEach(p => p.classList.toggle('selected', p.dataset.id === id));
+  updateTradeAction();
+}
+
+function selectPartnerCard(id, partnerName) {
+  _tradePartnerCard = id;
+  _tradePartnerName = partnerName;
+  document.querySelectorAll('.trade-partner .trade-piece').forEach(p => {
+    p.classList.toggle('selected', p.dataset.id === id && p.dataset.from === partnerName);
+  });
+  updateTradeAction();
+}
+
+function updateTradeAction() {
+  const action = document.getElementById('tradeAction');
+  if (!action) return;
+  if (_tradeMyCard && _tradePartnerCard && _tradePartnerName) {
+    const allMap = {};
+    ALBUMS.forEach(a => STICKERS[a].forEach((s, i) => { allMap[s.id] = {s, theme: a, idx: i}; }));
+    const myInfo = allMap[_tradeMyCard];
+    const partnerInfo = allMap[_tradePartnerCard];
+    document.getElementById('tradeSummary').textContent =
+      `🔄 ${myInfo?.s.name || _tradeMyCard} ↔ ${partnerInfo?.s.name || _tradePartnerCard} (מ${_tradePartnerName})`;
+    action.style.display = 'block';
+  } else {
+    action.style.display = 'none';
+  }
+}
+
+async function executeTrade() {
+  if (!_tradeMyCard || !_tradePartnerCard || !_tradePartnerName) return;
+
+  const myName = state.student.name;
+  const myMember = state.admin.members.find(m => m.name === myName);
+  const joinCode = state.student.joinCode;
+
+  let cloud;
+  try {
+    cloud = await cloudLoadSpace(joinCode);
+  } catch(e) {
+    showToast('❌ שגיאה בחיבור — נסו שוב', 'info');
+    return;
+  }
+
+  const cloudMembers = cloud?.admin?.members || [];
+  const cloudMe = cloudMembers.find(m => m.name === myName);
+  const cloudPartner = cloudMembers.find(m => m.name === _tradePartnerName);
+
+  if (!cloudMe || !cloudPartner) {
+    showToast('❌ לא נמצא שחקן — נסו שוב', 'info');
+    return;
+  }
+
+  if (!cloudMe.duplicates?.includes(_tradeMyCard)) {
+    showToast('❌ הקלף כבר לא זמין', 'info');
+    renderTradeUI();
+    return;
+  }
+  if (!cloudPartner.duplicates?.includes(_tradePartnerCard)) {
+    showToast('❌ הקלף של החבר כבר לא זמין', 'info');
+    renderTradeUI();
+    return;
+  }
+
+  const allMap = {};
+  ALBUMS.forEach(a => STICKERS[a].forEach(s => { allMap[s.id] = a; }));
+  const myCardTheme = allMap[_tradeMyCard];
+  const partnerCardTheme = allMap[_tradePartnerCard];
+
+  const myDupIdx = cloudMe.duplicates.indexOf(_tradeMyCard);
+  if (myDupIdx >= 0) cloudMe.duplicates.splice(myDupIdx, 1);
+  const myStkIdx = cloudMe.stickers.indexOf(_tradeMyCard);
+  if (myStkIdx >= 0) cloudMe.stickers.splice(myStkIdx, 1);
+  if (!cloudMe.stickers.includes(_tradePartnerCard)) cloudMe.stickers.push(_tradePartnerCard);
+  if (!cloudMe.collected) cloudMe.collected = {};
+  if (!cloudMe.collected[partnerCardTheme]) cloudMe.collected[partnerCardTheme] = [];
+  if (!cloudMe.collected[partnerCardTheme].includes(_tradePartnerCard)) cloudMe.collected[partnerCardTheme].push(_tradePartnerCard);
+
+  const pDupIdx = cloudPartner.duplicates.indexOf(_tradePartnerCard);
+  if (pDupIdx >= 0) cloudPartner.duplicates.splice(pDupIdx, 1);
+  const pStkIdx = cloudPartner.stickers.indexOf(_tradePartnerCard);
+  if (pStkIdx >= 0) cloudPartner.stickers.splice(pStkIdx, 1);
+  if (!cloudPartner.stickers.includes(_tradeMyCard)) cloudPartner.stickers.push(_tradeMyCard);
+  if (!cloudPartner.collected) cloudPartner.collected = {};
+  if (!cloudPartner.collected[myCardTheme]) cloudPartner.collected[myCardTheme] = [];
+  if (!cloudPartner.collected[myCardTheme].includes(_tradeMyCard)) cloudPartner.collected[myCardTheme].push(_tradeMyCard);
+
+  try {
+    await fetch(`${FIREBASE_URL}/spaces/${joinCode}/admin/members.json`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(cloudMembers)
+    });
+  } catch(e) {
+    showToast('❌ שגיאה בשמירה — נסו שוב', 'info');
+    return;
+  }
+
+  state.admin.members = cloudMembers;
+  if (myMember) {
+    myMember.duplicates = cloudMe.duplicates;
+    myMember.stickers = cloudMe.stickers;
+    myMember.collected = cloudMe.collected;
+  }
+  restoreStudentCollected();
+  saveState();
+  renderAllPuzzles();
+  updateStats();
+  renderMyStickers();
+
+  playSound('award');
+  showToast(`🎉 החלפה בוצעה בהצלחה!`, 'gold');
+
+  _tradeMyCard = null;
+  _tradePartnerCard = null;
+  _tradePartnerName = null;
+  renderTradeUI();
+}
+
+// ===== CARD TRADING =====
+function openTradeModal(){document.getElementById('tradeModal').classList.add('show');renderTradeUI()}
+function closeTradeModal(){document.getElementById('tradeModal').classList.remove('show')}
+var _tradeMyCard=null,_tradePartnerCard=null,_tradePartnerName=null;
+
+async function renderTradeUI(){
+  var container=document.getElementById('tradeContent');
+  if(!state.student||!state.admin||!state.admin.members){container.innerHTML='<p style="text-align:center;color:#8a8aaa">\u05DC\u05D0 \u05E0\u05D9\u05EA\u05DF \u05DC\u05E1\u05D7\u05D5\u05E8 \u05DB\u05E8\u05D2\u05E2</p>';return}
+  var myName=state.student.name;
+  var myMember=state.admin.members.find(function(m){return m.name===myName});
+  var myDups=myMember&&myMember.duplicates?myMember.duplicates:[];
+  var cloudMembers=state.admin.members;
+  try{var cloud=await cloudLoadSpace(state.student.joinCode);if(cloud&&cloud.admin&&cloud.admin.members)cloudMembers=cloud.admin.members}catch(e){}
+  if(myDups.length===0){container.innerHTML='<div style="text-align:center;padding:24px"><div style="font-size:3rem;margin-bottom:12px">\U0001F4ED</div><p style="color:var(--text-soft)">\u05D0\u05D9\u05DF \u05DC\u05DA \u05E7\u05DC\u05E4\u05D9\u05DD \u05DB\u05E4\u05D5\u05DC\u05D9\u05DD \u05DC\u05D4\u05D7\u05DC\u05E4\u05D4.</p><p style="font-size:.8rem;color:#8a8aaa;margin-top:8px">\u05D4\u05E9\u05DC\u05D9\u05DE\u05D5 \u05E2\u05D5\u05D3 \u05DE\u05E9\u05D9\u05DE\u05D5\u05EA - 30% \u05DE\u05D4\u05E7\u05DC\u05E4\u05D9\u05DD \u05D9\u05D4\u05D9\u05D5 \u05DB\u05E4\u05D5\u05DC\u05D9\u05DD!</p></div>';return}
+  var allMap={};ALBUMS.forEach(function(a){STICKERS[a].forEach(function(s,i){allMap[s.id]={s:s,theme:a,idx:i}})});
+  var html='<h4 style="margin-bottom:8px;color:var(--text)">\u05D4\u05E7\u05DC\u05E4\u05D9\u05DD \u05D4\u05DB\u05E4\u05D5\u05DC\u05D9\u05DD \u05E9\u05DC\u05DA:</h4><div class="trade-grid" id="myTradeCards">';
+  var uniqueDups=[...new Set(myDups)];
+  uniqueDups.forEach(function(id){var info=allMap[id];if(!info)return;var row=Math.floor(info.idx/3),col=info.idx%3;var count=myDups.filter(function(d){return d===id}).length;
+    html+='<div class="trade-piece" data-id="'+id+'" onclick="selectMyTradeCard(this)" style="background-image:url(images/'+info.theme+'-'+row+'-'+col+'.jpg)">'+(count>1?'<div class="dup-badge">x'+count+'</div>':'')+'</div>'});
+  html+='</div>';
+  var others=cloudMembers.filter(function(m){return m.name!==myName&&m.duplicates&&m.duplicates.length>0});
+  if(others.length===0){html+='<p style="text-align:center;color:#8a8aaa;margin-top:16px">\u05D0\u05D9\u05DF \u05D7\u05D1\u05E8\u05D9\u05DD \u05E2\u05DD \u05E7\u05DC\u05E4\u05D9\u05DD \u05DB\u05E4\u05D5\u05DC\u05D9\u05DD \u05DB\u05E8\u05D2\u05E2</p>'}
+  else{html+='<h4 style="margin:16px 0 8px;color:var(--text)">\u05E7\u05DC\u05E4\u05D9\u05DD \u05DB\u05E4\u05D5\u05DC\u05D9\u05DD \u05E9\u05DC \u05D7\u05D1\u05E8\u05D9\u05DD:</h4>';
+    var myCollected=new Set(ALBUMS.flatMap(function(a){return state.collected[a]||[]}));
+    others.forEach(function(other){var otherDups=[...new Set(other.duplicates||[])];var interesting=otherDups.filter(function(id){return!myCollected.has(id)});if(interesting.length===0)return;
+      html+='<div class="trade-partner"><div class="trade-partner-name">\U0001F9D2 '+escapeHtml(other.name)+'</div><div class="trade-grid">';
+      interesting.forEach(function(id){var info=allMap[id];if(!info)return;var row=Math.floor(info.idx/3),col=info.idx%3;
+        html+='<div class="trade-piece" data-id="'+id+'" data-from="'+escapeHtml(other.name)+'" onclick="selectPartnerCard(this)" style="background-image:url(images/'+info.theme+'-'+row+'-'+col+'.jpg)"></div>'});
+      html+='</div></div>'})}
+  html+='<div id="tradeAction" style="text-align:center;margin-top:16px;display:none"><p style="margin-bottom:8px;font-weight:700;color:var(--text)" id="tradeSummary"></p><button class="trade-btn" onclick="executeTrade()">\u05D1\u05E6\u05E2 \u05D4\u05D7\u05DC\u05E4\u05D4!</button></div>';
+  container.innerHTML=html}
+
+function selectMyTradeCard(el){_tradeMyCard=el.dataset.id;document.querySelectorAll('#myTradeCards .trade-piece').forEach(function(p){p.classList.toggle('selected',p.dataset.id===_tradeMyCard)});updateTradeAction()}
+function selectPartnerCard(el){_tradePartnerCard=el.dataset.id;_tradePartnerName=el.dataset.from;document.querySelectorAll('.trade-partner .trade-piece').forEach(function(p){p.classList.remove('selected')});el.classList.add('selected');updateTradeAction()}
+
+function updateTradeAction(){var action=document.getElementById('tradeAction');if(!action)return;if(_tradeMyCard&&_tradePartnerCard&&_tradePartnerName){var allMap={};ALBUMS.forEach(function(a){STICKERS[a].forEach(function(s,i){allMap[s.id]={s:s,theme:a,idx:i}})});var mi=allMap[_tradeMyCard],pi=allMap[_tradePartnerCard];document.getElementById('tradeSummary').textContent=(mi?mi.s.name:_tradeMyCard)+' \u2194 '+(pi?pi.s.name:_tradePartnerCard)+' (\u05DE'+_tradePartnerName+')';action.style.display='block'}else{action.style.display='none'}}
+
+async function executeTrade(){
+  if(!_tradeMyCard||!_tradePartnerCard||!_tradePartnerName)return;
+  var myName=state.student.name,joinCode=state.student.joinCode;
+  var cloud;try{cloud=await cloudLoadSpace(joinCode)}catch(e){showToast('\u05E9\u05D2\u05D9\u05D0\u05D4 \u05D1\u05D7\u05D9\u05D1\u05D5\u05E8','info');return}
+  var cm=cloud&&cloud.admin&&cloud.admin.members?cloud.admin.members:[];
+  var cloudMe=cm.find(function(m){return m.name===myName}),cloudPartner=cm.find(function(m){return m.name===_tradePartnerName});
+  if(!cloudMe||!cloudPartner){showToast('\u05DC\u05D0 \u05E0\u05DE\u05E6\u05D0 \u05E9\u05D7\u05E7\u05DF','info');return}
+  if(!cloudMe.duplicates||cloudMe.duplicates.indexOf(_tradeMyCard)===-1){showToast('\u05D4\u05E7\u05DC\u05E3 \u05DB\u05D1\u05E8 \u05DC\u05D0 \u05D6\u05DE\u05D9\u05DF','info');renderTradeUI();return}
+  if(!cloudPartner.duplicates||cloudPartner.duplicates.indexOf(_tradePartnerCard)===-1){showToast('\u05D4\u05E7\u05DC\u05E3 \u05E9\u05DC \u05D4\u05D7\u05D1\u05E8 \u05DB\u05D1\u05E8 \u05DC\u05D0 \u05D6\u05DE\u05D9\u05DF','info');renderTradeUI();return}
+  var allThemeMap={};ALBUMS.forEach(function(a){STICKERS[a].forEach(function(s){allThemeMap[s.id]=a})});
+  var myTheme=allThemeMap[_tradeMyCard],partnerTheme=allThemeMap[_tradePartnerCard];
+  var i1=cloudMe.duplicates.indexOf(_tradeMyCard);if(i1>=0)cloudMe.duplicates.splice(i1,1);
+  var i2=cloudMe.stickers.indexOf(_tradeMyCard);if(i2>=0)cloudMe.stickers.splice(i2,1);
+  if(cloudMe.stickers.indexOf(_tradePartnerCard)===-1)cloudMe.stickers.push(_tradePartnerCard);
+  if(!cloudMe.collected)cloudMe.collected={};if(!cloudMe.collected[partnerTheme])cloudMe.collected[partnerTheme]=[];
+  if(cloudMe.collected[partnerTheme].indexOf(_tradePartnerCard)===-1)cloudMe.collected[partnerTheme].push(_tradePartnerCard);
+  var i3=cloudPartner.duplicates.indexOf(_tradePartnerCard);if(i3>=0)cloudPartner.duplicates.splice(i3,1);
+  var i4=cloudPartner.stickers.indexOf(_tradePartnerCard);if(i4>=0)cloudPartner.stickers.splice(i4,1);
+  if(cloudPartner.stickers.indexOf(_tradeMyCard)===-1)cloudPartner.stickers.push(_tradeMyCard);
+  if(!cloudPartner.collected)cloudPartner.collected={};if(!cloudPartner.collected[myTheme])cloudPartner.collected[myTheme]=[];
+  if(cloudPartner.collected[myTheme].indexOf(_tradeMyCard)===-1)cloudPartner.collected[myTheme].push(_tradeMyCard);
+  try{await fetch(FIREBASE_URL+'/spaces/'+joinCode+'/admin/members.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(cm)})}catch(e){showToast('\u05E9\u05D2\u05D9\u05D0\u05D4 \u05D1\u05E9\u05DE\u05D9\u05E8\u05D4','info');return}
+  state.admin.members=cm;restoreStudentCollected();saveState();renderAllPuzzles();updateStats();renderMyStickers();
+  playSound('award');showToast('\u05D4\u05D7\u05DC\u05E4\u05D4 \u05D1\u05D5\u05E6\u05E2\u05D4 \u05D1\u05D4\u05E6\u05DC\u05D7\u05D4!','gold');
+  _tradeMyCard=null;_tradePartnerCard=null;_tradePartnerName=null;renderTradeUI()}
+
+function filterStudents(){var q=(document.getElementById('studentSearch')||{value:''}).value.trim().toLowerCase();document.querySelectorAll('#studentCardsContainer .student-card').forEach(function(card){var name=(card.dataset.name||'').toLowerCase();card.style.display=!q||name.indexOf(q)>=0?'':'none'})}
+
+function awardAllStudents(){var members=state.admin&&state.admin.members?state.admin.members:[];if(members.length===0)return;if(!confirm('\u05DC\u05D4\u05E2\u05E0\u05D9\u05E7 \u05DE\u05D3\u05D1\u05E7\u05D4 \u05DC\u05DB\u05DC '+members.length+' \u05D4\u05EA\u05DC\u05DE\u05D9\u05D3\u05D9\u05DD?'))return;var count=0;members.forEach(function(m){if(!m.stickers)m.stickers=[];var allPieces=ALBUMS.flatMap(function(a){return STICKERS[a].map(function(s){return{id:s.id,theme:a,name:s.name}})});var uncollected=allPieces.filter(function(p){return m.stickers.indexOf(p.id)===-1});if(uncollected.length===0)return;var pick=uncollected[Math.floor(Math.random()*uncollected.length)];m.stickers.push(pick.id);if(!m.collected)m.collected={};if(!m.collected[pick.theme])m.collected[pick.theme]=[];if(m.collected[pick.theme].indexOf(pick.id)===-1)m.collected[pick.theme].push(pick.id);if(!m.teacherGifts)m.teacherGifts=[];m.teacherGifts.push({id:pick.id,theme:pick.theme,albumName:ALBUM_META[pick.theme].name,from:state.admin.name});count++});saveState();renderStudentGrid();showToast(count+' \u05DE\u05D3\u05D1\u05E7\u05D5\u05EA \u05D7\u05D5\u05DC\u05E7\u05D5 \u05DC\u05DB\u05DC \u05D4\u05EA\u05DC\u05DE\u05D9\u05D3\u05D9\u05DD!','gold')}
+
 </script>
-<!-- Visitor Analytics -->
-<script async src="https://cdn.counter.dev/script.js" data-id="shemesh613" data-utcoffset="2"></script>
 </body>
 </html>
-<!-- deployed 20260315124516 -->
