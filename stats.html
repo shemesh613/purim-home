@@ -24,13 +24,21 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .badge-section {
-      margin: 30px 0;
+    .stats-container {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(167,139,250,0.2);
+      border-radius: 16px;
+      padding: 30px;
+      margin: 20px 0;
       text-align: center;
+      backdrop-filter: blur(10px);
+      max-width: 700px;
+      width: 100%;
     }
-    .badge-section img {
-      height: 40px;
-      margin: 8px;
+    .stats-container h2 {
+      color: #a78bfa;
+      margin-bottom: 16px;
+      font-size: 1.3rem;
     }
     .info {
       background: rgba(167,139,250,0.1);
@@ -41,6 +49,7 @@
       margin: 20px 0;
       line-height: 1.8;
       text-align: center;
+      color: #94a3b8;
     }
     .back-link {
       margin-top: 30px;
@@ -53,17 +62,21 @@
 </head>
 <body>
   <h1>📊 סטטיסטיקות האתר</h1>
-  <div class="badge-section">
-    <p style="color:#94a3b8; margin-bottom:12px;">🔢 מונה ביקורים:</p>
-    <img src="https://api.visitorbadge.io/api/visitors?path=shemesh613-purim-home&label=Total%20Visitors&labelColor=%231a1035&countColor=%237c3aed" alt="visitor count"/>
-    <br>
-    <img src="https://api.visitorbadge.io/api/daily?path=shemesh613-purim-home&label=Today&labelColor=%231a1035&countColor=%2360a5fa" alt="daily visitors"/>
+
+  <div class="stats-container">
+    <h2>🌍 מבקרים לפי מדינה + סה"כ צפיות</h2>
+    <a href="https://www.flagcounter.me/details/gG5" target="_blank">
+      <img src="https://www.flagcounter.me/gG5/" alt="Flag Counter" style="border:0; max-width:100%;">
+    </a>
+    <p style="color:#94a3b8; margin-top:12px; font-size:0.9rem;">👆 לחץ לפרטים מלאים</p>
   </div>
+
   <div class="info">
-    💡 המונים מתעדכנים בזמן אמת.<br>
-    כל כניסה לאתר או לדף זה נספרת אוטומטית.<br>
-    אין צורך בלוגין — הכל פתוח לצפייה!
+    💡 המונה סופר כל כניסה לאתר לפי מדינה.<br>
+    🔄 רענן את הדף כדי לראות עדכון.<br>
+    📊 לחץ על המונה לדף פרטים מלא — בלי לוגין!
   </div>
+
   <a href="index.html" class="back-link">← חזרה לאתר הראשי</a>
 </body>
 </html>
