@@ -217,7 +217,7 @@
     /* ══ Games Grid ══ */
     .games-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       grid-auto-rows: 1fr;
       gap: 16px;
       align-items: stretch;
@@ -959,6 +959,10 @@
       .corner-logo { width: 50px; height: 50px; top: 10px; left: 10px; }
       .section { padding: 16px 14px 20px; }
     }
+    @media (max-width: 900px) {
+      .games-grid { grid-template-columns: repeat(3, 1fr); }
+      .tools-grid { grid-template-columns: repeat(2, 1fr); }
+    }
 
     /* ══ Role Sidebar ══ */
     .role-sidebar {
@@ -1379,12 +1383,6 @@
         <p class="card-desc">נערו את הטלפון — רעשן פורים!</p>
         <span class="card-badge badge-fun">🎉 כיפי</span>
       </a>
-      <a href="sticker-album/" class="game-card" style="--card-shadow: rgba(124,58,237,0.2); --card-border: #c084fc; background:linear-gradient(135deg,#ede9fe,#ddd6fe);">
-        <span class="card-emoji">🧩</span>
-        <h3 class="card-title">אלבום מדבקות פאזל</h3>
-        <p class="card-desc">השלימו משימות, אספו חלקים והרכיבו 6 פאזלים!</p>
-        <span class="card-badge" style="background:#7c3aed;color:#fff;">🧩 פאזל</span>
-      </a>
     </div>
 
     <!-- Mishloach Manot -->
@@ -1448,7 +1446,7 @@
     </div>
 
     <div class="games-grid">
-      <a href="https://shemesh613.github.io/pesach-game/" target="_blank" class="game-card pesach-card" style="--card-shadow: rgba(67,233,123,0.25); --card-border: #43e97b; background:linear-gradient(135deg,#ecfdf5,#d1fae5); grid-column: 1 / -1;">
+      <a href="https://shemesh613.github.io/pesach-game/" target="_blank" class="game-card pesach-card" style="--card-shadow: rgba(67,233,123,0.25); --card-border: #43e97b; background:linear-gradient(135deg,#ecfdf5,#d1fae5); ">
         <span class="card-emoji">🫓</span>
         <h3 class="card-title">משחק הפסח — זיהוי תנועות!</h3>
         <p class="card-desc">ענו על שאלות פסח עם תנועות ראש! הנהנו = נכון, הנידו = לא נכון — משחק מצלמה אינטראקטיבי לחג!</p>
@@ -1488,6 +1486,12 @@
         <span class="card-emoji">📜</span>
         <h3 class="card-title">אתגר ההגדה</h3>
         <p class="card-desc">כמה חלקים מההגדה אתם מכירים? סדרו את הסדר!</p>
+        <span class="card-badge" style="background:#d97706;color:#fff;">🔜 בקרוב</span>
+      </div>
+      <div class="game-card pesach-card" style="--card-shadow: rgba(21,101,192,0.18); --card-border: #42a5f5; background:linear-gradient(135deg,#e3f2fd,#bbdefb); cursor:default; opacity:0.8;">
+        <span class="card-emoji">🏃</span>
+        <h3 class="card-title">מירוץ יציאת מצרים</h3>
+        <p class="card-desc">רוצו עם בני ישראל מפרעה אל החירות — מירוץ מכשולים!</p>
         <span class="card-badge" style="background:#d97706;color:#fff;">🔜 בקרוב</span>
       </div>
     </div>
