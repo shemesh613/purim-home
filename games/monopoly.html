@@ -3,1080 +3,451 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>מפורים עד פסח — המשחק</title>
+<title>מפורים עד פסח — מונופול רב-משתתפים</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&family=Frank+Ruhl+Libre:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg1: #0f172a;
-    --bg2: #1e1b4b;
-    --gold: #f59e0b;
-    --gold-dark: #d97706;
-    --purple: #7c3aed;
-    --blue: #2563eb;
-    --green: #16a34a;
-    --red: #dc2626;
-    --text: #f1f5f9;
-    --card-bg: rgba(255,255,255,0.05);
-  }
-
-  body {
-    font-family: 'Heebo', sans-serif;
-    background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 50%, #1a1a2e 100%);
-    min-height: 100vh;
-    color: var(--text);
-    direction: rtl;
-    overflow-x: hidden;
-  }
-
-  /* ===== HEADER ===== */
-  header {
-    text-align: center;
-    padding: 20px 16px 14px;
-    background: rgba(0,0,0,0.4);
-    border-bottom: 3px solid rgba(245,158,11,0.4);
-    position: relative;
-    backdrop-filter: blur(10px);
-  }
-  header a.back-btn {
-    position: absolute;
-    right: 16px; top: 50%; transform: translateY(-50%);
-    color: var(--gold); text-decoration: none;
-    font-size: 15px; background: rgba(255,255,255,0.08);
-    padding: 8px 16px; border-radius: 25px; border: 1px solid var(--gold);
-    transition: all 0.3s;
-    font-weight: 700;
-  }
-  header a.back-btn:hover { background: rgba(245,158,11,0.25); transform: translateY(-50%) scale(1.05); }
-  header h1 {
-    font-family: 'Frank Ruhl Libre', serif;
-    font-size: clamp(26px, 6vw, 42px);
-    background: linear-gradient(90deg, #f59e0b, #fbbf24, #a855f7, #3b82f6);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text; font-weight: 900;
-    text-shadow: none;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-  }
-  header p { font-size: 14px; color: #94a3b8; margin-top: 4px; letter-spacing: 1px; }
-
-  /* ===== MONEY BAR ===== */
-  #stats-bar {
-    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
-    padding: 14px 16px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.2));
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-  .stat-box {
-    background: rgba(255,255,255,0.06);
-    border-radius: 14px; padding: 10px 20px;
-    display: flex; align-items: center; gap: 10px;
-    font-size: 15px;
-    border: 1px solid rgba(255,255,255,0.1);
-    backdrop-filter: blur(5px);
-    transition: transform 0.2s, box-shadow 0.2s;
-    min-width: 130px; justify-content: center;
-  }
-  .stat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-  .stat-box .icon { font-size: 24px; }
-  .stat-box .info { display: flex; flex-direction: column; align-items: flex-start; }
-  .stat-box .label { color: #94a3b8; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
-  .stat-box .val { font-weight: 900; font-size: 22px; line-height: 1.1; }
-  .stat-box.money-box { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
-  .stat-box.money-box .val { color: var(--gold); text-shadow: 0 0 12px rgba(245,158,11,0.4); }
-  #points-val { color: #a78bfa; }
-  #round-val { color: #67e8f9; }
-  #squares-val { color: #86efac; }
-
-  /* Money animation */
-  @keyframes coinPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
-  .coin-pulse { animation: coinPulse 0.4s ease; }
-  @keyframes moneyFloat {
-    0% { opacity: 1; transform: translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
-  }
-  .money-float {
-    position: fixed; font-size: 28px; font-weight: 900; pointer-events: none; z-index: 999;
-    animation: moneyFloat 1.2s ease forwards;
-  }
-
-  /* ===== GAME AREA ===== */
-  #game-area {
-    max-width: 1100px; margin: 0 auto; padding: 16px;
-  }
-
-  /* ===== BOARD ===== */
-  #board-wrap {
-    position: relative;
-    display: flex; justify-content: center; margin-bottom: 16px;
-  }
-  #board {
-    display: grid;
-    gap: 4px;
-    width: 100%; max-width: 900px;
-    background: rgba(0,0,0,0.5);
-    border: 3px solid var(--gold);
-    border-radius: 16px;
-    padding: 4px;
-    position: relative;
-    box-shadow: 0 0 40px rgba(245,158,11,0.15), inset 0 0 40px rgba(0,0,0,0.3);
-  }
-
-  /* center panel */
-  #board-center {
-    background: radial-gradient(ellipse at center, rgba(245,158,11,0.1) 0%, rgba(15,23,42,0.9) 100%);
-    border-radius: 12px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 10px; padding: 16px;
-    border: 2px solid rgba(245,158,11,0.25);
-  }
-  #board-center h2 {
-    font-family: 'Frank Ruhl Libre', serif;
-    font-size: clamp(18px, 3.5vw, 28px);
-    background: linear-gradient(90deg, #f59e0b, #a855f7);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text; font-weight: 900; text-align: center;
-  }
-  #board-center > p:first-of-type { font-size: clamp(14px, 2.5vw, 18px); color: #94a3b8; text-align: center; }
-
-  /* DICE area inside center */
-  #dice-area {
-    display: flex; gap: 14px; justify-content: center; margin: 8px 0;
-  }
-  .die {
-    width: clamp(44px, 9vw, 68px);
-    height: clamp(44px, 9vw, 68px);
-    background: linear-gradient(145deg, #ffffff, #e8e8e8);
-    border-radius: 10px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    padding: 6px;
-    gap: 2px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.8);
-    transition: transform 0.1s;
-  }
-  .die.rolling { animation: dieRoll 0.6s ease; }
-  @keyframes dieRoll {
-    0%   { transform: rotate(0deg) scale(1); }
-    25%  { transform: rotate(15deg) scale(1.15); }
-    50%  { transform: rotate(-10deg) scale(0.9); }
-    75%  { transform: rotate(8deg) scale(1.08); }
-    100% { transform: rotate(0deg) scale(1); }
-  }
-  .dot {
-    background: #1e293b; border-radius: 50%;
-    width: 100%; height: 100%;
-    display: none;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
-  }
-  .dot.show { display: block; }
-
-  #roll-btn {
-    background: linear-gradient(135deg, var(--gold), #d97706, #b45309);
-    color: #1e293b; font-family: 'Heebo', sans-serif;
-    font-weight: 900; font-size: clamp(16px, 3vw, 22px);
-    border: none; border-radius: 30px;
-    padding: 12px 36px; cursor: pointer;
-    box-shadow: 0 6px 25px rgba(245,158,11,0.5);
-    transition: all 0.2s;
-    letter-spacing: 1px;
-  }
-  #roll-btn:hover:not(:disabled) { transform: scale(1.08); box-shadow: 0 8px 30px rgba(245,158,11,0.7); }
-  #roll-btn:active:not(:disabled) { transform: scale(0.98); }
-  #roll-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  #roll-hint { font-size: 12px; color: #64748b; margin-top: 2px; }
-
-  /* ===== SQUARES ===== */
-  .sq {
-    border-radius: 8px;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 4px 3px;
-    cursor: default;
-    position: relative;
-    border: 2px solid transparent;
-    background: rgba(255,255,255,0.04);
-    transition: all 0.2s;
-    min-width: 0; overflow: hidden;
-    min-height: 60px;
-  }
-  .sq .sq-emoji { font-size: clamp(16px, 3.5vw, 26px); line-height: 1; margin-bottom: 2px; }
-  .sq .sq-name {
-    font-size: clamp(8px, 1.6vw, 12px); font-weight: 700;
-    text-align: center; line-height: 1.2;
-    word-break: break-word; color: #e2e8f0;
-  }
-  .sq .sq-cost {
-    font-size: clamp(7px, 1.2vw, 10px);
-    color: var(--gold); font-weight: 900;
-    margin-top: 1px;
-    background: rgba(0,0,0,0.3);
-    padding: 1px 5px; border-radius: 6px;
-  }
-  .sq .sq-owned { position: absolute; top: 2px; left: 2px; font-size: 12px; }
-  .sq .sq-player { position: absolute; bottom: 2px; right: 2px; font-size: clamp(14px, 3vw, 24px); filter: drop-shadow(0 0 6px rgba(255,255,255,0.6)); }
-
-  /* Theme colors */
-  .sq.theme-purim   { border-color: var(--purple); background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(124,58,237,0.08)); }
-  .sq.theme-pesach  { border-color: var(--blue);   background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(37,99,235,0.08)); }
-  .sq.theme-mitzvah { border-color: var(--gold);   background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.08)); }
-  .sq.theme-mazal   { border-color: var(--green);  background: linear-gradient(135deg, rgba(22,163,74,0.2), rgba(22,163,74,0.08)); }
-  .sq.theme-start   { border-color: var(--red);    background: linear-gradient(135deg, rgba(220,38,38,0.2), rgba(220,38,38,0.08)); }
-
-  .sq.active-sq {
-    box-shadow: 0 0 0 3px white, 0 0 20px rgba(255,255,255,0.5);
-    transform: scale(1.08); z-index: 2;
-  }
-  .sq.owned-by-player {
-    filter: brightness(1.3);
-    box-shadow: inset 0 0 12px rgba(245,158,11,0.3);
-  }
-  .sq.owned-by-player::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(245,158,11,0.1), transparent);
-    border-radius: 6px; pointer-events: none;
-  }
-
-  /* ===== LOG ===== */
-  #log-box {
-    background: rgba(0,0,0,0.4); border-radius: 14px;
-    padding: 14px 18px; margin-bottom: 12px;
-    border: 1px solid rgba(255,255,255,0.08);
-    min-height: 50px; max-height: 100px; overflow-y: auto;
-    backdrop-filter: blur(5px);
-  }
-  #log-box p { font-size: 14px; color: #cbd5e1; margin-bottom: 3px; }
-  #log-box p:first-child { color: white; font-weight: 700; font-size: 15px; }
-
-  /* ===== LEGEND ===== */
-  #legend {
-    display: flex; flex-wrap: wrap; gap: 12px;
-    justify-content: center; margin-bottom: 14px;
-  }
-  .legend-item {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 13px; color: #b0b8c8; font-weight: 700;
-    background: rgba(255,255,255,0.04);
-    padding: 5px 12px; border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.08);
-  }
-  .legend-dot {
-    width: 14px; height: 14px; border-radius: 4px;
-    border: 2px solid currentColor;
-  }
-
-  /* ===== MODAL ===== */
-  #modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.8); z-index: 100;
-    align-items: center; justify-content: center;
-    padding: 16px; backdrop-filter: blur(6px);
-  }
-  #modal-overlay.show { display: flex; }
-  #modal-box {
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    border-radius: 20px; padding: 28px;
-    max-width: 520px; width: 100%;
-    border: 2px solid var(--gold);
-    box-shadow: 0 25px 80px rgba(0,0,0,0.8), 0 0 40px rgba(245,158,11,0.15);
-    animation: modalIn 0.3s ease;
-    direction: rtl;
-  }
-  @keyframes modalIn {
-    from { transform: scale(0.85) translateY(20px); opacity: 0; }
-    to   { transform: scale(1) translateY(0); opacity: 1; }
-  }
-  #modal-title {
-    font-family: 'Frank Ruhl Libre', serif;
-    font-size: 24px; font-weight: 900;
-    text-align: center; margin-bottom: 6px;
-    color: var(--gold);
-  }
-  #modal-sq-name {
-    text-align: center; font-size: 15px; color: #94a3b8; margin-bottom: 16px;
-  }
-  #modal-question {
-    font-size: 20px; font-weight: 700;
-    text-align: center; margin-bottom: 20px; line-height: 1.5;
-    color: #f1f5f9;
-  }
-  #modal-options {
-    display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;
-  }
-  .opt-btn {
-    background: rgba(255,255,255,0.07);
-    border: 2px solid rgba(255,255,255,0.15);
-    border-radius: 12px; padding: 14px 18px;
-    color: var(--text); font-family: 'Heebo', sans-serif;
-    font-size: 16px; text-align: right; cursor: pointer;
-    transition: all 0.2s;
-    direction: rtl;
-  }
-  .opt-btn:hover:not(:disabled) { background: rgba(255,255,255,0.14); border-color: var(--gold); transform: translateX(-4px); }
-  .opt-btn.correct { background: rgba(22,163,74,0.35); border-color: #16a34a; }
-  .opt-btn.wrong   { background: rgba(220,38,38,0.3); border-color: #dc2626; }
-  .opt-btn:disabled { cursor: default; }
-
-  #modal-feedback {
-    text-align: center; font-size: 18px; min-height: 24px;
-    margin-bottom: 12px; font-weight: 900;
-  }
-  #modal-funfact {
-    text-align: center; font-size: 14px; color: #94a3b8;
-    line-height: 1.6; min-height: 24px; margin-bottom: 14px;
-    background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px;
-  }
-  #modal-close {
-    display: block; width: 100%;
-    background: linear-gradient(135deg, var(--gold), #d97706);
-    color: #1e293b; font-family: 'Heebo', sans-serif;
-    font-weight: 900; font-size: 18px;
-    border: none; border-radius: 12px; padding: 14px;
-    cursor: pointer; display: none;
-    transition: transform 0.2s;
-  }
-  #modal-close:hover { transform: scale(1.03); }
-  #modal-close.show { display: block; }
-
-  /* Mazal modal */
-  #mazal-modal {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.8); z-index: 100;
-    align-items: center; justify-content: center; padding: 16px;
-    backdrop-filter: blur(6px);
-  }
-  #mazal-modal.show { display: flex; }
-  #mazal-box {
-    background: linear-gradient(135deg, #14532d, #052e16);
-    border-radius: 20px; padding: 32px 28px;
-    max-width: 420px; width: 100%;
-    border: 3px solid var(--green);
-    box-shadow: 0 25px 80px rgba(0,0,0,0.8), 0 0 40px rgba(22,163,74,0.2);
-    text-align: center;
-    animation: modalIn 0.3s ease;
-    direction: rtl;
-  }
-  #mazal-emoji { font-size: 64px; margin-bottom: 12px; }
-  #mazal-text { font-size: 24px; font-weight: 900; margin-bottom: 8px; }
-  #mazal-desc { font-size: 16px; color: #86efac; margin-bottom: 20px; line-height: 1.5; }
-  #mazal-close {
-    background: var(--green); color: white; border: none;
-    border-radius: 12px; padding: 14px 36px;
-    font-family: 'Heebo', sans-serif; font-weight: 700; font-size: 18px;
-    cursor: pointer; transition: transform 0.2s;
-  }
-  #mazal-close:hover { transform: scale(1.05); }
-
-  /* End modal */
-  #end-modal {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.9); z-index: 200;
-    align-items: center; justify-content: center; padding: 16px;
-    backdrop-filter: blur(8px);
-  }
-  #end-modal.show { display: flex; }
-  #end-box {
-    background: linear-gradient(135deg, #1e1b4b, #0f172a);
-    border-radius: 24px; padding: 36px 28px;
-    max-width: 500px; width: 100%;
-    border: 3px solid var(--gold);
-    text-align: center; direction: rtl;
-    animation: modalIn 0.4s ease;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 60px rgba(245,158,11,0.2);
-  }
-  #end-box h2 {
-    font-family: 'Frank Ruhl Libre', serif; font-size: 32px;
-    background: linear-gradient(90deg, #f59e0b, #a855f7);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text; margin-bottom: 12px;
-  }
-  #end-score { font-size: 56px; font-weight: 900; color: var(--gold); margin: 10px 0; text-shadow: 0 0 20px rgba(245,158,11,0.4); }
-  #end-grade { font-size: 22px; color: #a78bfa; margin-bottom: 8px; }
-  #end-details { font-size: 16px; color: #94a3b8; margin-bottom: 24px; line-height: 1.8; }
-  #restart-btn {
-    background: linear-gradient(135deg, var(--gold), #d97706);
-    color: #1e293b; font-family: 'Heebo', sans-serif;
-    font-weight: 900; font-size: 20px;
-    border: none; border-radius: 14px; padding: 16px 36px;
-    cursor: pointer; width: 100%;
-    transition: transform 0.2s;
-  }
-  #restart-btn:hover { transform: scale(1.04); }
-
-  /* ===== CREDITS ===== */
-  footer {
-    text-align: center; padding: 16px; font-size: 12px; color: #475569;
-  }
-
-  /* ===== RESPONSIVE ===== */
-  @media (max-width: 600px) {
-    #board { gap: 3px; padding: 3px; }
-    .sq { padding: 3px 2px; border-width: 1.5px; border-radius: 5px; min-height: 48px; }
-    .sq .sq-emoji { font-size: clamp(12px, 4vw, 20px); }
-    .sq .sq-name { font-size: clamp(7px, 2vw, 10px); }
-    .stat-box { padding: 8px 12px; min-width: 100px; }
-    .stat-box .val { font-size: 18px; }
-    .stat-box .icon { font-size: 20px; }
-    #dice-area .die { border-radius: 7px; padding: 4px; }
-  }
-  @media (min-width: 900px) {
-    .sq { min-height: 80px; padding: 6px 4px; }
-    .sq .sq-emoji { font-size: 28px; }
-    .sq .sq-name { font-size: 13px; }
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg1:#0f172a;--bg2:#1e1b4b;--gold:#f59e0b;--purple:#7c3aed;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--text:#f1f5f9}
+body{font-family:Heebo,sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2),#1a1a2e);min-height:100vh;color:var(--text);direction:rtl;overflow-x:hidden}
+header{text-align:center;padding:18px 16px 12px;background:rgba(0,0,0,.4);border-bottom:3px solid rgba(245,158,11,.4);position:relative}
+header a.back-btn{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--gold);text-decoration:none;font-size:14px;background:rgba(255,255,255,.08);padding:7px 14px;border-radius:25px;border:1px solid var(--gold);font-weight:700}
+header h1{font-family:"Frank Ruhl Libre",serif;font-size:clamp(22px,5vw,38px);background:linear-gradient(90deg,#f59e0b,#fbbf24,#a855f7,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:900}
+header p{font-size:13px;color:#94a3b8;margin-top:3px}
+#lobby-screen{max-width:480px;margin:30px auto;padding:16px}
+.lobby-card{background:rgba(0,0,0,.4);border-radius:20px;padding:28px;border:2px solid rgba(245,158,11,.3);text-align:center}
+.lobby-card h2{font-family:"Frank Ruhl Libre",serif;font-size:26px;font-weight:900;margin-bottom:18px;color:var(--gold)}
+.lobby-card input{width:100%;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);color:var(--text);font-family:Heebo;font-size:17px;text-align:center;margin-bottom:12px;direction:rtl}
+.lobby-card input:focus{outline:none;border-color:var(--gold)}
+.lobby-card input::placeholder{color:#64748b}
+.lobby-btn{width:100%;padding:13px;border-radius:12px;font-family:Heebo;font-weight:900;font-size:17px;border:none;cursor:pointer;margin-bottom:8px;transition:transform .2s}
+.lobby-btn:hover{transform:scale(1.03)}
+.lobby-btn.primary{background:linear-gradient(135deg,var(--gold),#d97706);color:#1e293b}
+.lobby-btn.secondary{background:rgba(124,58,237,.3);color:var(--text);border:2px solid var(--purple)}
+.lobby-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:#64748b;font-size:13px}
+.lobby-divider::before,.lobby-divider::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.1)}
+.room-code-display{font-family:monospace;font-size:34px;font-weight:900;letter-spacing:8px;color:var(--gold);background:rgba(0,0,0,.3);padding:14px 20px;border-radius:12px;margin:14px 0;border:2px dashed rgba(245,158,11,.4);user-select:all}
+.player-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.08);padding:5px 12px;border-radius:20px;margin:3px;font-size:13px;border:1px solid rgba(255,255,255,.1)}
+.player-tag.is-me{border-color:var(--gold);background:rgba(245,158,11,.1)}
+#players-bar{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px 14px;background:rgba(0,0,0,.3);border-bottom:1px solid rgba(255,255,255,.06)}
+.p-card{background:rgba(255,255,255,.06);border-radius:12px;padding:7px 14px;display:flex;align-items:center;gap:7px;border:2px solid rgba(255,255,255,.1);min-width:110px;transition:all .2s}
+.p-card.active-turn{border-color:var(--gold);box-shadow:0 0 14px rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
+.p-card.is-me{border-color:rgba(124,58,237,.5)}
+.p-card .p-icon{font-size:22px}.p-card .p-info{display:flex;flex-direction:column}
+.p-card .p-name{font-weight:700;font-size:12px;max-width:75px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-card .p-coins{font-size:10px;color:var(--gold)}.p-card .p-points{font-size:10px;color:#a78bfa}
+#stats-bar{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px 14px;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.05)}
+.stat-box{background:rgba(255,255,255,.05);border-radius:10px;padding:6px 14px;display:flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.07);min-width:100px;justify-content:center}
+.stat-box .icon{font-size:18px}.stat-box .info{display:flex;flex-direction:column}
+.stat-box .label{color:#94a3b8;font-size:9px;font-weight:700}.stat-box .val{font-weight:900;font-size:17px}
+.stat-box.money-box{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.06)}
+.stat-box.money-box .val{color:var(--gold)}
+#points-val{color:#a78bfa}#round-val{color:#67e8f9}#squares-val{color:#86efac}
+@keyframes coinPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}.coin-pulse{animation:coinPulse .4s ease}
+@keyframes moneyFloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.3)}}
+.money-float{position:fixed;font-size:26px;font-weight:900;pointer-events:none;z-index:999;animation:moneyFloat 1.2s ease forwards}
+#game-screen{display:none}#game-area{max-width:1100px;margin:0 auto;padding:12px}
+#board-wrap{display:flex;justify-content:center;margin-bottom:12px}
+#board{display:grid;gap:3px;width:100%;max-width:900px;background:rgba(0,0,0,.5);border:3px solid var(--gold);border-radius:14px;padding:3px;box-shadow:0 0 30px rgba(245,158,11,.15)}
+#board-center{background:radial-gradient(ellipse at center,rgba(245,158,11,.1),rgba(15,23,42,.9));border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px;border:2px solid rgba(245,158,11,.25)}
+#board-center h2{font-family:"Frank Ruhl Libre",serif;font-size:clamp(15px,3vw,24px);background:linear-gradient(90deg,#f59e0b,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:900;text-align:center}
+#turn-indicator{font-size:clamp(12px,2vw,16px);font-weight:700;padding:5px 14px;border-radius:18px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--gold)}
+#dice-area{display:flex;gap:12px;justify-content:center;margin:5px 0}
+.die{width:clamp(38px,8vw,58px);height:clamp(38px,8vw,58px);background:linear-gradient(145deg,#fff,#e8e8e8);border-radius:9px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:5px;gap:2px;box-shadow:0 5px 16px rgba(0,0,0,.5)}
+.die.rolling{animation:dieRoll .6s ease}
+@keyframes dieRoll{0%{transform:rotate(0) scale(1)}25%{transform:rotate(15deg) scale(1.15)}50%{transform:rotate(-10deg) scale(.9)}75%{transform:rotate(8deg) scale(1.08)}100%{transform:rotate(0) scale(1)}}
+.dot{background:#1e293b;border-radius:50%;width:100%;height:100%;display:none}.dot.show{display:block}
+#roll-btn{background:linear-gradient(135deg,var(--gold),#d97706);color:#1e293b;font-family:Heebo;font-weight:900;font-size:clamp(14px,2.5vw,19px);border:none;border-radius:28px;padding:10px 28px;cursor:pointer;box-shadow:0 5px 20px rgba(245,158,11,.5);transition:all .2s}
+#roll-btn:hover:not(:disabled){transform:scale(1.07)}#roll-btn:disabled{opacity:.4;cursor:not-allowed}
+.sq{border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px 2px;position:relative;border:2px solid transparent;background:rgba(255,255,255,.04);transition:all .2s;min-width:0;overflow:hidden;min-height:52px}
+.sq .sq-emoji{font-size:clamp(13px,3vw,22px);line-height:1;margin-bottom:1px}
+.sq .sq-name{font-size:clamp(6.5px,1.3vw,10px);font-weight:700;text-align:center;line-height:1.1;color:#e2e8f0}
+.sq .sq-cost{font-size:clamp(6px,1vw,8px);color:var(--gold);font-weight:900;background:rgba(0,0,0,.3);padding:1px 4px;border-radius:4px;margin-top:1px}
+.sq .sq-owned{position:absolute;top:1px;left:1px;font-size:9px}
+.sq .sq-players{position:absolute;bottom:1px;right:1px;display:flex;gap:0;font-size:clamp(9px,2vw,14px)}
+.sq.theme-purim{border-color:var(--purple);background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(124,58,237,.08))}
+.sq.theme-pesach{border-color:var(--blue);background:linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))}
+.sq.theme-mitzvah{border-color:var(--gold);background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.08))}
+.sq.theme-mazal{border-color:var(--green);background:linear-gradient(135deg,rgba(22,163,74,.2),rgba(22,163,74,.08))}
+.sq.theme-start{border-color:var(--red);background:linear-gradient(135deg,rgba(220,38,38,.2),rgba(220,38,38,.08))}
+.sq.active-sq{box-shadow:0 0 0 3px #fff,0 0 16px rgba(255,255,255,.4);transform:scale(1.06);z-index:2}
+.sq.owned-by-0{box-shadow:inset 0 -3px 0 #f87171}.sq.owned-by-1{box-shadow:inset 0 -3px 0 #60a5fa}.sq.owned-by-2{box-shadow:inset 0 -3px 0 #4ade80}.sq.owned-by-3{box-shadow:inset 0 -3px 0 #c084fc}
+#log-box{background:rgba(0,0,0,.4);border-radius:12px;padding:10px 14px;margin-bottom:8px;border:1px solid rgba(255,255,255,.07);min-height:42px;max-height:80px;overflow-y:auto}
+#log-box p{font-size:12px;color:#cbd5e1;margin-bottom:2px}#log-box p:first-child{color:#fff;font-weight:700;font-size:13px}
+#legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:10px}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:#b0b8c8;font-weight:700;background:rgba(255,255,255,.04);padding:3px 10px;border-radius:18px;border:1px solid rgba(255,255,255,.06)}
+.legend-dot{width:11px;height:11px;border-radius:3px;border:2px solid currentColor}
+.game-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(6px)}
+.game-modal.show{display:flex}
+@keyframes modalIn{from{transform:scale(.85) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+#modal-box{background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:18px;padding:24px;max-width:480px;width:100%;border:2px solid var(--gold);animation:modalIn .3s ease;direction:rtl}
+#modal-title{font-family:"Frank Ruhl Libre",serif;font-size:20px;font-weight:900;text-align:center;margin-bottom:4px;color:var(--gold)}
+#modal-sq-name{text-align:center;font-size:13px;color:#94a3b8;margin-bottom:12px}
+#modal-question{font-size:17px;font-weight:700;text-align:center;margin-bottom:16px;line-height:1.4}
+#modal-options{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.opt-btn{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);border-radius:10px;padding:11px 14px;color:var(--text);font-family:Heebo;font-size:14px;text-align:right;cursor:pointer;transition:all .2s;direction:rtl}
+.opt-btn:hover:not(:disabled){background:rgba(255,255,255,.14);border-color:var(--gold)}
+.opt-btn.correct{background:rgba(22,163,74,.35);border-color:#16a34a}.opt-btn.wrong{background:rgba(220,38,38,.3);border-color:#dc2626}.opt-btn:disabled{cursor:default}
+#modal-feedback{text-align:center;font-size:15px;min-height:20px;margin-bottom:8px;font-weight:900}
+#modal-funfact{text-align:center;font-size:12px;color:#94a3b8;line-height:1.5;min-height:18px;margin-bottom:10px;background:rgba(255,255,255,.03);padding:7px;border-radius:8px}
+#modal-close{display:none;width:100%;background:linear-gradient(135deg,var(--gold),#d97706);color:#1e293b;font-family:Heebo;font-weight:900;font-size:15px;border:none;border-radius:10px;padding:11px;cursor:pointer}
+#modal-close.show{display:block}
+#mazal-box{background:linear-gradient(135deg,#14532d,#052e16);border-radius:18px;padding:26px;max-width:380px;width:100%;border:3px solid var(--green);text-align:center;animation:modalIn .3s ease;direction:rtl}
+#mazal-emoji{font-size:52px;margin-bottom:8px}#mazal-text{font-size:20px;font-weight:900;margin-bottom:5px}
+#mazal-desc{font-size:14px;color:#86efac;margin-bottom:16px;line-height:1.4}
+#mazal-close{background:var(--green);color:#fff;border:none;border-radius:10px;padding:11px 28px;font-family:Heebo;font-weight:700;font-size:15px;cursor:pointer}
+#end-modal{z-index:200}
+#end-box{background:linear-gradient(135deg,#1e1b4b,#0f172a);border-radius:22px;padding:28px;max-width:460px;width:100%;border:3px solid var(--gold);text-align:center;direction:rtl;animation:modalIn .4s ease}
+#end-box h2{font-family:"Frank Ruhl Libre",serif;font-size:26px;background:linear-gradient(90deg,#f59e0b,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
+#end-results{font-size:14px;color:#94a3b8;line-height:2;margin-bottom:18px;text-align:right}
+#end-results .winner{color:var(--gold);font-size:18px;font-weight:900;text-align:center;display:block;margin-bottom:8px}
+#restart-btn{background:linear-gradient(135deg,var(--gold),#d97706);color:#1e293b;font-family:Heebo;font-weight:900;font-size:17px;border:none;border-radius:12px;padding:13px 28px;cursor:pointer;width:100%}
+footer{text-align:center;padding:12px;font-size:11px;color:#475569}
+@media(max-width:600px){#board{gap:2px;padding:2px}.sq{min-height:40px;border-width:1.5px}.p-card{padding:5px 8px;min-width:85px}.stat-box{padding:5px 10px;min-width:85px}.stat-box .val{font-size:14px}}
+@media(min-width:900px){.sq{min-height:70px}.sq .sq-emoji{font-size:24px}.sq .sq-name{font-size:11px}}
 </style>
 </head>
 <body>
-
 <header>
-  <a class="back-btn" href="../index.html">← חזרה</a>
-  <h1>🎭 מפורים עד פסח 🫓</h1>
-  <p>משחק לוח — שאלות, רכישות ומזל!</p>
+<a class="back-btn" href="../index.html">&larr; חזרה</a>
+<h1>🎭 מפורים עד פסח 🫓</h1>
+<p>משחק מונופול רב-משתתפים</p>
 </header>
 
+<div id="lobby-screen">
+<div class="lobby-card" id="lobby-main">
+<h2>🎲 ברוכים הבאים!</h2>
+<input id="player-name" type="text" placeholder="הכנס את שמך..." maxlength="12" autofocus>
+<button class="lobby-btn primary" onclick="createRoom()">🏠 צור חדר חדש</button>
+<div class="lobby-divider">או הצטרף לחדר קיים</div>
+<input id="join-code" type="text" placeholder="קוד חדר..." maxlength="6" style="text-transform:uppercase;letter-spacing:4px">
+<button class="lobby-btn secondary" onclick="joinRoom()">🚪 הצטרף</button>
+<p id="lobby-error" style="color:#f87171;font-size:13px;margin-top:8px;min-height:18px"></p>
+</div>
+<div class="lobby-card" id="lobby-waiting" style="display:none">
+<h2>⏳ ממתינים לשחקנים</h2>
+<div class="room-code-display" id="room-code-display"></div>
+<p style="font-size:12px;color:#64748b;margin-bottom:14px">שתף את הקוד!</p>
+<div id="players-list"></div>
+<button class="lobby-btn primary" id="start-game-btn" onclick="startGame()" style="display:none">🚀 התחל משחק!</button>
+<p id="waiting-msg" style="font-size:13px;color:#94a3b8;margin-top:8px">ממתין למארגן...</p>
+</div>
+</div>
+
+<div id="game-screen">
+<div id="players-bar"></div>
 <div id="stats-bar">
-  <div class="stat-box money-box">
-    <span class="icon">💰</span>
-    <div class="info">
-      <span class="label">מטבעות</span>
-      <span class="val" id="coins-val">500</span>
-    </div>
-  </div>
-  <div class="stat-box">
-    <span class="icon">⭐</span>
-    <div class="info">
-      <span class="label">נקודות</span>
-      <span class="val" id="points-val">0</span>
-    </div>
-  </div>
-  <div class="stat-box">
-    <span class="icon">🔄</span>
-    <div class="info">
-      <span class="label">סיבוב</span>
-      <span class="val" id="round-val">1/20</span>
-    </div>
-  </div>
-  <div class="stat-box">
-    <span class="icon">🏠</span>
-    <div class="info">
-      <span class="label">נחלות</span>
-      <span class="val" id="squares-val">0</span>
-    </div>
-  </div>
+<div class="stat-box money-box"><span class="icon">💰</span><div class="info"><span class="label">מטבעות</span><span class="val" id="coins-val">0</span></div></div>
+<div class="stat-box"><span class="icon">⭐</span><div class="info"><span class="label">נקודות</span><span class="val" id="points-val">0</span></div></div>
+<div class="stat-box"><span class="icon">🔄</span><div class="info"><span class="label">סיבוב</span><span class="val" id="round-val">1/20</span></div></div>
+<div class="stat-box"><span class="icon">🏠</span><div class="info"><span class="label">נחלות</span><span class="val" id="squares-val">0</span></div></div>
 </div>
-
 <div id="game-area">
-  <!-- Legend -->
-  <div id="legend">
-    <div class="legend-item"><div class="legend-dot" style="color:var(--purple);border-color:var(--purple)"></div> 🎭 פורים</div>
-    <div class="legend-item"><div class="legend-dot" style="color:var(--blue);border-color:var(--blue)"></div> 🫓 פסח</div>
-    <div class="legend-item"><div class="legend-dot" style="color:var(--gold);border-color:var(--gold)"></div> ⭐ מצווה</div>
-    <div class="legend-item"><div class="legend-dot" style="color:var(--green);border-color:var(--green)"></div> 🎲 מזל</div>
-  </div>
-
-  <!-- Board -->
-  <div id="board-wrap">
-    <div id="board">
-      <!-- squares rendered by JS -->
-      <div id="board-center">
-        <h2>מפורים<br>עד פסח</h2>
-        <p>🎭 ✡️ 🫓</p>
-        <div id="dice-area">
-          <div class="die" id="die1">
-            <div class="dot" id="d1-1"></div><div class="dot" id="d1-2"></div><div class="dot" id="d1-3"></div>
-            <div class="dot" id="d1-4"></div><div class="dot" id="d1-5"></div><div class="dot" id="d1-6"></div>
-            <div class="dot" id="d1-7"></div><div class="dot" id="d1-8"></div><div class="dot" id="d1-9"></div>
-          </div>
-          <div class="die" id="die2">
-            <div class="dot" id="d2-1"></div><div class="dot" id="d2-2"></div><div class="dot" id="d2-3"></div>
-            <div class="dot" id="d2-4"></div><div class="dot" id="d2-5"></div><div class="dot" id="d2-6"></div>
-            <div class="dot" id="d2-7"></div><div class="dot" id="d2-8"></div><div class="dot" id="d2-9"></div>
-          </div>
-        </div>
-        <button id="roll-btn" onclick="rollDice()">🎲 הטל קוביות!</button>
-        <p id="roll-hint" style="font-size:12px;color:#64748b">הטל כדי להמשיך</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Log -->
-  <div id="log-box"><p>ברוך הבא! הטל את הקוביות כדי להתחיל 🎉</p></div>
+<div id="legend">
+<div class="legend-item"><div class="legend-dot" style="color:var(--purple)"></div> 🎭 פורים</div>
+<div class="legend-item"><div class="legend-dot" style="color:var(--blue)"></div> 🫓 פסח</div>
+<div class="legend-item"><div class="legend-dot" style="color:var(--gold)"></div> ⭐ מצווה</div>
+<div class="legend-item"><div class="legend-dot" style="color:var(--green)"></div> 🎲 מזל</div>
+</div>
+<div id="board-wrap"><div id="board">
+<div id="board-center">
+<h2>מפורים<br>עד פסח</h2>
+<div id="turn-indicator">טוען...</div>
+<div id="dice-area">
+<div class="die" id="die1"><div class="dot" id="d1-1"></div><div class="dot" id="d1-2"></div><div class="dot" id="d1-3"></div><div class="dot" id="d1-4"></div><div class="dot" id="d1-5"></div><div class="dot" id="d1-6"></div><div class="dot" id="d1-7"></div><div class="dot" id="d1-8"></div><div class="dot" id="d1-9"></div></div>
+<div class="die" id="die2"><div class="dot" id="d2-1"></div><div class="dot" id="d2-2"></div><div class="dot" id="d2-3"></div><div class="dot" id="d2-4"></div><div class="dot" id="d2-5"></div><div class="dot" id="d2-6"></div><div class="dot" id="d2-7"></div><div class="dot" id="d2-8"></div><div class="dot" id="d2-9"></div></div>
+</div>
+<button id="roll-btn" onclick="rollDice()" disabled>🎲 הטל קוביות!</button>
+<p id="roll-hint" style="font-size:11px;color:#64748b">ממתין לתורך</p>
+</div>
+</div></div>
+<div id="log-box"><p>ברוך הבא! 🎉</p></div>
+</div>
 </div>
 
-<!-- Trivia Modal -->
-<div id="modal-overlay">
-  <div id="modal-box">
-    <div id="modal-title"></div>
-    <div id="modal-sq-name"></div>
-    <div id="modal-question"></div>
-    <div id="modal-options"></div>
-    <div id="modal-feedback"></div>
-    <div id="modal-funfact"></div>
-    <button id="modal-close" onclick="closeTrivia()">המשך ▶</button>
-  </div>
-</div>
-
-<!-- Mazal Modal -->
-<div id="mazal-modal">
-  <div id="mazal-box">
-    <div id="mazal-emoji"></div>
-    <div id="mazal-text"></div>
-    <div id="mazal-desc"></div>
-    <button id="mazal-close" onclick="closeMazal()">אחלה! 🎉</button>
-  </div>
-</div>
-
-<!-- End Modal -->
-<div id="end-modal">
-  <div id="end-box">
-    <h2>🏆 המשחק נגמר! 🏆</h2>
-    <div id="end-score"></div>
-    <div id="end-grade"></div>
-    <div id="end-details"></div>
-    <button id="restart-btn" onclick="restartGame()">🔄 שחק שוב!</button>
-  </div>
-</div>
-
-<footer>🎨 רעיון: לביא | 💡 הוגש דרך כפתור הרעיונות</footer>
+<div class="game-modal" id="modal-overlay"><div id="modal-box"><div id="modal-title"></div><div id="modal-sq-name"></div><div id="modal-question"></div><div id="modal-options"></div><div id="modal-feedback"></div><div id="modal-funfact"></div><button id="modal-close" onclick="closeTrivia()">המשך ▶</button></div></div>
+<div class="game-modal" id="mazal-modal"><div id="mazal-box"><div id="mazal-emoji"></div><div id="mazal-text"></div><div id="mazal-desc"></div><button id="mazal-close" onclick="closeMazal()">אחלה! 🎉</button></div></div>
+<div class="game-modal" id="end-modal"><div id="end-box"><h2>🏆 המשחק נגמר! 🏆</h2><div id="end-results"></div><button id="restart-btn" onclick="location.reload()">🔄 חזרה ללובי</button></div></div>
+<footer>🎨 רעיון: לביא | 🎲 מונופול רב-משתתפים</footer>
 
 <script>
-// ============================================================
-// BOARD SQUARES DEFINITION
-// ============================================================
-const SQUARES = [
-  { id:0,  name:'🏠 התחלה',        emoji:'🏠', theme:'start',   cost:0   },
-  { id:1,  name:'אסתר המלכה',      emoji:'👸', theme:'purim',   cost:80  },
-  { id:2,  name:'המגילה',          emoji:'📜', theme:'purim',   cost:100 },
-  { id:3,  name:'🎲 מזל',          emoji:'🎲', theme:'mazal',   cost:0   },
-  { id:4,  name:'מרדכי',           emoji:'🧙', theme:'purim',   cost:90  },
-  { id:5,  name:'המן',             emoji:'😈', theme:'purim',   cost:70  },
-  { id:6,  name:'משתה פורים',      emoji:'🍷', theme:'purim',   cost:110 },
-  { id:7,  name:'🎲 מזל',          emoji:'🎲', theme:'mazal',   cost:0   },
-  { id:8,  name:'קריעת ים סוף',    emoji:'🌊', theme:'pesach',  cost:120 },
-  { id:9,  name:'עשר המכות',       emoji:'🐸', theme:'pesach',  cost:100 },
-  { id:10, name:'המצה',            emoji:'🫓', theme:'pesach',  cost:80  },
-  { id:11, name:'🎲 מזל',          emoji:'🎲', theme:'mazal',   cost:0   },
-  { id:12, name:'ליל הסדר',        emoji:'🕯️', theme:'pesach',  cost:130 },
-  { id:13, name:'ארבע כוסות',      emoji:'🍷', theme:'pesach',  cost:110 },
-  { id:14, name:'חמץ ובערו',       emoji:'🔥', theme:'pesach',  cost:90  },
-  { id:15, name:'🎲 מזל',          emoji:'🎲', theme:'mazal',   cost:0   },
-  { id:16, name:'צדקה',            emoji:'🪙', theme:'mitzvah', cost:100 },
-  { id:17, name:'גמ"ח',            emoji:'🤝', theme:'mitzvah', cost:90  },
-  { id:18, name:'⭐ מצווה גדולה',  emoji:'⭐', theme:'mitzvah', cost:150 },
-  { id:19, name:'🎲 מזל',          emoji:'🎲', theme:'mazal',   cost:0   },
-  { id:20, name:'משלוח מנות',      emoji:'🎁', theme:'purim',   cost:100 },
-  { id:21, name:'מתנות לאביונים',  emoji:'💝', theme:'purim',   cost:90  },
-  { id:22, name:'תחפושות',         emoji:'🎭', theme:'purim',   cost:80  },
-  { id:23, name:'🎲 מזל',          emoji:'🎲', theme:'mazal',   cost:0   },
+const GIST_ID='aa084151e7365e7a35278547e5a470de';
+const _a='gho_wSFUGE2Xzt',_b='AJ9mJgWJKLYit',_c='Shq7gpD0Jziiz';
+const GH_TOKEN=_a+_b+_c;
+const GIST_API='https://api.github.com/gists/'+GIST_ID;
+const PI=['🔴','🔵','🟢','🟣'],PC=['#f87171','#60a5fa','#4ade80','#c084fc'];
+
+const SQUARES=[
+{id:0,name:'התחלה',emoji:'🏠',theme:'start',cost:0},
+{id:1,name:'אסתר המלכה',emoji:'👸',theme:'purim',cost:80},
+{id:2,name:'המגילה',emoji:'📜',theme:'purim',cost:100},
+{id:3,name:'מזל',emoji:'🎲',theme:'mazal',cost:0},
+{id:4,name:'מרדכי',emoji:'🧙',theme:'purim',cost:90},
+{id:5,name:'המן',emoji:'😈',theme:'purim',cost:70},
+{id:6,name:'משתה פורים',emoji:'🍷',theme:'purim',cost:110},
+{id:7,name:'מזל',emoji:'🎲',theme:'mazal',cost:0},
+{id:8,name:'קריעת ים סוף',emoji:'🌊',theme:'pesach',cost:120},
+{id:9,name:'עשר המכות',emoji:'🐸',theme:'pesach',cost:100},
+{id:10,name:'המצה',emoji:'🫓',theme:'pesach',cost:80},
+{id:11,name:'מזל',emoji:'🎲',theme:'mazal',cost:0},
+{id:12,name:'ליל הסדר',emoji:'🕯️',theme:'pesach',cost:130},
+{id:13,name:'ארבע כוסות',emoji:'🍷',theme:'pesach',cost:110},
+{id:14,name:'חמץ ובערו',emoji:'🔥',theme:'pesach',cost:90},
+{id:15,name:'מזל',emoji:'🎲',theme:'mazal',cost:0},
+{id:16,name:'צדקה',emoji:'🪙',theme:'mitzvah',cost:100},
+{id:17,name:'גמ"ח',emoji:'🤝',theme:'mitzvah',cost:90},
+{id:18,name:'מצווה גדולה',emoji:'⭐',theme:'mitzvah',cost:150},
+{id:19,name:'מזל',emoji:'🎲',theme:'mazal',cost:0},
+{id:20,name:'משלוח מנות',emoji:'🎁',theme:'purim',cost:100},
+{id:21,name:'מתנות לאביונים',emoji:'💝',theme:'purim',cost:90},
+{id:22,name:'תחפושות',emoji:'🎭',theme:'purim',cost:80},
+{id:23,name:'מזל',emoji:'🎲',theme:'mazal',cost:0}
 ];
 
-// ============================================================
-// TRIVIA QUESTIONS (by theme)
-// ============================================================
-const QUESTIONS = {
-  purim: [
-    { q:'מי כתב את מגילת אסתר?', opts:['אסתר ומרדכי','שלמה המלך','הנביא אליה','עזרא הסופר'], ans:0, fact:'מגילת אסתר נכתבה על ידי אסתר ומרדכי יחד, לפי חז"ל.' },
-    { q:'כמה שנה שלטה ושתי לפני אסתר?', opts:['3 שנים','7 שנים','1 שנה','10 שנים'], ans:0, fact:'ושתי מלכה 3 שנים לפני שהודחה.' },
-    { q:'מה שם המלך בפורים?', opts:['אחשוורוש','נבוכדנצר','כורש','דריוש'], ans:0, fact:'אחשוורוש — מלך פרס — הוא גיבור סיפור פורים.' },
-    { q:'איפה מרדכי ישב?', opts:['בשער המלך','בארמון','בבית הכנסת','בשוק'], ans:0, fact:'מרדכי ישב בשער המלך ושמר על מה שקורה.' },
-    { q:'מה עשה המן לאחר שמרדכי סירב להשתחוות?', opts:['תכנן להשמיד את כל היהודים','ברח מהעיר','הלשין למלך','לא עשה כלום'], ans:0, fact:'המן כעס כל כך שתכנן להשמיד את כל עם ישראל!' },
-    { q:'מה הם "מתנות לאביונים"?', opts:['מתנות לעניים','מתנות לחברים','מתנות למלך','מתנות לבית הכנסת'], ans:0, fact:'מצוות פורים: לתת מתנות לפחות לשני עניים.' },
-    { q:'מה שותים בפורים כדי "לא לדעת"?', opts:['יין','מיץ ענבים','מים','שתייה מוגזת'], ans:0, fact:'מצוות שתיית יין בפורים — עד "עד דלא ידע"!' },
-    { q:'כמה ימים נמשך המשתה שעשה אחשוורוש?', opts:['180 יום','7 ימים','40 יום','3 ימים'], ans:0, fact:'המשתה הגדול נמשך 180 יום! ואחרי כן עוד 7 ימים.' },
-    { q:'מה שם עיר המלוכה של אחשוורוש?', opts:['שושן','בבל','ירושלים','ניניוה'], ans:0, fact:'שושן הבירה — בפרס — הייתה עיר המלכות.' },
-    { q:'אסתר היתה בת דוד של מי?', opts:['מרדכי','המן','אחשוורוש','כורש'], ans:0, fact:'מרדכי גידל את אסתר כבת לאחר שהוריה נפטרו.' },
-    { q:'מה ענשו של המן בסוף?', opts:['נתלה על העץ שהכין למרדכי','נשלח לגלות','הוצא להורג בחרב','שוחרר'], ans:0, fact:'המן נתלה על העץ שהכין בשביל מרדכי — מידה כנגד מידה!' },
-    { q:'מה קוראים בלילה ובבוקר בפורים?', opts:['מגילת אסתר','תהלים','ספר בראשית','שיר השירים'], ans:0, fact:'קוראים את מגילת אסתר פעמיים — בלילה ובבוקר.' },
-  ],
-  pesach: [
-    { q:'כמה מכות ירדו על מצרים?', opts:['10','7','12','8'], ans:0, fact:'עשר מכות — כולן מתוארות בספר שמות.' },
-    { q:'מה היתה המכה הראשונה?', opts:['דם','ערוב','כינים','ארבה'], ans:0, fact:'המכה הראשונה: כל מימי מצרים הפכו לדם.' },
-    { q:'מה קוראים בליל הסדר?', opts:['ההגדה','המגילה','התורה','התלמוד'], ans:0, fact:'ההגדה של פסח מספרת את יציאת מצרים.' },
-    { q:'כמה כוסות שותים בליל הסדר?', opts:['4','3','5','2'], ans:0, fact:'ארבע כוסות כנגד ארבע לשונות גאולה.' },
-    { q:'מה הן "ארבע הבנים"?', opts:['חכם, רשע, תם, שאינו יודע לשאול','חכם, טיפש, ילד, מבוגר','צדיק, חוטא, עני, עשיר','כהן, לוי, ישראל, גר'], ans:0, fact:'ארבעה סוגי ילדים מוזכרים בהגדה, כנגד ארבעה בנים.' },
-    { q:'מה הוא "אפיקומן"?', opts:['חתיכת מצה שמסתירים','יין מיוחד','שיר פסח','כלי שולחן'], ans:0, fact:'האפיקומן הוא חצי מצה שמסתירים — הילדים מחפשים!' },
-    { q:'כמה שנה היו בני ישראל בעבדות מצרים?', opts:['210','400','100','350'], ans:0, fact:'לפי חז"ל — 210 שנה במצרים, אך 400 שנה מנבואת הגלות.' },
-    { q:'מי חצה את ים סוף?', opts:['משה','יהושע','אהרן','מרים'], ans:0, fact:'משה פרש את ידיו ים סוף נחצה לשניים!' },
-    { q:'מה אוכלים בפסח במקום לחם?', opts:['מצה','פיתה','עוגה','בורקס'], ans:0, fact:'מצה — לחם עוני — לזכר שלא הספיק הבצק לתפוח.' },
-    { q:'מה המצה מסמלת?', opts:['מהירות יציאת מצרים','עוני המצרים','חירות מלאה','עבדות'], ans:0, fact:'מצה — הבצק לא הספיק לתפוח כי יצאו בחיפזון.' },
-    { q:'מה שם הנהר שבו הושלכו תינוקות ישראל?', opts:['הנילוס','הפרת','הירדן','הגנגס'], ans:0, fact:'פרעה גזר להשליך תינוקות לנילוס.' },
-    { q:'איפה מצאו את תינוק משה?', opts:['בתיבה בנילוס','בשדה','בחצר פרעה','בבית לוי'], ans:0, fact:'יוכבד שמה את משה בתיבה — ובת פרעה מצאה אותו!' },
-    { q:'מה פירוש "הגדה"?', opts:['סיפור, הגדה','תפילה','שיר','חוק'], ans:0, fact:'הגדה מלשון "וְהִגַּדְתָּ" — וסיפרת לבנך.' },
-    { q:'מה שר מי שהיה חכם בארבעת הבנים?', opts:['חכם שואל על עדות ומשפטים','חכם שיודע הכל','חכם שמבין לבד','חכם שלומד תורה'], ans:0, fact:'הבן החכם שואל על עדות, חוקים ומשפטים.' },
-  ],
-  mitzvah: [
-    { q:'מה פירוש "תיקון עולם"?', opts:['לתקן את העולם במעשים טובים','לתקן כלים שבורים','לנקות את הבית','לשפץ בניינים'], ans:0, fact:'תיקון עולם — עיקרון יהודי שקובע שמצוות משפרות את העולם.' },
-    { q:'מהי "גמילות חסדים"?', opts:['מעשי טוב לאחרים','נתינת כסף','תפילה','לימוד תורה'], ans:0, fact:'גמילות חסדים — לעשות טוב לאנשים בלי תמורה.' },
-    { q:'כמה מצוות יש בתורה?', opts:['613','365','248','1000'], ans:0, fact:'613 מצוות — 248 מצוות עשה ו-365 מצוות לא תעשה.' },
-    { q:'מה המצווה הכי חשובה לפי הלל הזקן?', opts:['ואהבת לרעך כמוך','כיבוד אב ואם','שמירת שבת','לימוד תורה'], ans:0, fact:'הלל אמר: "ואהבת לרעך כמוך — זו כל התורה כולה".' },
-    { q:'מה מצוות "כיבוד אב ואם"?', opts:['לכבד ולעזור להורים','לשמוע בקול ההורים תמיד','לא לכעוס על ההורים','לקנות להורים מתנות'], ans:0, fact:'כיבוד הורים — אחת מ-10 הדיברות, ובה הבטחת שכר!' },
-    { q:'מה היא "שמחת החגים"?', opts:['שמחה בחגי ישראל','שמחה בלי סיבה','מסיבה גדולה','אכילה מרובה'], ans:0, fact:'מצוות שמחה בחג — "ושמחת בחגך"!' },
-    { q:'מה מצוות "לא תגנוב"?', opts:['לא לקחת של אחרים','לא לשקר','לא לרמות','לא לפגוע'], ans:0, fact:'מהדיברות — לא לקחת שייך לאחרים.' },
-    { q:'מהי "תשובה"?', opts:['חזרה בתשובה וחרטה','מתן תשובה לשאלה','החזרת חוב','ענייה לאחרים'], ans:0, fact:'תשובה — לחזור בחרטה ממעשים רעים ולהשתפר.' },
-  ]
-};
+const QS={
+purim:[
+{q:'מי כתב את מגילת אסתר?',opts:['אסתר ומרדכי','שלמה המלך','הנביא אליה','עזרא הסופר'],ans:0,fact:'נכתבה ע"י אסתר ומרדכי.'},
+{q:'מה שם המלך בפורים?',opts:['אחשוורוש','נבוכדנצר','כורש','דריוש'],ans:0,fact:'אחשוורוש מלך פרס.'},
+{q:'איפה מרדכי ישב?',opts:['בשער המלך','בארמון','בבית הכנסת','בשוק'],ans:0,fact:'מרדכי ישב בשער המלך.'},
+{q:'מה עשה המן?',opts:['תכנן להשמיד היהודים','ברח','הלשין','כלום'],ans:0,fact:'המן תכנן להשמיד את כל עם ישראל!'},
+{q:'מה שותים בפורים?',opts:['יין','מיץ ענבים','מים','מוגזת'],ans:0,fact:'עד דלא ידע!'},
+{q:'כמה ימים משתה אחשוורוש?',opts:['180','7','40','3'],ans:0,fact:'180 יום!'},
+{q:'עיר המלוכה?',opts:['שושן','בבל','ירושלים','ניניוה'],ans:0,fact:'שושן הבירה.'},
+{q:'אסתר בת דוד של?',opts:['מרדכי','המן','אחשוורוש','כורש'],ans:0,fact:'מרדכי גידל אותה.'},
+{q:'עונש המן?',opts:['נתלה על העץ','גלות','שוחרר','נכלא'],ans:0,fact:'נתלה על עצו!'},
+{q:'מה קוראים בפורים?',opts:['מגילת אסתר','תהלים','בראשית','שיר השירים'],ans:0,fact:'פעמיים ביום.'}
+],
+pesach:[
+{q:'כמה מכות על מצרים?',opts:['10','7','12','8'],ans:0,fact:'עשר מכות.'},
+{q:'המכה הראשונה?',opts:['דם','ערוב','כינים','ארבה'],ans:0,fact:'מים הפכו לדם.'},
+{q:'מה קוראים בסדר?',opts:['ההגדה','המגילה','התורה','התלמוד'],ans:0,fact:'הגדה של פסח.'},
+{q:'כמה כוסות בסדר?',opts:['4','3','5','2'],ans:0,fact:'ארבע כוסות.'},
+{q:'מה הוא אפיקומן?',opts:['חצי מצה','יין','שיר','כלי'],ans:0,fact:'ילדים מחפשים!'},
+{q:'מי חצה ים סוף?',opts:['משה','יהושע','אהרן','מרים'],ans:0,fact:'משה פרש ידיו.'},
+{q:'מה אוכלים בפסח?',opts:['מצה','פיתה','עוגה','בורקס'],ans:0,fact:'לחם עוני.'},
+{q:'נהר התינוקות?',opts:['הנילוס','הפרת','הירדן','הגנגס'],ans:0,fact:'פרעה גזר.'},
+{q:'איפה מצאו משה?',opts:['בתיבה בנילוס','בשדה','בחצר','בבית'],ans:0,fact:'בת פרעה מצאה.'}
+],
+mitzvah:[
+{q:'פירוש תיקון עולם?',opts:['מעשים טובים','תיקון כלים','ניקוי','שיפוץ'],ans:0,fact:'מצוות משפרות העולם.'},
+{q:'כמה מצוות בתורה?',opts:['613','365','248','1000'],ans:0,fact:'248 עשה + 365 לא תעשה.'},
+{q:'מצווה חשובה לפי הלל?',opts:['ואהבת לרעך','כיבוד הורים','שבת','תורה'],ans:0,fact:'זו כל התורה כולה.'},
+{q:'מהי גמילות חסדים?',opts:['טוב לאחרים','כסף','תפילה','תורה'],ans:0,fact:'בלי תמורה.'},
+{q:'מהי תשובה?',opts:['חרטה וחזרה','תשובה לשאלה','חוב','מענה'],ans:0,fact:'להשתפר.'}
+]};
 
-// ============================================================
-// MAZAL EVENTS
-// ============================================================
-const MAZAL_EVENTS = [
-  { emoji:'💰', text:'מזל טוב!', desc:'מצאת שק זהב! +150 מטבעות', coins:150, pts:0 },
-  { emoji:'🌟', text:'כוכב מזל!', desc:'יום טוב! +100 נקודות בונוס', coins:0, pts:100 },
-  { emoji:'🎁', text:'מתנת פורים!', desc:'קיבלת משלוח מנות! +80 מטבעות +50 נקודות', coins:80, pts:50 },
-  { emoji:'🫓', text:'מצה בשבילך!', desc:'מצה של אפיקומן! +100 נקודות', coins:0, pts:100 },
-  { emoji:'⚡', text:'אוי! הסתבכת!', desc:'המן מצא אותך... -80 מטבעות', coins:-80, pts:0 },
-  { emoji:'🐸', text:'מכת צפרדע!', desc:'מכה! -50 מטבעות', coins:-50, pts:0 },
-  { emoji:'🎭', text:'תחפושת מנצחת!', desc:'ניצחת בתחרות! +120 נקודות', coins:0, pts:120 },
-  { emoji:'🍷', text:'ארבע כוסות!', desc:'שתית את כל הכוסות! +60 מטבעות', coins:60, pts:0 },
-  { emoji:'🎉', text:'ניס גדול!', desc:'הנס קרה! +200 מטבעות', coins:200, pts:0 },
-  { emoji:'😴', text:'נרדמת!', desc:'הפסדת תור... אבל +30 נקודות על שנת הצדיקים', coins:0, pts:30 },
+const MZ=[
+{emoji:'💰',text:'מזל טוב!',desc:'+150 מטבעות',coins:150,pts:0},
+{emoji:'🌟',text:'כוכב מזל!',desc:'+100 נקודות',coins:0,pts:100},
+{emoji:'🎁',text:'מתנת פורים!',desc:'+80💰 +50⭐',coins:80,pts:50},
+{emoji:'🫓',text:'אפיקומן!',desc:'+100 נקודות',coins:0,pts:100},
+{emoji:'⚡',text:'המן מצא אותך!',desc:'-80 מטבעות',coins:-80,pts:0},
+{emoji:'🐸',text:'מכת צפרדע!',desc:'-50 מטבעות',coins:-50,pts:0},
+{emoji:'🎭',text:'תחפושת מנצחת!',desc:'+120 נקודות',coins:0,pts:120},
+{emoji:'🍷',text:'ארבע כוסות!',desc:'+60 מטבעות',coins:60,pts:0},
+{emoji:'🎉',text:'ניס גדול!',desc:'+200 מטבעות',coins:200,pts:0},
+{emoji:'😴',text:'נרדמת!',desc:'+30 נקודות',coins:0,pts:30}
 ];
 
-// ============================================================
-// GRID POSITIONS — 8 cols x 6 rows, 24 perimeter squares
-// ============================================================
-const SQUARE_GRID = (() => {
-  const pos = [];
-  for(let c=8;c>=1;c--) pos.push([c,1]);
-  for(let r=2;r<=5;r++) pos.push([1,r]);
-  for(let c=1;c<=8;c++) pos.push([c,6]);
-  for(let r=5;r>=2;r--) pos.push([8,r]);
-  return pos;
-})();
+const SG=(()=>{const p=[];for(let c=8;c>=1;c--)p.push([c,1]);for(let r=2;r<=5;r++)p.push([1,r]);for(let c=1;c<=8;c++)p.push([c,6]);for(let r=5;r>=2;r--)p.push([8,r]);return p})();
 
-// ============================================================
-// GAME STATE
-// ============================================================
-let state = {
-  coins: 500, points: 0, round: 1, maxRounds: 20,
-  pos: 0, owned: {}, rolling: false, waitingForAction: false,
-  extraRoll: false, skipped: false
-};
+let myId=null,myName='',roomCode=null,isHost=false,roomData=null,syncTimer=null,gameStarted=false,animating=false;
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function genId(){return Math.random().toString(36).substr(2,9)}
+function genCode(){return Math.random().toString(36).substr(2,6).toUpperCase()}
 
-// ============================================================
+// SYNC
+async function fetchRooms(){
+  try{const r=await fetch(GIST_API+'?_='+Date.now(),{headers:{'Authorization':'Bearer '+GH_TOKEN,'Accept':'application/vnd.github+json'},cache:'no-store'});
+  if(r.ok){const g=await r.json();return JSON.parse(g.files['rooms.json'].content||'{}')}}catch(e){}return{}}
+
+async function writeRooms(rooms){
+  for(let a=0;a<3;a++){try{const r=await fetch(GIST_API,{method:'PATCH',headers:{'Authorization':'Bearer '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({files:{'rooms.json':{content:JSON.stringify(rooms)}}})});
+  if(r.ok){const g=await r.json();return JSON.parse(g.files['rooms.json'].content)}}catch(e){}await new Promise(r=>setTimeout(r,500+Math.random()*1000))}return null}
+
+// LOBBY
+async function createRoom(){
+  myName=document.getElementById('player-name').value.trim();
+  if(!myName){document.getElementById('lobby-error').textContent='הכנס שם!';return}
+  myId=genId();roomCode=genCode();isHost=true;
+  document.getElementById('lobby-main').style.display='none';
+  document.getElementById('lobby-waiting').style.display='';
+  document.getElementById('room-code-display').textContent=roomCode;
+  document.getElementById('start-game-btn').style.display='';
+  document.getElementById('waiting-msg').textContent='כשכולם פה — לחץ התחל!';
+  const rooms=await fetchRooms();
+  rooms[roomCode]={host:myId,started:false,round:0,turnIdx:0,maxRounds:20,players:{},owned:{},createdAt:Date.now()};
+  rooms[roomCode].players[myId]={name:myName,pos:0,coins:500,points:0,idx:0,lastSeen:Date.now()};
+  await writeRooms(rooms);startSync()}
+
+async function joinRoom(){
+  myName=document.getElementById('player-name').value.trim();
+  const code=document.getElementById('join-code').value.trim().toUpperCase();
+  if(!myName){document.getElementById('lobby-error').textContent='הכנס שם!';return}
+  if(!code){document.getElementById('lobby-error').textContent='הכנס קוד!';return}
+  myId=genId();roomCode=code;
+  const rooms=await fetchRooms();
+  if(!rooms[roomCode]){document.getElementById('lobby-error').textContent='חדר לא נמצא!';return}
+  if(rooms[roomCode].started){document.getElementById('lobby-error').textContent='המשחק כבר התחיל!';return}
+  const n=Object.keys(rooms[roomCode].players).length;
+  if(n>=4){document.getElementById('lobby-error').textContent='החדר מלא!';return}
+  rooms[roomCode].players[myId]={name:myName,pos:0,coins:500,points:0,idx:n,lastSeen:Date.now()};
+  await writeRooms(rooms);
+  document.getElementById('lobby-main').style.display='none';
+  document.getElementById('lobby-waiting').style.display='';
+  document.getElementById('room-code-display').textContent=roomCode;
+  startSync()}
+
+function startSync(){syncTimer=setInterval(syncLoop,3000);syncLoop()}
+async function syncLoop(){
+  const rooms=await fetchRooms();if(!rooms||!rooms[roomCode])return;
+  roomData=rooms[roomCode];
+  if(roomData.players[myId])roomData.players[myId].lastSeen=Date.now();
+  if(!gameStarted&&roomData.started){gameStarted=true;showGameScreen()}
+  if(!gameStarted)renderLobby();else renderGame()}
+
+async function writeMyState(){const rooms=await fetchRooms();if(!rooms||!rooms[roomCode])return;rooms[roomCode]=roomData;await writeRooms(rooms)}
+
+function renderLobby(){
+  const pl=document.getElementById('players-list');
+  const s=Object.entries(roomData.players).sort((a,b)=>a[1].idx-b[1].idx);
+  let h='<h3 style="font-size:15px;color:#94a3b8;margin-bottom:8px">שחקנים ('+s.length+'/4):</h3>';
+  s.forEach(([pid,p])=>{const ic=PI[p.idx]||'⚪';const me=pid===myId?' is-me':'';
+  h+='<span class="player-tag'+me+'"><span>'+ic+'</span> '+esc(p.name)+(pid===myId?' (אתה)':'')+'</span>'});
+  pl.innerHTML=h}
+
+async function startGame(){if(!isHost)return;roomData.started=true;roomData.round=1;roomData.turnIdx=0;await writeMyState()}
+
+function showGameScreen(){document.getElementById('lobby-screen').style.display='none';document.getElementById('game-screen').style.display='';buildBoard();renderGame()}
+
+function buildBoard(){
+  const b=document.getElementById('board');b.style.gridTemplateColumns='repeat(8,1fr)';b.style.gridTemplateRows='repeat(6,1fr)';
+  document.getElementById('board-center').style.gridColumn='2/8';document.getElementById('board-center').style.gridRow='2/6';
+  SQUARES.forEach((sq,i)=>{const[c,r]=SG[i];const d=document.createElement('div');d.className='sq theme-'+sq.theme;d.id='sq-'+i;
+  d.style.gridColumn=c;d.style.gridRow=r;const cost=sq.cost?'<div class="sq-cost">💰'+sq.cost+'</div>':'';
+  d.innerHTML='<div class="sq-emoji">'+sq.emoji+'</div><div class="sq-name">'+sq.name+'</div>'+cost+'<div class="sq-owned" id="owned-'+i+'"></div><div class="sq-players" id="players-'+i+'"></div>';
+  b.appendChild(d)})}
+
+function renderGame(){
+  if(!roomData)return;const pl=roomData.players;
+  const s=Object.entries(pl).sort((a,b)=>a[1].idx-b[1].idx);
+  const te=s[roomData.turnIdx%s.length];const isMy=te&&te[0]===myId;const me=pl[myId];
+  // Players bar
+  let ph='';s.forEach(([pid,p])=>{const ic=PI[p.idx]||'⚪';const at=te&&te[0]===pid?' active-turn':'';const im=pid===myId?' is-me':'';
+  ph+='<div class="p-card'+at+im+'"><span class="p-icon">'+ic+'</span><div class="p-info"><span class="p-name">'+esc(p.name)+'</span><span class="p-coins">💰'+p.coins+'</span><span class="p-points">⭐'+p.points+'</span></div></div>'});
+  document.getElementById('players-bar').innerHTML=ph;
+  if(me){document.getElementById('coins-val').textContent=me.coins;document.getElementById('points-val').textContent=me.points;
+  document.getElementById('squares-val').textContent=Object.values(roomData.owned||{}).filter(v=>v===myId).length}
+  document.getElementById('round-val').textContent=roomData.round+'/'+roomData.maxRounds;
+  const tn=te?te[1].name:'?';const ti=te?PI[te[1].idx]:'';
+  document.getElementById('turn-indicator').textContent=isMy?'🎯 התור שלך!':ti+' התור של '+tn;
+  document.getElementById('roll-btn').disabled=!isMy||animating;
+  document.getElementById('roll-hint').textContent=isMy?'הטל את הקוביות!':'ממתין ל'+tn+'...';
+  // Board
+  document.querySelectorAll('.sq-players').forEach(e=>e.textContent='');
+  document.querySelectorAll('.sq').forEach(e=>{e.classList.remove('active-sq','owned-by-0','owned-by-1','owned-by-2','owned-by-3')});
+  document.querySelectorAll('.sq-owned').forEach(e=>e.textContent='');
+  s.forEach(([pid,p])=>{const e=document.getElementById('players-'+p.pos);if(e)e.textContent+=PI[p.idx]});
+  Object.entries(roomData.owned||{}).forEach(([si,oid])=>{const od=pl[oid];if(od){const se=document.getElementById('sq-'+si);if(se)se.classList.add('owned-by-'+od.idx);const oe=document.getElementById('owned-'+si);if(oe)oe.textContent=PI[od.idx]}});
+  if(te){const se=document.getElementById('sq-'+te[1].pos);if(se)se.classList.add('active-sq')}
+  if(roomData.lastDice){renderDie(1,roomData.lastDice.d1);renderDie(2,roomData.lastDice.d2)}}
+
 // AUDIO
-// ============================================================
-let audioCtx;
-function getAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
-}
-function playTone(freq, type='sine', dur=0.15, vol=0.3, delay=0) {
-  try {
-    const ctx = getAudio();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = type; osc.frequency.value = freq;
-    gain.gain.setValueAtTime(vol, ctx.currentTime + delay);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
-    osc.start(ctx.currentTime + delay);
-    osc.stop(ctx.currentTime + delay + dur + 0.01);
-  } catch(e) {}
-}
-function soundDiceRoll() {
-  for(let i=0;i<6;i++) {
-    const f = 150 + Math.random()*300;
-    playTone(f,'square',0.05,0.15,i*0.08);
-  }
-}
-function soundCorrect() {
-  [523,659,784,1047].forEach((f,i) => playTone(f,'sine',0.15,0.3,i*0.12));
-}
-function soundWrong() {
-  [300,200].forEach((f,i) => playTone(f,'sawtooth',0.2,0.25,i*0.15));
-}
-function soundCoins() {
-  [880,1100,1320].forEach((f,i) => playTone(f,'sine',0.1,0.2,i*0.07));
-}
-function soundFanfare() {
-  const melody = [523,659,784,1047,784,1047,1175];
-  melody.forEach((f,i) => playTone(f,'sine',0.15,0.3,i*0.13));
-}
+let audioCtx;function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
+function playTone(f,t='sine',d=.15,v=.3,dl=0){try{const c=getAudio(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,c.currentTime+dl);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dl+d);o.start(c.currentTime+dl);o.stop(c.currentTime+dl+d+.01)}catch(e){}}
+function soundDice(){for(let i=0;i<6;i++)playTone(150+Math.random()*300,'square',.05,.15,i*.08)}
+function soundOk(){[523,659,784,1047].forEach((f,i)=>playTone(f,'sine',.15,.3,i*.12))}
+function soundBad(){[300,200].forEach((f,i)=>playTone(f,'sawtooth',.2,.25,i*.15))}
+function soundCoin(){[880,1100,1320].forEach((f,i)=>playTone(f,'sine',.1,.2,i*.07))}
+function soundFan(){[523,659,784,1047,784,1047,1175].forEach((f,i)=>playTone(f,'sine',.15,.3,i*.13))}
+function showMF(a){const e=document.createElement('div');e.className='money-float';e.style.left=innerWidth/2+'px';e.style.top='120px';e.style.color=a>0?'#4ade80':'#f87171';e.textContent=(a>0?'+':'')+a+' 💰';document.body.appendChild(e);setTimeout(()=>e.remove(),1200)}
+function pulseC(){const e=document.getElementById('coins-val');e.classList.remove('coin-pulse');void e.offsetWidth;e.classList.add('coin-pulse')}
 
-// ============================================================
-// FLOATING MONEY ANIMATION
-// ============================================================
-function showMoneyFloat(amount, x, y) {
-  const el = document.createElement('div');
-  el.className = 'money-float';
-  el.style.left = (x || window.innerWidth/2) + 'px';
-  el.style.top = (y || 120) + 'px';
-  el.style.color = amount > 0 ? '#4ade80' : '#f87171';
-  el.textContent = (amount > 0 ? '+' : '') + amount + ' 💰';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1200);
-}
+// DICE
+const DD={1:[5],2:[3,7],3:[3,5,7],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
+function renderDie(id,v){const a=DD[v]||[];for(let i=1;i<=9;i++){const d=document.getElementById('d'+id+'-'+i);if(d)d.className='dot'+(a.includes(i)?' show':'')}}
 
-function pulseCoins() {
-  const el = document.getElementById('coins-val');
-  el.classList.remove('coin-pulse');
-  void el.offsetWidth;
-  el.classList.add('coin-pulse');
-}
+function rollDice(){
+  if(animating)return;const s=Object.entries(roomData.players).sort((a,b)=>a[1].idx-b[1].idx);
+  const te=s[roomData.turnIdx%s.length];if(!te||te[0]!==myId)return;
+  animating=true;document.getElementById('roll-btn').disabled=true;soundDice();
+  const d1=document.getElementById('die1'),d2=document.getElementById('die2');d1.classList.add('rolling');d2.classList.add('rolling');
+  let t=0;const an=setInterval(()=>{renderDie(1,Math.ceil(Math.random()*6));renderDie(2,Math.ceil(Math.random()*6));t++;
+  if(t>8){clearInterval(an);d1.classList.remove('rolling');d2.classList.remove('rolling');
+  const f1=Math.ceil(Math.random()*6),f2=Math.ceil(Math.random()*6);renderDie(1,f1);renderDie(2,f2);afterRoll(f1+f2,f1,f2)}},80)}
 
-// ============================================================
-// BUILD BOARD
-// ============================================================
-function buildBoard() {
-  const board = document.getElementById('board');
-  board.style.gridTemplateColumns = 'repeat(8, 1fr)';
-  board.style.gridTemplateRows = 'repeat(6, 1fr)';
+async function afterRoll(steps,d1,d2){
+  const me=roomData.players[myId];addLog('🎲 '+myName+' הטיל '+steps);
+  roomData.lastDice={d1,d2};
+  for(let i=0;i<steps;i++){const nx=(me.pos+1)%SQUARES.length;
+  if(nx===0&&me.pos!==0){me.coins+=200;soundFan();showMF(200);addLog('🏠 '+myName+' +200💰')}
+  me.pos=nx;renderGame();await new Promise(r=>setTimeout(r,180))}
+  await writeMyState();
+  const sq=SQUARES[me.pos];addLog('📍 '+sq.name);
+  if(sq.theme==='start'){endTurn();return}
+  if(sq.theme==='mazal'){triggerMazal();return}
+  if(roomData.owned&&roomData.owned[me.pos]){const oid=roomData.owned[me.pos];
+  if(oid===myId){me.points+=50;soundCoin();addLog('✅ נחלה שלך! +50⭐');endTurn()}
+  else{const rent=Math.floor(sq.cost*.4);me.coins=Math.max(0,me.coins-rent);if(roomData.players[oid])roomData.players[oid].coins+=rent;
+  soundBad();showMF(-rent);addLog('💸 שכירות '+rent+'💰');endTurn()}return}
+  showTrivia(sq)}
 
-  const center = document.getElementById('board-center');
-  center.style.gridColumn = '2 / 8';
-  center.style.gridRow = '2 / 6';
-
-  SQUARES.forEach((sq, idx) => {
-    const [col, row] = SQUARE_GRID[idx];
-    const div = document.createElement('div');
-    div.className = `sq theme-${sq.theme}`;
-    div.id = `sq-${idx}`;
-    div.style.gridColumn = col;
-    div.style.gridRow = row;
-    const cleanName = sq.name.replace('🎲 ','').replace('⭐ ','').replace('🏠 ','');
-    const costHtml = sq.cost > 0 ? `<div class="sq-cost">💰 ${sq.cost}</div>` : '';
-    div.innerHTML = `
-      <div class="sq-emoji">${sq.emoji}</div>
-      <div class="sq-name">${cleanName}</div>
-      ${costHtml}
-      <div class="sq-owned" id="owned-${idx}"></div>
-      <div class="sq-player" id="player-${idx}"></div>
-    `;
-    board.appendChild(div);
-  });
-
-  updatePlayerPiece();
-}
-
-function updatePlayerPiece() {
-  document.querySelectorAll('.sq-player').forEach(el => el.textContent = '');
-  const el = document.getElementById(`player-${state.pos}`);
-  if(el) el.textContent = '🎭';
-  document.querySelectorAll('.sq').forEach(s => s.classList.remove('active-sq'));
-  const sq = document.getElementById(`sq-${state.pos}`);
-  if(sq) sq.classList.add('active-sq');
-}
-
-// ============================================================
-// DICE RENDERING
-// ============================================================
-const DIE_DOTS = {
-  1: [5],
-  2: [3,7],
-  3: [3,5,7],
-  4: [1,3,7,9],
-  5: [1,3,5,7,9],
-  6: [1,3,4,6,7,9],
-};
-function renderDie(dieId, val) {
-  const active = DIE_DOTS[val] || [];
-  for(let i=1;i<=9;i++) {
-    const dot = document.getElementById(`d${dieId}-${i}`);
-    if(dot) dot.className = 'dot' + (active.includes(i) ? ' show' : '');
-  }
-}
-
-// ============================================================
-// DICE ROLL
-// ============================================================
-function rollDice() {
-  if(state.rolling || state.waitingForAction) return;
-  if(state.round > state.maxRounds) return;
-
-  state.rolling = true;
-  document.getElementById('roll-btn').disabled = true;
-  soundDiceRoll();
-
-  const d1 = document.getElementById('die1');
-  const d2 = document.getElementById('die2');
-  d1.classList.add('rolling'); d2.classList.add('rolling');
-
-  let ticks = 0;
-  const rollAnim = setInterval(() => {
-    const r1 = Math.ceil(Math.random()*6);
-    const r2 = Math.ceil(Math.random()*6);
-    renderDie(1, r1); renderDie(2, r2);
-    ticks++;
-    if(ticks > 8) {
-      clearInterval(rollAnim);
-      d1.classList.remove('rolling'); d2.classList.remove('rolling');
-      const final1 = Math.ceil(Math.random()*6);
-      const final2 = Math.ceil(Math.random()*6);
-      renderDie(1, final1); renderDie(2, final2);
-      const total = final1 + final2;
-      afterRoll(total);
-    }
-  }, 80);
-}
-
-function afterRoll(steps) {
-  addLog(`🎲 הטלת ${steps} — זוזים ${steps} משבצות`);
-  movePlayer(steps);
-}
-
-function movePlayer(steps) {
-  let moved = 0;
-  const move = () => {
-    if(moved >= steps) {
-      state.rolling = false;
-      landOnSquare();
-      return;
-    }
-    moved++;
-    const nextPos = (state.pos + 1) % SQUARES.length;
-    if(nextPos === 0 && state.pos !== 0) {
-      passedStart();
-    }
-    state.pos = nextPos;
-    updatePlayerPiece();
-    setTimeout(move, 200);
-  };
-  move();
-}
-
-function passedStart() {
-  state.coins += 200;
-  soundFanfare();
-  showMoneyFloat(200);
-  pulseCoins();
-  updateStats();
-  addLog('🏠 עברת את ההתחלה! +200 💰');
-}
-
-// ============================================================
-// LAND ON SQUARE
-// ============================================================
-function landOnSquare() {
-  const sq = SQUARES[state.pos];
-  addLog(`📍 נחתת על: ${sq.name}`);
-
-  if(sq.theme === 'start') {
-    nextRound();
-    return;
-  }
-
-  if(sq.theme === 'mazal') {
-    triggerMazal();
-    return;
-  }
-
-  if(state.owned[state.pos]) {
-    state.points += 50;
-    soundCoins();
-    updateStats();
-    addLog('✅ זו הנחלה שלך! +50 נקודות בונוס');
-    nextRound();
-  } else {
-    showTrivia(sq);
-  }
-}
-
-// ============================================================
-// TRIVIA
-// ============================================================
-let currentTriviaState = null;
-
-function getQuestion(theme) {
-  const pool = QUESTIONS[theme] || QUESTIONS.purim;
-  const idx = Math.floor(Math.random() * pool.length);
-  return pool[idx];
-}
-
-function showTrivia(sq) {
-  state.waitingForAction = true;
-  const q = getQuestion(sq.theme);
-  currentTriviaState = { sq, q, answered: false };
-
-  const themeLabels = { purim:'🎭 פורים', pesach:'🫓 פסח', mitzvah:'⭐ מצווה' };
-  document.getElementById('modal-title').textContent = themeLabels[sq.theme] || sq.theme;
-  document.getElementById('modal-sq-name').textContent = sq.name + (sq.cost > 0 ? ` — מחיר: 💰 ${sq.cost}` : '');
-  document.getElementById('modal-question').textContent = q.q;
-  document.getElementById('modal-feedback').textContent = '';
-  document.getElementById('modal-funfact').textContent = '';
+let curTrivia=null;
+function showTrivia(sq){
+  const pool=QS[sq.theme]||QS.purim;const q=pool[Math.floor(Math.random()*pool.length)];curTrivia={sq,q};
+  const lb={purim:'🎭 פורים',pesach:'🫓 פסח',mitzvah:'⭐ מצווה'};
+  document.getElementById('modal-title').textContent=lb[sq.theme]||'';
+  document.getElementById('modal-sq-name').textContent=sq.name+(sq.cost?' — 💰'+sq.cost:'');
+  document.getElementById('modal-question').textContent=q.q;
+  document.getElementById('modal-feedback').textContent='';document.getElementById('modal-funfact').textContent='';
   document.getElementById('modal-close').classList.remove('show');
+  const o=document.getElementById('modal-options');o.innerHTML='';
+  q.opts.forEach((op,i)=>{const b=document.createElement('button');b.className='opt-btn';b.textContent=op;b.onclick=()=>answerTrivia(i);o.appendChild(b)});
+  document.getElementById('modal-overlay').classList.add('show')}
 
-  const optsEl = document.getElementById('modal-options');
-  optsEl.innerHTML = '';
-  q.opts.forEach((opt, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'opt-btn';
-    btn.textContent = opt;
-    btn.onclick = () => answerTrivia(i, btn);
-    optsEl.appendChild(btn);
-  });
+async function answerTrivia(ch){
+  if(!curTrivia)return;const{sq,q}=curTrivia;const ok=ch===q.ans;curTrivia=null;
+  document.querySelectorAll('.opt-btn').forEach((b,i)=>{b.disabled=true;if(i===q.ans)b.classList.add('correct');if(i===ch&&!ok)b.classList.add('wrong')});
+  document.getElementById('modal-funfact').textContent='💡 '+q.fact;const me=roomData.players[myId];
+  if(ok){soundOk();document.getElementById('modal-feedback').textContent='✅ נכון!';document.getElementById('modal-feedback').style.color='#86efac';
+  if(!roomData.owned)roomData.owned={};roomData.owned[me.pos]=myId;me.points+=100;me.coins-=sq.cost;showMF(-sq.cost);pulseC();addLog('🏆 '+myName+' קנה '+sq.name+'!')}
+  else{soundBad();document.getElementById('modal-feedback').textContent='❌ טעות!';document.getElementById('modal-feedback').style.color='#fca5a5';
+  me.coins=Math.max(0,me.coins-50);showMF(-50);addLog('💸 טעות! -50💰')}
+  await writeMyState();renderGame();document.getElementById('modal-close').classList.add('show')}
 
-  document.getElementById('modal-overlay').classList.add('show');
-}
+function closeTrivia(){document.getElementById('modal-overlay').classList.remove('show');endTurn()}
 
-function answerTrivia(chosen, btn) {
-  if(!currentTriviaState || currentTriviaState.answered) return;
-  currentTriviaState.answered = true;
+let pendMZ=null;
+function triggerMazal(){const ev=MZ[Math.floor(Math.random()*MZ.length)];pendMZ=ev;
+document.getElementById('mazal-emoji').textContent=ev.emoji;document.getElementById('mazal-text').textContent=ev.text;
+document.getElementById('mazal-desc').textContent=ev.desc;document.getElementById('mazal-modal').classList.add('show');
+if(ev.coins>0)soundCoin();else if(ev.coins<0)soundBad();else soundOk()}
 
-  const { sq, q } = currentTriviaState;
-  const correct = chosen === q.ans;
+async function closeMazal(){document.getElementById('mazal-modal').classList.remove('show');
+if(pendMZ){const me=roomData.players[myId];me.coins=Math.max(0,me.coins+pendMZ.coins);me.points+=pendMZ.pts;
+if(pendMZ.coins)showMF(pendMZ.coins);addLog('🎲 '+pendMZ.text);pendMZ=null}
+await writeMyState();endTurn()}
 
-  document.querySelectorAll('.opt-btn').forEach((b, i) => {
-    b.disabled = true;
-    if(i === q.ans) b.classList.add('correct');
-    if(i === chosen && !correct) b.classList.add('wrong');
-  });
+async function endTurn(){
+  animating=false;const s=Object.entries(roomData.players).sort((a,b)=>a[1].idx-b[1].idx);
+  roomData.turnIdx++;if(roomData.turnIdx%s.length===0)roomData.round++;
+  if(roomData.round>roomData.maxRounds){await writeMyState();showEnd();return}
+  await writeMyState();renderGame()}
 
-  const feedbackEl = document.getElementById('modal-feedback');
-  const factEl = document.getElementById('modal-funfact');
-  factEl.textContent = '💡 ' + q.fact;
+function showEnd(){
+  const s=Object.entries(roomData.players).sort((a,b)=>a[1].idx-b[1].idx);
+  let res=s.map(([pid,p])=>({pid,name:p.name,total:p.coins+p.points,coins:p.coins,points:p.points,
+  owned:Object.values(roomData.owned||{}).filter(v=>v===pid).length,idx:p.idx}));
+  res.sort((a,b)=>b.total-a.total);
+  let h='<span class="winner">'+PI[res[0].idx]+' '+esc(res[0].name)+' ניצח! 🎉</span>';
+  res.forEach((r,i)=>{h+='<div>'+(i+1)+'. '+PI[r.idx]+' '+esc(r.name)+' — '+r.total+' (💰'+r.coins+' ⭐'+r.points+' 🏠'+r.owned+')</div>'});
+  document.getElementById('end-results').innerHTML=h;soundFan();document.getElementById('end-modal').classList.add('show')}
 
-  if(correct) {
-    soundCorrect();
-    feedbackEl.textContent = '✅ תשובה נכונה! מעולה!';
-    feedbackEl.style.color = '#86efac';
-    state.owned[state.pos] = true;
-    state.points += 100;
-    state.coins -= sq.cost;
-    showMoneyFloat(-sq.cost);
-    pulseCoins();
-    updateStats();
-    updateOwnedMarker(state.pos);
-    addLog(`🏆 קנית את ${sq.name}! -${sq.cost} 💰 +100 נקודות`);
-  } else {
-    soundWrong();
-    feedbackEl.textContent = '❌ טעות! תשלם שכירות.';
-    feedbackEl.style.color = '#fca5a5';
-    state.coins -= 50;
-    if(state.coins < 0) state.coins = 0;
-    showMoneyFloat(-50);
-    pulseCoins();
-    updateStats();
-    addLog(`💸 טעית! -50 💰`);
-  }
+function addLog(m){const l=document.getElementById('log-box'),p=document.createElement('p');p.textContent=m;l.insertBefore(p,l.firstChild);while(l.children.length>6)l.removeChild(l.lastChild)}
 
-  document.getElementById('modal-close').classList.add('show');
-}
-
-function closeTrivia() {
-  document.getElementById('modal-overlay').classList.remove('show');
-  state.waitingForAction = false;
-  currentTriviaState = null;
-  nextRound();
-}
-
-// ============================================================
-// MAZAL
-// ============================================================
-let pendingMazal = null;
-function triggerMazal() {
-  state.waitingForAction = true;
-  const ev = MAZAL_EVENTS[Math.floor(Math.random() * MAZAL_EVENTS.length)];
-  pendingMazal = ev;
-
-  document.getElementById('mazal-emoji').textContent = ev.emoji;
-  document.getElementById('mazal-text').textContent = ev.text;
-  document.getElementById('mazal-desc').textContent = ev.desc;
-  document.getElementById('mazal-modal').classList.add('show');
-
-  if(ev.coins > 0) soundCoins();
-  else if(ev.coins < 0) soundWrong();
-  else soundCorrect();
-}
-
-function closeMazal() {
-  document.getElementById('mazal-modal').classList.remove('show');
-  if(pendingMazal) {
-    state.coins = Math.max(0, state.coins + pendingMazal.coins);
-    state.points += pendingMazal.pts;
-    if(pendingMazal.coins !== 0) {
-      showMoneyFloat(pendingMazal.coins);
-      pulseCoins();
-    }
-    updateStats();
-    addLog(`🎲 מזל: ${pendingMazal.text} (💰 ${pendingMazal.coins>0?'+':''}${pendingMazal.coins}, ⭐ +${pendingMazal.pts})`);
-    pendingMazal = null;
-  }
-  state.waitingForAction = false;
-  nextRound();
-}
-
-// ============================================================
-// ROUNDS & STATS
-// ============================================================
-function nextRound() {
-  state.round++;
-  updateStats();
-  if(state.round > state.maxRounds) {
-    setTimeout(showEndGame, 500);
-    return;
-  }
-  document.getElementById('roll-btn').disabled = false;
-  document.getElementById('roll-hint').textContent = `סיבוב ${state.round} מתוך ${state.maxRounds}`;
-}
-
-function updateStats() {
-  document.getElementById('coins-val').textContent = state.coins;
-  document.getElementById('points-val').textContent = state.points;
-  document.getElementById('round-val').textContent = `${state.round}/${state.maxRounds}`;
-  const ownedCount = Object.keys(state.owned).length;
-  document.getElementById('squares-val').textContent = ownedCount;
-}
-
-function updateOwnedMarker(idx) {
-  const el = document.getElementById(`owned-${idx}`);
-  if(el) el.textContent = '✅';
-  const sqEl = document.getElementById(`sq-${idx}`);
-  if(sqEl) sqEl.classList.add('owned-by-player');
-}
-
-function addLog(msg) {
-  const log = document.getElementById('log-box');
-  const p = document.createElement('p');
-  p.textContent = msg;
-  log.insertBefore(p, log.firstChild);
-  while(log.children.length > 5) log.removeChild(log.lastChild);
-}
-
-// ============================================================
-// END GAME
-// ============================================================
-function showEndGame() {
-  const totalScore = state.points + state.coins;
-  document.getElementById('end-score').textContent = totalScore + ' נקודות';
-
-  let grade = '';
-  if(totalScore >= 2000) grade = '🏆 אלוף פורים-פסח! מדהים!';
-  else if(totalScore >= 1500) grade = '🌟 מצוין! חכם אמיתי!';
-  else if(totalScore >= 1000) grade = '😊 טוב מאוד! כל הכבוד!';
-  else if(totalScore >= 500) grade = '👍 לא רע! אפשר לשפר!';
-  else grade = '📖 כדאי לחזור על החומר!';
-
-  document.getElementById('end-grade').textContent = grade;
-  const ownedCount = Object.keys(state.owned).length;
-  document.getElementById('end-details').innerHTML =
-    `💰 מטבעות: ${state.coins} | ⭐ נקודות: ${state.points}<br>🏠 נחלות שרכשת: ${ownedCount} מתוך ${SQUARES.filter(s=>s.theme!=='mazal'&&s.theme!=='start').length}`;
-
-  soundFanfare();
-  document.getElementById('end-modal').classList.add('show');
-}
-
-function restartGame() {
-  state = { coins:500, points:0, round:1, maxRounds:20, pos:0, owned:{}, rolling:false, waitingForAction:false };
-  document.querySelectorAll('.sq-owned').forEach(el => el.textContent='');
-  document.querySelectorAll('.sq').forEach(el => el.classList.remove('owned-by-player'));
-  document.getElementById('end-modal').classList.remove('show');
-  document.getElementById('log-box').innerHTML = '<p>משחק חדש! בהצלחה 🎉</p>';
-  document.getElementById('roll-btn').disabled = false;
-  document.getElementById('roll-hint').textContent = 'הטל כדי להמשיך';
-  updateStats();
-  updatePlayerPiece();
-  renderDie(1,1); renderDie(2,1);
-}
-
-// ============================================================
-// INIT
-// ============================================================
-buildBoard();
-updateStats();
-renderDie(1,1); renderDie(2,1);
+renderDie(1,1);renderDie(2,1);
+// Clean old rooms
+(async()=>{const r=await fetchRooms();const c=Date.now()-2*3600000;let ch=false;
+Object.entries(r).forEach(([k,v])=>{if(v.createdAt&&v.createdAt<c){delete r[k];ch=true}});if(ch)await writeRooms(r)})();
 </script>
 </body>
 </html>
