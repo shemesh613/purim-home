@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מונופול — מפורים עד פסח</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e1b4b);
+    min-height: 100vh;
+    color: #e2e8f0;
+    direction: rtl;
+    overflow-x: hidden;
+  }
+
+  a.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #a5b4fc;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 16px;
+    border: 1px solid #4338ca;
+    border-radius: 20px;
+    margin: 12px 16px;
+    transition: background 0.2s;
+  }
+  a.back-btn:hover { background: #1e1b4b; }
+
+  h1 {
+    text-align: center;
+    font-size: clamp(20px, 5vw, 32px);
+    font-weight: 900;
+    background: linear-gradient(90deg, #f59e0b, #a855f7, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding: 4px 0 12px;
+  }
+
+  /* STATS BAR */
+  #stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 0 auto 16px;
+    max-width: 700px;
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .stat-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .stat-box span.val { color: #fbbf24; font-size: 20px; }
+
+  /* BOARD WRAPPER */
+  #board-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 0 12px 20px;
+    flex-wrap: wrap;
+  }
+
+  /* BOARD GRID */
+  #board {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 4px;
+    width: min(420px, 95vw);
+    height: min(420px, 95vw);
+    flex-shrink: 0;
+  }
+
+  .square {
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: clamp(7px, 1.5vw, 11px);
+    font-weight: 700;
+    padding: 3px;
+    cursor: default;
+    position: relative;
+    border: 2px solid transparent;
+    transition: transform 0.2s, box-shadow 0.2s;
+    line-height: 1.2;
+    overflow: hidden;
+  }
+
+  .square .sq-emoji { font-size: clamp(14px, 3vw, 22px); }
+  .square .sq-name { font-size: clamp(6px, 1.2vw, 10px); margin-top: 2px; }
+  .square .owner-mark { position: absolute; top: 2px; left: 2px; font-size: 10px; }
+  .square .token { position: absolute; bottom: 2px; right: 2px; font-size: 16px; animation: bounce 0.5s ease; }
+
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  /* Square colors */
+  .sq-gold { background: rgba(245,158,11,0.15); border-color: #f59e0b; }
+  .sq-purple { background: rgba(168,85,247,0.15); border-color: #a855f7; }
+  .sq-blue { background: rgba(59,130,246,0.15); border-color: #3b82f6; }
+  .sq-green { background: rgba(16,185,129,0.15); border-color: #10b981; }
+
+  .square.owned { opacity: 0.85; }
+  .square.owned-me { box-shadow: 0 0 8px 2px rgba(251,191,36,0.6); }
+  .square.player-here { transform: scale(1.05); box-shadow: 0 0 14px 4px rgba(255,255,255,0.4); }
+
+  /* CENTER PANEL */
+  #center-panel {
+    grid-column: 2 / 6;
+    grid-row: 2 / 6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 8px;
+  }
+
+  #dice-display {
+    font-size: 52px;
+    line-height: 1;
+    transition: transform 0.1s;
+    cursor: pointer;
+    user-select: none;
+  }
+  #dice-display.rolling { animation: shake 0.5s ease; }
+  @keyframes shake {
+    0%,100% { transform: rotate(0); }
+    20% { transform: rotate(-20deg) scale(1.2); }
+    40% { transform: rotate(20deg) scale(1.2); }
+    60% { transform: rotate(-15deg); }
+    80% { transform: rotate(15deg); }
+  }
+
+  #roll-btn {
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 24px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(124,58,237,0.4);
+  }
+  #roll-btn:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 6px 20px rgba(124,58,237,0.6); }
+  #roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  #center-msg {
+    font-size: 12px;
+    color: #94a3b8;
+    text-align: center;
+    max-width: 140px;
+  }
+
+  /* SIDE PANEL */
+  #side-panel {
+    width: min(280px, 95vw);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .panel-box {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .panel-box h3 { font-size: 13px; color: #94a3b8; margin-bottom: 8px; }
+
+  #event-log {
+    height: 150px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .log-entry {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+    border-right: 3px solid #4338ca;
+  }
+  .log-entry.good { border-color: #10b981; }
+  .log-entry.bad { border-color: #ef4444; }
+  .log-entry.event { border-color: #f59e0b; }
+
+  #squares-owned {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .owned-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+  .owned-badge.purple { background: rgba(168,85,247,0.3); color: #d8b4fe; }
+  .owned-badge.blue { background: rgba(59,130,246,0.3); color: #93c5fd; }
+  .owned-badge.gold { background: rgba(245,158,11,0.3); color: #fde68a; }
+
+  /* MODAL */
+  #modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+  }
+  #modal-overlay.hidden { display: none; }
+
+  #modal-box {
+    background: #1e293b;
+    border: 2px solid #4338ca;
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 420px;
+    width: 100%;
+    direction: rtl;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: pop 0.3s ease;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  #modal-box h2 { font-size: 18px; margin-bottom: 6px; color: #f1f5f9; }
+  #modal-box .modal-subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 16px; }
+  #modal-question { font-size: 16px; font-weight: 700; color: #e2e8f0; margin-bottom: 14px; line-height: 1.5; }
+
+  .option-btn {
+    display: block;
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #e2e8f0;
+    padding: 10px 16px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: right;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .option-btn:hover { background: rgba(99,102,241,0.2); border-color: #6366f1; }
+  .option-btn.correct { background: rgba(16,185,129,0.3); border-color: #10b981; color: #6ee7b7; }
+  .option-btn.wrong { background: rgba(239,68,68,0.3); border-color: #ef4444; color: #fca5a5; }
+
+  #modal-fact {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-top: 10px;
+    padding: 8px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    display: none;
+  }
+  #modal-continue-btn {
+    margin-top: 14px;
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: none;
+    width: 100%;
+  }
+
+  /* EVENT POPUP */
+  #event-popup {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #1e1b4b, #0f172a);
+    border: 2px solid #f59e0b;
+    border-radius: 16px;
+    padding: 16px 24px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 16px;
+    z-index: 200;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    min-width: 240px;
+  }
+  #event-popup.show { opacity: 1; }
+
+  /* GAME OVER */
+  #gameover-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #0f172a, #1e1b4b);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    text-align: center;
+    padding: 24px;
+    display: none;
+  }
+  #gameover-screen h2 { font-size: 40px; margin-bottom: 12px; }
+  #gameover-screen .go-score { font-size: 28px; font-weight: 700; color: #fbbf24; margin-bottom: 8px; }
+  #gameover-screen .go-grade { font-size: 60px; margin-bottom: 16px; }
+  #gameover-screen .go-msg { font-size: 18px; color: #94a3b8; margin-bottom: 24px; }
+  #restart-btn {
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    color: white;
+    border: none;
+    padding: 14px 36px;
+    border-radius: 28px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* Credits */
+  .credits {
+    text-align: center;
+    font-size: 12px;
+    color: #475569;
+    padding: 8px;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    #board { width: 95vw; height: 95vw; }
+    #side-panel { width: 95vw; }
+  }
+</style>
+</head>
+<body>
+
+<a href="../index.html" class="back-btn">← חזרה לדף הראשי</a>
+<h1>🎭 מונופול — מפורים עד פסח 🫓</h1>
+
+<!-- Stats Bar -->
+<div id="stats-bar">
+  <div class="stat-box">🪙 מטבעות: <span class="val" id="coins-val">500</span></div>
+  <div class="stat-box">⭐ נקודות: <span class="val" id="points-val">0</span></div>
+  <div class="stat-box">🎲 סיבוב: <span class="val" id="round-val">1</span> / 15</div>
+  <div class="stat-box">📍 משבצת: <span class="val" id="pos-val">1</span></div>
+</div>
+
+<!-- Board Wrapper -->
+<div id="board-wrapper">
+  <div id="board"><!-- JS renders here --></div>
+  <div id="side-panel">
+    <div class="panel-box">
+      <h3>📋 יומן אירועים</h3>
+      <div id="event-log"></div>
+    </div>
+    <div class="panel-box">
+      <h3>🏠 משבצות שלי</h3>
+      <div id="squares-owned"><span style="color:#475569;font-size:12px">עדיין אין משבצות</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay" class="hidden">
+  <div id="modal-box">
+    <h2 id="modal-title">❓ שאלת טריוויה</h2>
+    <div class="modal-subtitle" id="modal-subtitle">ענה נכון וקנה את המשבצת!</div>
+    <div id="modal-question"></div>
+    <div id="modal-options"></div>
+    <div id="modal-fact"></div>
+    <button id="modal-continue-btn" onclick="closeModal()">המשך ▶</button>
+  </div>
+</div>
+
+<!-- Event popup -->
+<div id="event-popup"></div>
+
+<!-- Game Over -->
+<div id="gameover-screen">
+  <div class="go-grade" id="go-grade">🌟</div>
+  <h2>המשחק הסתיים!</h2>
+  <div class="go-score" id="go-score"></div>
+  <div class="go-msg" id="go-msg"></div>
+  <button class="restart-btn" onclick="restartGame()" id="restart-btn">🔄 שחק שוב</button>
+</div>
+
+<div class="credits">🎨 רעיון: לביא | 💡 הוגש דרך כפתור הרעיונות</div>
+
+<script>
+// ===== BOARD DATA =====
+const SQUARES = [
+  { id:1,  name:"התחלה",           emoji:"🏠", type:"gold"   },
+  { id:2,  name:"אסתר",            emoji:"🎭", type:"purple" },
+  { id:3,  name:"מרדכי",           emoji:"🎭", type:"purple" },
+  { id:4,  name:"מזל!",            emoji:"🎲", type:"green"  },
+  { id:5,  name:"המשתה",           emoji:"🎭", type:"purple" },
+  { id:6,  name:"עשר מכות",        emoji:"🫓", type:"blue"   },
+  { id:7,  name:"קריעת הים",       emoji:"🫓", type:"blue"   },
+  { id:8,  name:"מזל!",            emoji:"🎲", type:"green"  },
+  { id:9,  name:"ליל הסדר",        emoji:"🫓", type:"blue"   },
+  { id:10, name:"מצה ומרור",       emoji:"🫓", type:"blue"   },
+  { id:11, name:"צדקה",            emoji:"⭐", type:"gold"   },
+  { id:12, name:"מזל!",            emoji:"🎲", type:"green"  },
+  { id:13, name:"גמילות חסדים",    emoji:"⭐", type:"gold"   },
+  { id:14, name:"משלוח מנות",      emoji:"🎭", type:"purple" },
+  { id:15, name:"תחפושות",         emoji:"🎭", type:"purple" },
+  { id:16, name:"מזל!",            emoji:"🎲", type:"green"  },
+  { id:17, name:"ארבע כוסות",      emoji:"🫓", type:"blue"   },
+  { id:18, name:"ביקור חולים",     emoji:"⭐", type:"gold"   },
+  { id:19, name:"מגילה",           emoji:"🎭", type:"purple" },
+  { id:20, name:"חיפוש חמץ",       emoji:"🫓", type:"blue"   },
+];
+
+// Grid positions: top row L->R: 1-6, right col T->B: 7-10, bottom row R->L: 11-15, left col B->T: 16-20
+// 6x6 grid, perimeter only. row/col are 0-indexed
+const SQUARE_POSITIONS = [
+  // top row (row 0, col 0-5): squares 1-6
+  [0,0],[0,1],[0,2],[0,3],[0,4],[0,5],
+  // right col (col 5, row 1-4): squares 7-10
+  [1,5],[2,5],[3,5],[4,5],
+  // bottom row (row 5, col 5->0): squares 11-15
+  [5,5],[5,4],[5,3],[5,2],[5,1],
+  // left col (col 0, row 4->1): squares 16-20
+  [4,0],[3,0],[2,0],[1,0]
+];
+
+// ===== TRIVIA =====
+const TRIVIA = [
+  { q:"מי היתה המלכה שהצילה את היהודים בפורים?", options:["ושתי","אסתר","דבורה","מרים"], correct:1, fact:"אסתר הייתה יהודייה שהפכה למלכה ועזרה להציל את עמה." },
+  { q:"מי היה הרשע שרצה להשמיד את היהודים?", options:["פרעה","המן","נבוכדנצר","אחשוורוש"], correct:1, fact:"המן תכנן להשמיד את כל היהודים בפרס." },
+  { q:"מי היה דודה של אסתר?", options:["אחשוורוש","המן","מרדכי","אליהו"], correct:2, fact:"מרדכי היה דודה של אסתר וגדלה כבתו." },
+  { q:"כמה מכות ירדו על המצרים?", options:["7","8","10","12"], correct:2, fact:"עשר מכות ירדו על מצרים כדי לשחרר את עם ישראל." },
+  { q:"מה אוכלים במקום לחם בפסח?", options:["פיתה","מצה","עוגה","כרוב"], correct:1, fact:"מצה היא לחם שטוח שלא תפח, לזכר היציאה המהירה ממצרים." },
+  { q:"כמה כוסות יין שותים בסדר פסח?", options:["2","3","4","5"], correct:2, fact:"ארבע כוסות יין, כנגד ארבע לשונות הגאולה." },
+  { q:"מה שמה של המגילה הנקראת בפורים?", options:["מגילת רות","מגילת אסתר","מגילת יחזקאל","מגילת קהלת"], correct:1, fact:"מגילת אסתר מספרת על ניסי פורים." },
+  { q:"מה שולחים לחברים בפורים?", options:["כסף","ספרים","משלוח מנות","פרחים"], correct:2, fact:"שולחים לפחות שני מאכלים לאדם אחד — משלוח מנות!" },
+  { q:"מה עושים עם החמץ לפני פסח?", options:["אוכלים","מוכרים ומבערים","שומרים","נותנים לכלב"], correct:1, fact:"בודקים, מבערים או מוכרים את החמץ לפני חג הפסח." },
+  { q:"מה שם הים שנקרע לעם ישראל?", options:["הים התיכון","ים המלח","ים סוף","ים כנרת"], correct:2, fact:"קריעת ים סוף הייתה נס גדול ביציאת מצרים." },
+  { q:"איזה ירק מר מניחים בסדר פסח?", options:["גזר","ביצה","מרור","חזרת"], correct:2, fact:"מרור מסמל את מרירות השעבוד במצרים." },
+  { q:"מה שם הספר שמספר את סיפור פסח?", options:["סידור","הגדה","תנ\"ך","משנה"], correct:1, fact:"ההגדה של פסח מספרת על יציאת מצרים." },
+  { q:"כמה שבטים יצאו ממצרים?", options:["10","12","13","6"], correct:1, fact:"שנים עשר שבטי ישראל יצאו ממצרים." },
+  { q:"מה עושים עם הגרגרן בפורים?", options:["אוכלים","שמים ב-אוזן","מרעישים כשמזכירים המן","שורפים"], correct:2, fact:"מרעישים רעשנים (גרגרנים) כשמזכירים את שם המן בקריאת המגילה." },
+  { q:"כמה ימים חג הפסח?", options:["5","6","7","8"], correct:3, fact:"פסח נמשך 7 ימים בישראל ו-8 ימים בחוץ לארץ." },
+  { q:"מי הוביל את עם ישראל ממצרים?", options:["אהרון","דוד","משה","שמשון"], correct:2, fact:"משה רבנו הוביל את עם ישראל מעבדות לחירות." },
+  { q:"מה שמה של אמא של משה?", options:["מרים","יוכבד","שרה","דינה"], correct:1, fact:"יוכבד הייתה אמא של משה, אהרון ומרים." },
+  { q:"מה מכניסים לקערת הסדר?", options:["פיצה","מרור,מצה,כרפס","שוקולד","גלידה"], correct:1, fact:"קערת הסדר מכילה 6 מאכלים סמליים: מרור, כרפס, חרוסת, זרוע, ביצה ומרור." },
+  { q:"מה זה 'אפיקומן'?", options:["ריקוד","שיר","חתיכת מצה מוסתרת","כוס יין"], correct:2, fact:"האפיקומן הוא חצי מצה שמסתירים וילדים צריכים למצוא לקראת סוף הסדר." },
+  { q:"מתי חג הפורים?", options:["א' ניסן","ט\"ו שבט","יד אדר","כה כסלו"], correct:2, fact:"פורים חל ב-יד אדר, ובשנה מעוברת ב-יד אדר ב'." },
+  { q:"מה עושים בליל חיפוש חמץ?", options:["שרים","בודקים חמץ לאור הנר","אוכלים מצה","קוראים מגילה"], correct:1, fact:"בליל י\"ד ניסן בודקים את הבית לאור הנר לחפש חמץ." },
+  { q:"מה מסמל ה'כרפס' בסדר?", options:["חורף","אביב ותקווה","מוות","מדבר"], correct:1, fact:"הכרפס הירוק מסמל את האביב ואת התקווה." },
+  { q:"מה שם הנסית שספינה יצאה?", options:["ושתי","אסתר","מרים","דבורה"], correct:2, fact:"מרים הנביאה, אחות משה, ניבאה את לידתו ושמרה עליו." },
+  { q:"כמה ימים חג הפורים?", options:["1","2","3","7"], correct:0, fact:"פורים הוא יום אחד (ובירושלים — שושן פורים, יום נוסף)." },
+  { q:"מה לובשים בפורים?", options:["חולצה לבנה","תחפושות","מדים","שמלה שחורה"], correct:1, fact:"לובשים תחפושות בפורים כדי לשמוח ולחגוג!" },
+  { q:"מה שם הקרבן בסדר פסח?", options:["עולה","שלמים","קרבן פסח","מנחה"], correct:2, fact:"קרבן הפסח היה כבש שנשחט ונאכל בליל פסח בזמן המקדש." },
+  { q:"איזה מצווה חשובה בפורים?", options:["תפילה","צדקה לעניים","שמיעת שופר","לישיבה בסוכה"], correct:1, fact:"מתנות לאביונים — נותנים צדקה לעניים בפורים." },
+  { q:"מה שם הנהר שבו הושם משה בתיבה?", options:["ירדן","נילוס","פרת","חידקל"], correct:1, fact:"אמא של משה שמה אותו בתיבה על נהר הנילוס כדי להצילו." },
+  { q:"מי היה מלך פרס בסיפור פורים?", options:["כורש","דריוש","אחשוורוש","נבוכדנצר"], correct:2, fact:"המלך אחשוורוש שלט על 127 מדינות ואסתר הייתה אשתו." },
+  { q:"מה אומרים כשיוצאים ממצרים לחירות?", options:["שלום","כשר לפסח","חג שמח — לחירות!","ברוך הבא"], correct:2, fact:"יציאת מצרים מסמלת מעבר מעבדות לחירות לכל הדורות." },
+];
+
+// ===== LUCK EVENTS =====
+const LUCK_EVENTS = [
+  { text:"🎉 קיבלת פרס מהמלך אחשוורוש! +150 מטבעות", coins:150 },
+  { text:"🎭 לבשת תחפושת מנצחת! +100 מטבעות", coins:100 },
+  { text:"🫓 מצאת אפיקומן! +75 מטבעות", coins:75 },
+  { text:"⭐ עשית מצווה! +120 מטבעות", coins:120 },
+  { text:"😅 שילמת דמי שמירה לאחשוורוש... -80 מטבעות", coins:-80 },
+  { text:"🎲 המן הפיל פור — הפסדת! -60 מטבעות", coins:-60 },
+  { text:"🫓 שכחת לבער חמץ! קנס: -50 מטבעות", coins:-50 },
+  { text:"🌊 עברת את ים סוף! +130 מטבעות", coins:130 },
+  { text:"🎁 קיבלת משלוח מנות! +90 מטבעות", coins:90 },
+  { text:"😬 שכחת להביא מתנות לאביונים... -70 מטבעות", coins:-70 },
+];
+
+// ===== GAME STATE =====
+let state = {
+  coins: 500,
+  points: 0,
+  round: 1,
+  position: 0, // 0-indexed
+  ownedSquares: {}, // squareId -> true
+  rolling: false,
+  answerGiven: false,
+  currentTrivia: null,
+  currentSquareId: null,
+  maxRounds: 15
+};
+
+// ===== AUDIO =====
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(freq, dur=0.15, type='sine', vol=0.3) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(); osc.stop(ctx.currentTime + dur);
+  } catch(e) {}
+}
+
+function playDice() {
+  [200,300,250,400,350].forEach((f,i) => setTimeout(()=>playTone(f,0.08,'square',0.2), i*80));
+}
+function playCorrect() {
+  [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,0.15,'sine',0.3),i*120));
+}
+function playWrong() {
+  [300,250,200].forEach((f,i)=>setTimeout(()=>playTone(f,0.15,'sawtooth',0.2),i*100));
+}
+function playCoins() {
+  [659,784,880].forEach((f,i)=>setTimeout(()=>playTone(f,0.1,'sine',0.25),i*80));
+}
+
+// ===== BOARD RENDERING =====
+function buildBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  // Create 6x6 grid of cells
+  const cells = [];
+  for (let r = 0; r < 6; r++) {
+    for (let c = 0; c < 6; c++) {
+      const cell = document.createElement('div');
+      cell.style.gridRow = r+1;
+      cell.style.gridColumn = c+1;
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      board.appendChild(cell);
+      cells.push(cell);
+    }
+  }
+
+  // Place center panel
+  const center = document.createElement('div');
+  center.id = 'center-panel';
+  center.style.gridRow = '2 / 6';
+  center.style.gridColumn = '2 / 6';
+  center.innerHTML = `
+    <div id="dice-display">🎲</div>
+    <button id="roll-btn" onclick="rollDice()">🎲 הטילו קוביה</button>
+    <div id="center-msg">לחצו להטיל קוביה!</div>
+  `;
+  board.appendChild(center);
+
+  // Place squares on perimeter
+  SQUARE_POSITIONS.forEach((pos, idx) => {
+    const sq = SQUARES[idx];
+    const [r, c] = pos;
+
+    // Find or create cell at position
+    const cell = board.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+    if (!cell) return;
+
+    cell.className = `square sq-${sq.type}`;
+    cell.dataset.sqid = sq.id;
+    cell.innerHTML = `
+      <div class="sq-emoji">${sq.emoji}</div>
+      <div class="sq-name">${sq.name}</div>
+      <div class="owner-mark" id="own-${sq.id}"></div>
+      <div class="token" id="token-${sq.id}" style="display:none">🎭</div>
+    `;
+  });
+
+  // Show token at start
+  renderToken();
+}
+
+function renderToken() {
+  // Hide all tokens
+  document.querySelectorAll('.token').forEach(t => t.style.display = 'none');
+  document.querySelectorAll('.square').forEach(sq => sq.classList.remove('player-here'));
+
+  const sq = SQUARES[state.position];
+  const tokenEl = document.getElementById(`token-${sq.id}`);
+  if (tokenEl) tokenEl.style.display = 'block';
+
+  const cell = document.querySelector(`[data-sqid="${sq.id}"]`);
+  if (cell) cell.classList.add('player-here');
+
+  // Update position display
+  document.getElementById('pos-val').textContent = sq.id;
+}
+
+function renderOwnership() {
+  SQUARES.forEach(sq => {
+    const el = document.getElementById(`own-${sq.id}`);
+    if (!el) return;
+    const cell = document.querySelector(`[data-sqid="${sq.id}"]`);
+    if (state.ownedSquares[sq.id]) {
+      el.textContent = '✅';
+      if (cell) cell.classList.add('owned', 'owned-me');
+    } else {
+      el.textContent = '';
+      if (cell) { cell.classList.remove('owned', 'owned-me'); }
+    }
+  });
+
+  // Update owned list
+  const owned = document.getElementById('squares-owned');
+  const ids = Object.keys(state.ownedSquares);
+  if (ids.length === 0) {
+    owned.innerHTML = '<span style="color:#475569;font-size:12px">עדיין אין משבצות</span>';
+  } else {
+    owned.innerHTML = ids.map(id => {
+      const sq = SQUARES.find(s => s.id == id);
+      return `<span class="owned-badge ${sq.type}">${sq.emoji} ${sq.name}</span>`;
+    }).join('');
+  }
+}
+
+function updateStats() {
+  document.getElementById('coins-val').textContent = state.coins;
+  document.getElementById('points-val').textContent = state.points;
+  document.getElementById('round-val').textContent = state.round;
+}
+
+// ===== LOG =====
+function addLog(msg, type='') {
+  const log = document.getElementById('event-log');
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${type}`;
+  entry.textContent = msg;
+  log.prepend(entry);
+  if (log.children.length > 20) log.lastChild.remove();
+}
+
+// ===== EVENT POPUP =====
+function showPopup(msg, color='#f59e0b') {
+  const el = document.getElementById('event-popup');
+  el.textContent = msg;
+  el.style.borderColor = color;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ===== DICE =====
+const DICE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+
+function rollDice() {
+  if (state.rolling) return;
+  state.rolling = true;
+  document.getElementById('roll-btn').disabled = true;
+  document.getElementById('center-msg').textContent = '...מטיל';
+
+  playDice();
+  const diceEl = document.getElementById('dice-display');
+  diceEl.classList.add('rolling');
+
+  // Animate dice
+  let count = 0;
+  const interval = setInterval(() => {
+    const n = Math.floor(Math.random()*6);
+    diceEl.textContent = DICE_FACES[n];
+    count++;
+    if (count >= 10) {
+      clearInterval(interval);
+      const rolled = Math.floor(Math.random()*6) + 1;
+      diceEl.textContent = DICE_FACES[rolled-1];
+      diceEl.classList.remove('rolling');
+      addLog(`🎲 הטלת קוביה: ${rolled}`, '');
+      movePlayer(rolled);
+    }
+  }, 80);
+}
+
+// ===== MOVEMENT =====
+function movePlayer(steps) {
+  let moved = 0;
+  function stepMove() {
+    if (moved >= steps) {
+      state.rolling = false;
+      landOnSquare();
+      return;
+    }
+    const prevPos = state.position;
+    state.position = (state.position + 1) % 20;
+    // Check passing start
+    if (state.position === 0 && prevPos !== 0) {
+      state.coins += 200;
+      updateStats();
+      addLog('🏠 עברת על START! +200 מטבעות', 'good');
+      showPopup('🏠 עברת START! +200 מטבעות 🪙', '#10b981');
+      playCoins();
+    }
+    renderToken();
+    moved++;
+    setTimeout(stepMove, 300);
+  }
+  stepMove();
+}
+
+// ===== LANDING =====
+function landOnSquare() {
+  const sq = SQUARES[state.position];
+  document.getElementById('center-msg').textContent = `נחתת: ${sq.emoji} ${sq.name}`;
+
+  if (sq.type === 'green') {
+    // Luck event
+    handleLuck(sq);
+  } else if (sq.id === 1) {
+    // START
+    addLog('🏠 על START — נח!', 'good');
+    endTurn();
+  } else if (sq.type === 'gold') {
+    // Bonus square
+    handleGold(sq);
+  } else if (state.ownedSquares[sq.id]) {
+    // Player's own square
+    state.coins += 50;
+    state.points += 25;
+    updateStats();
+    addLog(`✅ המשבצת שלך! +50 מטבעות`, 'good');
+    showPopup(`✅ המשבצת שלך! +50 🪙`, '#10b981');
+    playCoins();
+    endTurn();
+  } else {
+    // Trivia
+    openTrivia(sq);
+  }
+}
+
+function handleLuck(sq) {
+  const event = LUCK_EVENTS[Math.floor(Math.random()*LUCK_EVENTS.length)];
+  state.coins += event.coins;
+  if (state.coins < 0) state.coins = 0;
+  updateStats();
+  const type = event.coins > 0 ? 'good' : 'bad';
+  addLog(event.text, type);
+  showPopup(event.text, event.coins > 0 ? '#10b981' : '#ef4444');
+  if (event.coins > 0) playCoins(); else playWrong();
+  endTurn();
+}
+
+function handleGold(sq) {
+  let bonus = 75;
+  let msg = '';
+  if (sq.name === 'צדקה') { msg = '⭐ נתת צדקה! +75 מטבעות'; }
+  else if (sq.name === 'גמילות חסדים') { msg = '⭐ עשית חסד! +75 מטבעות'; bonus = 75; }
+  else if (sq.name === 'ביקור חולים') { msg = '⭐ ביקרת חולה! +75 מטבעות'; bonus = 75; }
+  state.coins += bonus;
+  state.points += 50;
+  updateStats();
+  addLog(msg, 'good');
+  showPopup(msg, '#f59e0b');
+  playCoins();
+  endTurn();
+}
+
+// ===== TRIVIA MODAL =====
+let usedTrivia = new Set();
+
+function openTrivia(sq) {
+  // Pick random unused trivia
+  let available = TRIVIA.filter((_, i) => !usedTrivia.has(i));
+  if (available.length === 0) { usedTrivia.clear(); available = TRIVIA; }
+  const idx = TRIVIA.indexOf(available[Math.floor(Math.random()*available.length)]);
+  usedTrivia.add(idx);
+  const trivia = TRIVIA[idx];
+
+  state.currentTrivia = { trivia, idx };
+  state.currentSquareId = sq.id;
+  state.answerGiven = false;
+
+  document.getElementById('modal-title').textContent = `${sq.emoji} ${sq.name}`;
+  document.getElementById('modal-subtitle').textContent = state.coins >= 100
+    ? 'ענה נכון וקנה את המשבצת ב-100 מטבעות! (+100 נקודות)'
+    : 'ענה נכון! (אין מספיק מטבעות לקנות)';
+  document.getElementById('modal-question').textContent = trivia.q;
+  document.getElementById('modal-fact').style.display = 'none';
+  document.getElementById('modal-continue-btn').style.display = 'none';
+
+  const optionsEl = document.getElementById('modal-options');
+  optionsEl.innerHTML = '';
+  trivia.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => answerTrivia(i, btn);
+    optionsEl.appendChild(btn);
+  });
+
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function answerTrivia(chosen, btn) {
+  if (state.answerGiven) return;
+  state.answerGiven = true;
+
+  const { trivia } = state.currentTrivia;
+  const correct = chosen === trivia.correct;
+
+  // Mark buttons
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === trivia.correct) b.classList.add('correct');
+    else if (b === btn && !correct) b.classList.add('wrong');
+  });
+
+  // Show fact
+  const factEl = document.getElementById('modal-fact');
+  factEl.textContent = '💡 ' + trivia.fact;
+  factEl.style.display = 'block';
+
+  if (correct) {
+    playCorrect();
+    if (state.coins >= 100) {
+      state.coins -= 100;
+      state.coins += 100; // net 0 cost but gain square + points
+      state.ownedSquares[state.currentSquareId] = true;
+      state.points += 100;
+      addLog(`✅ קנית: ${SQUARES[state.position].emoji} ${SQUARES[state.position].name}! +100 נקודות`, 'good');
+      showPopup('✅ נכון! קנית את המשבצת! 🎉', '#10b981');
+    } else {
+      state.points += 50;
+      addLog(`✅ תשובה נכונה! +50 נקודות (אין מטבעות לקנייה)`, 'good');
+    }
+    updateStats();
+    renderOwnership();
+  } else {
+    playWrong();
+    const rent = 50;
+    state.coins = Math.max(0, state.coins - rent);
+    addLog(`❌ תשובה שגויה! -${rent} מטבעות`, 'bad');
+    showPopup(`❌ לא נכון! -${rent} מטבעות`, '#ef4444');
+    updateStats();
+  }
+
+  document.getElementById('modal-continue-btn').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+  endTurn();
+}
+
+// ===== TURN =====
+function endTurn() {
+  if (state.round >= state.maxRounds) {
+    setTimeout(showGameOver, 800);
+    return;
+  }
+  state.round++;
+  updateStats();
+  document.getElementById('roll-btn').disabled = false;
+  document.getElementById('center-msg').textContent = 'לחצו להטיל קוביה!';
+  document.getElementById('dice-display').textContent = '🎲';
+}
+
+// ===== GAME OVER =====
+function showGameOver() {
+  const totalScore = state.points + state.coins;
+  const ownedCount = Object.keys(state.ownedSquares).length;
+
+  let grade = '⭐';
+  let msg = 'כל הכבוד על המשחק!';
+  if (totalScore >= 2000) { grade = '🏆👑'; msg = 'מדהים! אלוף/ת אמיתי/ת של פורים ופסח!'; }
+  else if (totalScore >= 1500) { grade = '🥇🎭'; msg = 'מצוין! אתה מכיר את החגים מצוין!'; }
+  else if (totalScore >= 1000) { grade = '🥈🎉'; msg = 'יפה מאוד! עוד קצת ותהיה מומחה!'; }
+  else if (totalScore >= 500) { grade = '🥉✨'; msg = 'טוב! יש עוד מה ללמוד על החגים!'; }
+  else { grade = '🎗️'; msg = 'נסה שוב ולמד עוד על פורים ופסח!'; }
+
+  document.getElementById('go-grade').textContent = grade;
+  document.getElementById('go-score').textContent = `ניקוד סופי: ${totalScore} | משבצות: ${ownedCount} | מטבעות: ${state.coins}`;
+  document.getElementById('go-msg').textContent = msg;
+  document.getElementById('gameover-screen').style.display = 'flex';
+
+  // Fireworks via playTone
+  [523,659,784,880,1047,1319].forEach((f,i)=>setTimeout(()=>playTone(f,0.3,'sine',0.4),i*200));
+}
+
+function restartGame() {
+  state = {
+    coins: 500, points: 0, round: 1, position: 0,
+    ownedSquares: {}, rolling: false, answerGiven: false,
+    currentTrivia: null, currentSquareId: null, maxRounds: 15
+  };
+  usedTrivia.clear();
+  document.getElementById('gameover-screen').style.display = 'none';
+  document.getElementById('modal-overlay').classList.add('hidden');
+  document.getElementById('event-log').innerHTML = '';
+  buildBoard();
+  renderOwnership();
+  updateStats();
+  addLog('🎮 משחק חדש התחיל! בהצלחה!', 'good');
+}
+
+// ===== INIT =====
+buildBoard();
+renderOwnership();
+updateStats();
+addLog('🎮 ברוכים הבאים למונופול פורים-פסח! 🎭🫓', 'good');
+addLog('🪙 התחלת עם 500 מטבעות. בהצלחה!', '');
+</script>
+</body>
+</html>

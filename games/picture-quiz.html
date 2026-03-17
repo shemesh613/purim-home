@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>חידון תמונות 🖼️</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+      min-height: 100vh;
+      direction: rtl;
+      overflow-x: hidden;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      color: white;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(217,119,6,0.4);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header h1 { font-size: 1.4rem; font-weight: 900; }
+    .back-btn {
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.5);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.35); }
+
+    /* PROGRESS BAR */
+    .progress-area {
+      padding: 16px 20px 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #92400e;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .progress-bar-bg {
+      background: #fde68a;
+      border-radius: 20px;
+      height: 12px;
+      overflow: hidden;
+      border: 2px solid #fbbf24;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #fbbf24, #f59e0b, #d97706);
+      border-radius: 20px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    /* SCORE / STREAK */
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      padding: 12px 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .stat-pill {
+      background: white;
+      border: 2px solid #fbbf24;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #92400e;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-pill .val { color: #d97706; font-size: 1.1rem; }
+    .streak-fire { font-size: 1.1rem; }
+
+    /* QUESTION CARD */
+    .question-card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      margin: 8px 16px 16px;
+      max-width: 568px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 6px 24px rgba(217,119,6,0.15);
+      border: 2px solid #fde68a;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .question-num {
+      font-size: 0.8rem;
+      color: #a16207;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .question-text {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #78350f;
+      margin-bottom: 16px;
+    }
+
+    /* IMAGE */
+    .sticker-img {
+      width: 100%;
+      max-width: 280px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 16px;
+      border: 3px solid #fbbf24;
+      box-shadow: 0 4px 14px rgba(251,191,36,0.4);
+      margin: 0 auto 20px;
+      display: block;
+      background: #fef3c7;
+      transition: transform 0.2s;
+    }
+    .sticker-img:hover { transform: scale(1.02); }
+
+    /* ANSWER BUTTONS */
+    .answers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .answer-btn {
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border: 2.5px solid #fbbf24;
+      border-radius: 14px;
+      padding: 14px 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #78350f;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Heebo', sans-serif;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .answer-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border-color: #d97706;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(217,119,6,0.25);
+    }
+    .answer-btn:disabled { cursor: default; }
+    .answer-btn.correct {
+      background: linear-gradient(135deg, #dcfce7, #bbf7d0) !important;
+      border-color: #22c55e !important;
+      color: #14532d !important;
+      animation: correctFlash 0.5s ease;
+    }
+    .answer-btn.wrong {
+      background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+      border-color: #ef4444 !important;
+      color: #7f1d1d !important;
+      animation: wrongShake 0.4s ease;
+    }
+    @keyframes correctFlash {
+      0%   { transform: scale(1); }
+      30%  { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+    @keyframes wrongShake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-6px); }
+      60%      { transform: translateX(6px); }
+    }
+
+    /* FEEDBACK */
+    .feedback-text {
+      margin-top: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      min-height: 24px;
+      transition: opacity 0.3s;
+    }
+    .feedback-text.correct-msg { color: #15803d; }
+    .feedback-text.wrong-msg   { color: #dc2626; }
+
+    /* CONFETTI CANVAS */
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* END SCREEN */
+    .end-screen {
+      display: none;
+      text-align: center;
+      padding: 20px 16px 40px;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .end-screen.show { display: block; }
+    .end-trophy {
+      font-size: 5rem;
+      margin-bottom: 10px;
+      animation: trophySpin 1s ease;
+    }
+    @keyframes trophySpin {
+      from { transform: rotate(-15deg) scale(0.5); opacity: 0; }
+      to   { transform: rotate(0deg) scale(1); opacity: 1; }
+    }
+    .end-title {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #78350f;
+      margin-bottom: 6px;
+    }
+    .end-subtitle { font-size: 1rem; color: #a16207; margin-bottom: 24px; }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .score-box {
+      background: white;
+      border: 2px solid #fbbf24;
+      border-radius: 16px;
+      padding: 14px 8px;
+      box-shadow: 0 3px 10px rgba(217,119,6,0.12);
+    }
+    .score-box .label { font-size: 0.75rem; color: #a16207; font-weight: 600; }
+    .score-box .number { font-size: 1.8rem; font-weight: 900; color: #d97706; }
+
+    .end-buttons { display: flex; flex-direction: column; gap: 12px; }
+    .btn-primary {
+      background: linear-gradient(135deg, #fbbf24, #d97706);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: 'Heebo', sans-serif;
+      box-shadow: 0 4px 14px rgba(217,119,6,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(217,119,6,0.5); }
+    .btn-secondary {
+      background: white;
+      color: #92400e;
+      border: 2.5px solid #fbbf24;
+      border-radius: 16px;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Heebo', sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: #fef3c7; }
+
+    /* CREDIT */
+    .credit {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #a16207;
+      padding: 20px 16px 10px;
+      opacity: 0.8;
+    }
+
+    /* LOADING */
+    #loading-screen {
+      position: fixed; inset: 0;
+      background: #fffbeb;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s;
+    }
+    #loading-screen .loader-emoji { font-size: 4rem; animation: pulse 1s infinite alternate; }
+    #loading-screen p { font-size: 1.1rem; color: #92400e; font-weight: 700; margin-top: 12px; }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
+
+    /* RESPONSIVE */
+    @media (max-width: 400px) {
+      .answers-grid { grid-template-columns: 1fr; }
+      .score-grid   { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="loader-emoji">🖼️</div>
+  <p>טוען חידון תמונות...</p>
+</div>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>🖼️ חידון תמונות</h1>
+  <a class="back-btn" href="../index.html">← חזרה</a>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-area" id="game-ui">
+  <div class="progress-info">
+    <span id="progress-label">שאלה 1 מתוך 15</span>
+    <span id="streak-label">🔥 רצף: 0</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row" id="stats-row">
+  <div class="stat-pill">⭐ ניקוד: <span class="val" id="score-display">0</span></div>
+  <div class="stat-pill">✅ נכון: <span class="val" id="correct-display">0</span></div>
+  <div class="stat-pill">❌ טעות: <span class="val" id="wrong-display">0</span></div>
+</div>
+
+<!-- QUESTION CARD -->
+<div class="question-card" id="question-card">
+  <div class="question-num" id="q-num">שאלה 1 / 15</div>
+  <div class="question-text">מה רואים בתמונה? 🤔</div>
+  <img class="sticker-img" id="sticker-img" src="" alt="תמונה לזיהוי" />
+  <div class="answers-grid" id="answers-grid"></div>
+  <div class="feedback-text" id="feedback-text"></div>
+</div>
+
+<!-- END SCREEN -->
+<div class="end-screen" id="end-screen">
+  <div class="end-trophy" id="end-trophy">🏆</div>
+  <div class="end-title" id="end-title">כל הכבוד!</div>
+  <div class="end-subtitle" id="end-subtitle">סיימת את החידון</div>
+
+  <div class="score-grid">
+    <div class="score-box">
+      <div class="label">ניקוד</div>
+      <div class="number" id="end-score">0</div>
+    </div>
+    <div class="score-box">
+      <div class="label">דיוק</div>
+      <div class="number" id="end-accuracy">0%</div>
+    </div>
+    <div class="score-box">
+      <div class="label">רצף מקסימלי</div>
+      <div class="number" id="end-streak">0</div>
+    </div>
+  </div>
+
+  <div class="end-buttons">
+    <button class="btn-primary" id="share-btn" onclick="shareWhatsApp()">📤 שתף בוואטסאפ</button>
+    <button class="btn-primary" onclick="restartGame()">🔄 משחק חדש</button>
+    <button class="btn-secondary" onclick="window.location.href='../index.html'">🏠 חזרה לבית</button>
+  </div>
+</div>
+
+<div class="credit">🎨 רעיון: לביא | 💡 הוגש דרך כפתור הרעיונות</div>
+
+<script>
+// ===== DATA =====
+const ALL_STICKERS = [
+  {theme:'purim',name:'המלכה קוראת במגילה',desc:'המלכה אסתר קוראת במגילת אסתר.',row:0,col:0},
+  {theme:'purim',name:'הצדיק מתפלל',desc:'מרדכי מתפלל לישועה בשער המלך.',row:0,col:1},
+  {theme:'purim',name:'ילדים בתחפושות',desc:'ילדים בתחפושות צבעוניות.',row:0,col:2},
+  {theme:'purim',name:'שולחן עם מאכלים',desc:'שולחן חגיגי עם אוזני המן.',row:1,col:0},
+  {theme:'purim',name:'נגנים מנגנים',desc:'תזמורת חגיגית מנגנת.',row:1,col:1},
+  {theme:'purim',name:'מתנות לאביונים',desc:'אנשים נותנים מתנות לנזקקים.',row:1,col:2},
+  {theme:'purim',name:'משפחה קוראת',desc:'משפחה קוראת את סיפור הפורים.',row:2,col:0},
+  {theme:'purim',name:'ילדים עם רעשנים',desc:'ילדים מרעישים ברעשנים.',row:2,col:1},
+  {theme:'purim',name:'תהלוכה חגיגית',desc:'תהלוכת פורים צבעונית.',row:2,col:2},
+  {theme:'pesach',name:'מעבר בים',desc:'משפחות הולכות דרך הים שנחצה.',row:0,col:0},
+  {theme:'pesach',name:'נושאי המצות',desc:'אנשים נושאים מצות ביציאה ממצרים.',row:0,col:1},
+  {theme:'pesach',name:'ליל הסדר',desc:'משפחה סביב שולחן הסדר.',row:0,col:2},
+  {theme:'pesach',name:'ילדים שואלים',desc:'ילדים שואלים ארבע שאלות.',row:1,col:0},
+  {theme:'pesach',name:'המנהיג עם המטה',desc:'משה רבנו מוביל את העם.',row:1,col:1},
+  {theme:'pesach',name:'שירה ותופים',desc:'נשים שרות אחרי חציית הים.',row:1,col:2},
+  {theme:'pesach',name:'בונים במדבר',desc:'בני ישראל בונים את המשכן.',row:2,col:0},
+  {theme:'pesach',name:'חיפוש חמץ',desc:'ילדים מחפשים חמץ עם נר.',row:2,col:1},
+  {theme:'pesach',name:'זריחת החירות',desc:'שקיעה זהובה — סמל לחירות.',row:2,col:2},
+  {theme:'heroes',name:'שמירה על הגבול',desc:'חיילים שומרים על הגבול.',row:0,col:0},
+  {theme:'heroes',name:'חובשים מצילים',desc:'חובשים מטפלים בפצועים.',row:0,col:1},
+  {theme:'heroes',name:'מתנדבים אורזים',desc:'מתנדבים אורזים חבילות מזון.',row:0,col:2},
+  {theme:'heroes',name:'סרטים צהובים',desc:'ילדים קושרים סרטים צהובים.',row:1,col:0},
+  {theme:'heroes',name:'מורה עם תלמידים',desc:'מורה מלמדת ילדים.',row:1,col:1},
+  {theme:'heroes',name:'כבאים מצילים',desc:'כבאים מצילים חתול.',row:1,col:2},
+  {theme:'gooddeeds',name:'עזרה לקשיש',desc:'ילד עוזר לסבתא.',row:0,col:0},
+  {theme:'gooddeeds',name:'חבילות לחיילים',desc:'ילדים אורזים חבילות אהבה.',row:0,col:1},
+  {theme:'gooddeeds',name:'ביקור חולים',desc:'ילדים מביאים פרחים לחולים.',row:0,col:2},
+  {theme:'gooddeeds',name:'תרומת בגדים',desc:'משפחה תורמת בגדים.',row:1,col:0},
+  {theme:'gooddeeds',name:'עזרה בשיעורים',desc:'תלמידה עוזרת לקטנים.',row:1,col:1},
+  {theme:'gooddeeds',name:'ניקוי חוף',desc:'ילדים מנקים חוף ים.',row:1,col:2}
+];
+
+const TOTAL_QUESTIONS = 15;
+
+// ===== STATE =====
+let questions = [];
+let currentQ = 0;
+let score = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let streak = 0;
+let maxStreak = 0;
+let answered = false;
+let audioCtx = null;
+
+// ===== AUDIO =====
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playCorrect() {
+  try {
+    const ctx = getAudioCtx();
+    const freqs = [523, 659, 784, 1047];
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.18, ctx.currentTime + i * 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.3);
+      osc.start(ctx.currentTime + i * 0.1);
+      osc.stop(ctx.currentTime + i * 0.1 + 0.35);
+    });
+  } catch(e){}
+}
+function playWrong() {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(200, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.4);
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.5);
+  } catch(e){}
+}
+
+// ===== CONFETTI =====
+const canvas = document.getElementById('confetti-canvas');
+const ctx2 = canvas.getContext('2d');
+let confettiParticles = [];
+let animFrame = null;
+
+function launchConfetti() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ['#fbbf24','#f59e0b','#34d399','#60a5fa','#f472b6','#a78bfa','#fb7185'];
+  for (let i = 0; i < 80; i++) {
+    confettiParticles.push({
+      x: Math.random() * canvas.width,
+      y: -10,
+      size: Math.random() * 8 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      speedX: (Math.random() - 0.5) * 4,
+      speedY: Math.random() * 4 + 2,
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 8,
+      opacity: 1
+    });
+  }
+  if (!animFrame) animateConfetti();
+}
+
+function animateConfetti() {
+  ctx2.clearRect(0, 0, canvas.width, canvas.height);
+  confettiParticles = confettiParticles.filter(p => p.opacity > 0.05);
+  confettiParticles.forEach(p => {
+    p.x += p.speedX;
+    p.y += p.speedY;
+    p.rotation += p.rotSpeed;
+    if (p.y > canvas.height * 0.6) p.opacity -= 0.025;
+    ctx2.save();
+    ctx2.globalAlpha = p.opacity;
+    ctx2.translate(p.x, p.y);
+    ctx2.rotate(p.rotation * Math.PI / 180);
+    ctx2.fillStyle = p.color;
+    ctx2.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+    ctx2.restore();
+  });
+  if (confettiParticles.length > 0) {
+    animFrame = requestAnimationFrame(animateConfetti);
+  } else {
+    animFrame = null;
+    ctx2.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+// ===== SHUFFLE =====
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ===== INIT GAME =====
+function initGame() {
+  questions = shuffle(ALL_STICKERS).slice(0, TOTAL_QUESTIONS);
+  currentQ = 0; score = 0; correctCount = 0; wrongCount = 0;
+  streak = 0; maxStreak = 0; answered = false;
+  updateStats();
+  document.getElementById('end-screen').classList.remove('show');
+  document.getElementById('game-ui').style.display = '';
+  document.getElementById('stats-row').style.display = '';
+  document.getElementById('question-card').style.display = '';
+  showQuestion();
+}
+
+// ===== SHOW QUESTION =====
+function showQuestion() {
+  answered = false;
+  const sticker = questions[currentQ];
+  const imgPath = `../sticker-album/images/${sticker.theme}-${sticker.row}-${sticker.col}.jpg`;
+
+  // Update progress
+  const pct = (currentQ / TOTAL_QUESTIONS) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `שאלה ${currentQ + 1} מתוך ${TOTAL_QUESTIONS}`;
+  document.getElementById('streak-label').textContent = `🔥 רצף: ${streak}`;
+  document.getElementById('q-num').textContent = `שאלה ${currentQ + 1} / ${TOTAL_QUESTIONS}`;
+
+  // Image
+  const img = document.getElementById('sticker-img');
+  img.style.opacity = '0';
+  img.src = imgPath;
+  img.onload = () => { img.style.transition = 'opacity 0.4s'; img.style.opacity = '1'; };
+  img.onerror = () => {
+    img.style.opacity = '1';
+    img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="280" height="200" viewBox="0 0 280 200"><rect fill="%23fef3c7" width="280" height="200"/><text x="140" y="100" text-anchor="middle" font-size="60">🖼️</text></svg>';
+  };
+
+  // Build answer options: 1 correct + 3 wrong
+  const allNames = ALL_STICKERS.map(s => s.name).filter(n => n !== sticker.name);
+  const wrongs = shuffle(allNames).slice(0, 3);
+  const options = shuffle([sticker.name, ...wrongs]);
+
+  const grid = document.getElementById('answers-grid');
+  grid.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = opt;
+    btn.onclick = () => handleAnswer(btn, opt, sticker.name);
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('feedback-text').textContent = '';
+  document.getElementById('feedback-text').className = 'feedback-text';
+}
+
+// ===== HANDLE ANSWER =====
+function handleAnswer(btn, chosen, correct) {
+  if (answered) return;
+  answered = true;
+
+  const allBtns = document.querySelectorAll('.answer-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  const isCorrect = chosen === correct;
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    streak++;
+    maxStreak = Math.max(maxStreak, streak);
+    const bonus = Math.min(streak - 1, 5) * 2;
+    const pts = 10 + bonus;
+    score += pts;
+    correctCount++;
+    playCorrect();
+    launchConfetti();
+    const feedback = document.getElementById('feedback-text');
+    feedback.className = 'feedback-text correct-msg';
+    const msgs = ['🎉 מצוין!', '⭐ כל הכבוד!', '🔥 נכון מאוד!', '✨ וואו!', '💪 יפה!'];
+    feedback.textContent = msgs[Math.floor(Math.random() * msgs.length)] + (bonus > 0 ? ` +${pts} נק' (בונוס רצף!)` : ` +${pts} נק'`);
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    wrongCount++;
+    playWrong();
+    // Reveal correct
+    allBtns.forEach(b => { if (b.textContent === correct) b.classList.add('correct'); });
+    const feedback = document.getElementById('feedback-text');
+    feedback.className = 'feedback-text wrong-msg';
+    feedback.textContent = `❌ לא נכון — התשובה הנכונה: ${correct}`;
+  }
+
+  updateStats();
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < TOTAL_QUESTIONS) {
+      showQuestion();
+    } else {
+      showEnd();
+    }
+  }, 1800);
+}
+
+// ===== UPDATE STATS =====
+function updateStats() {
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('correct-display').textContent = correctCount;
+  document.getElementById('wrong-display').textContent = wrongCount;
+  document.getElementById('streak-label').textContent = `🔥 רצף: ${streak}`;
+}
+
+// ===== SHOW END =====
+function showEnd() {
+  document.getElementById('game-ui').style.display = 'none';
+  document.getElementById('stats-row').style.display = 'none';
+  document.getElementById('question-card').style.display = 'none';
+  document.getElementById('end-screen').classList.add('show');
+
+  const accuracy = Math.round((correctCount / TOTAL_QUESTIONS) * 100);
+  document.getElementById('end-score').textContent = score;
+  document.getElementById('end-accuracy').textContent = accuracy + '%';
+  document.getElementById('end-streak').textContent = maxStreak;
+
+  // Trophy and title based on score
+  const trophy = document.getElementById('end-trophy');
+  const title = document.getElementById('end-title');
+  const subtitle = document.getElementById('end-subtitle');
+
+  if (accuracy >= 90) {
+    trophy.textContent = '🏆';
+    title.textContent = 'אלוף אמיתי!';
+    subtitle.textContent = 'ידע מדהים — אתה אלוף החידונים!';
+  } else if (accuracy >= 70) {
+    trophy.textContent = '🌟';
+    title.textContent = 'כל הכבוד!';
+    subtitle.textContent = 'תוצאה מעולה — המשך כך!';
+  } else if (accuracy >= 50) {
+    trophy.textContent = '👍';
+    title.textContent = 'לא רע!';
+    subtitle.textContent = 'תרגול נוסף יעזור לך להגיע לפסגה!';
+  } else {
+    trophy.textContent = '💪';
+    title.textContent = 'נסה שוב!';
+    subtitle.textContent = 'כל ניסיון מקרב אותך לניצחון!';
+  }
+
+  // Big confetti at end
+  setTimeout(launchConfetti, 200);
+  setTimeout(launchConfetti, 700);
+}
+
+// ===== WHATSAPP SHARE =====
+function shareWhatsApp() {
+  const accuracy = Math.round((correctCount / TOTAL_QUESTIONS) * 100);
+  const msg = `🖼️ חידון תמונות - פורים ועוד!\nניקוד: ${score} נקודות\nדיוק: ${accuracy}%\nרצף מקסימלי: ${maxStreak}\n🎮 שחק גם אתה!`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ===== RESTART =====
+function restartGame() {
+  document.getElementById('end-screen').classList.remove('show');
+  initGame();
+}
+
+// ===== START =====
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const ls = document.getElementById('loading-screen');
+    ls.style.opacity = '0';
+    setTimeout(() => { ls.style.display = 'none'; initGame(); }, 500);
+  }, 600);
+});
+
+window.addEventListener('resize', () => {
+  if (animFrame) { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+});
+</script>
+</body>
+</html>
