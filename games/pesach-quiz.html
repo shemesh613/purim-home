@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>❓ חידון פסח — יציאת מצרים!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❓</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@300;400;700;900&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: linear-gradient(180deg, #f0fdf4, #ecfeff);
+      color: #1e1b4b;
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 15px;
+      overflow-x: hidden;
+      transition: filter 0.1s, transform 0.1s;
+    }
+    .back-link {
+      position: fixed; top: 12px; right: 12px;
+      color: #0284c7; text-decoration: none;
+      font-size: 0.85rem; z-index: 100;
+      background: #fff; padding: 5px 12px;
+      border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(1.3rem, 4vw, 1.8rem);
+      color: #0284c7; text-align: center; margin: 4px 0 3px;
+    }
+
+    /* Progress */
+    .progress-bar {
+      width: 100%; max-width: 600px; height: 8px;
+      background: #bae6fd; border-radius: 6px;
+      margin: 6px 0; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 6px;
+      background: linear-gradient(90deg, #0284c7, #059669, #fbbf24, #22c55e, #3b82f6);
+      background-size: 400% 100%;
+      animation: progShimmer 3s linear infinite;
+      transition: width 0.5s;
+    }
+    @keyframes progShimmer { 0% { background-position: 400% 0; } 100% { background-position: -400% 0; } }
+
+    /* Top bar */
+    .top-bar {
+      display: flex; gap: 8px; align-items: center;
+      margin-bottom: 8px; font-size: 0.85rem;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .score-box {
+      background: linear-gradient(135deg, #fbbf24, #f97316);
+      color: #fff; padding: 6px 18px; border-radius: 12px;
+      font-weight: 900; font-size: 1.2rem;
+      box-shadow: 0 3px 12px rgba(251,191,36,0.4);
+      transition: transform 0.3s;
+    }
+    .score-box.bump { animation: scoreBump 0.5s ease-out; }
+    @keyframes scoreBump { 0% { transform: scale(1); } 30% { transform: scale(1.4) rotate(5deg); } 60% { transform: scale(1.1) rotate(-3deg); } 100% { transform: scale(1); } }
+
+    .streak-box {
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      color: #fff; padding: 6px 16px; border-radius: 12px;
+      font-weight: 900; font-size: 1.1rem;
+      box-shadow: 0 3px 12px rgba(239,68,68,0.4);
+      display: none;
+    }
+    .streak-box.active { display: block; animation: streakFire 0.4s ease-out; }
+    @keyframes streakFire {
+      0% { transform: scale(0.5) rotate(-10deg); }
+      60% { transform: scale(1.2) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    /* COMBO display (huge!) */
+    .combo-display {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(4rem, 15vw, 8rem);
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(251,191,36,0.8), 0 0 60px rgba(236,72,153,0.6), 0 5px 15px rgba(0,0,0,0.3);
+      pointer-events: none;
+      z-index: 200;
+      opacity: 0;
+      display: none;
+    }
+    .combo-display.active {
+      display: block;
+      animation: comboShow 1.2s ease-out forwards;
+    }
+    @keyframes comboShow {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(-20deg); }
+      20% { opacity: 1; transform: translate(-50%, -50%) scale(1.5) rotate(10deg); }
+      40% { transform: translate(-50%, -50%) scale(1.2) rotate(-5deg); }
+      60% { transform: translate(-50%, -50%) scale(1.3) rotate(3deg); }
+      80% { opacity: 1; transform: translate(-50%, -50%) scale(1.1) rotate(0deg); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(2) rotate(0deg); }
+    }
+
+    /* Question card */
+    .question-card {
+      background: #fff; border-radius: 20px;
+      padding: 18px; max-width: 600px; width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      position: relative; overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .question-card.rainbow-border {
+      animation: rainbowBorder 1s ease-out;
+    }
+    @keyframes rainbowBorder {
+      0% { box-shadow: 0 0 0 4px #ef4444, 0 4px 24px rgba(0,0,0,0.08); }
+      15% { box-shadow: 0 0 0 4px #f97316, 0 4px 24px rgba(0,0,0,0.08); }
+      30% { box-shadow: 0 0 0 4px #fbbf24, 0 4px 24px rgba(0,0,0,0.08); }
+      45% { box-shadow: 0 0 0 4px #22c55e, 0 4px 24px rgba(0,0,0,0.08); }
+      60% { box-shadow: 0 0 0 4px #3b82f6, 0 4px 24px rgba(0,0,0,0.08); }
+      75% { box-shadow: 0 0 0 4px #8b5cf6, 0 4px 24px rgba(0,0,0,0.08); }
+      90% { box-shadow: 0 0 0 4px #059669, 0 4px 24px rgba(0,0,0,0.08); }
+      100% { box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    }
+
+    .question-emoji { font-size: 2.5rem; margin-bottom: 6px; }
+    .question-text {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(1.05rem, 3vw, 1.3rem);
+      color: #1e1b4b; line-height: 1.5; margin-bottom: 14px;
+    }
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    @media (max-width: 500px) { .options { grid-template-columns: 1fr; gap: 6px; } }
+    .option-btn {
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.95rem; padding: 10px 14px;
+      border: 2px solid #bae6fd; background: #faf5ff;
+      color: #0c4a6e; border-radius: 14px;
+      cursor: pointer; transition: all 0.3s;
+      text-align: center; font-weight: 600;
+      position: relative; overflow: hidden;
+    }
+    .option-btn:hover:not(.disabled) {
+      border-color: #0284c7; background: #ede9fe;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(124,58,237,0.15);
+    }
+    .option-btn.correct {
+      border-color: #22c55e; background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #166534;
+      animation: correctBounce 0.6s ease-out;
+      box-shadow: 0 0 20px rgba(34,197,94,0.3);
+    }
+    @keyframes correctBounce { 0% { transform: scale(1); } 30% { transform: scale(1.12) rotate(2deg); } 60% { transform: scale(1.05) rotate(-1deg); } 100% { transform: scale(1); } }
+    .option-btn.wrong {
+      border-color: #ef4444; background: #fef2f2; color: #991b1b;
+      animation: wrongShake 0.5s ease-out;
+    }
+    @keyframes wrongShake {
+      0%,100% { transform: translateX(0); }
+      10% { transform: translateX(-12px) rotate(-2deg); }
+      30% { transform: translateX(12px) rotate(2deg); }
+      50% { transform: translateX(-8px) rotate(-1deg); }
+      70% { transform: translateX(8px) rotate(1deg); }
+      90% { transform: translateX(-4px); }
+    }
+    .option-btn.disabled { pointer-events: none; opacity: 0.45; }
+    .option-btn.disabled.correct { opacity: 1; }
+
+    .feedback {
+      margin-top: 10px; font-size: 0.9rem;
+      min-height: 1.5em; line-height: 1.4;
+      padding: 8px 10px; border-radius: 12px;
+    }
+    .feedback.correct-fb { background: linear-gradient(135deg, #dcfce7, #d1fae5); color: #166534; }
+    .feedback.wrong-fb { background: #fef2f2; color: #991b1b; }
+
+    .next-btn {
+      font-family: 'Heebo', sans-serif;
+      padding: 10px 30px; border: none;
+      background: linear-gradient(135deg, #0284c7, #059669);
+      color: #fff; border-radius: 12px;
+      cursor: pointer; font-size: 0.95rem; font-weight: 700;
+      margin-top: 14px; display: none;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(124,58,237,0.3);
+    }
+    .next-btn.visible { display: inline-block; animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .next-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(124,58,237,0.4); }
+
+    /* ══════════ MEGA EFFECTS ══════════ */
+    .effect-layer {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 150;
+      overflow: hidden;
+    }
+
+    /* Flying emoji */
+    .flying-emoji {
+      position: absolute; font-size: 3rem;
+      animation: flyUp var(--dur, 1.5s) ease-out forwards;
+      pointer-events: none; z-index: 151;
+    }
+    @keyframes flyUp {
+      0% { transform: translateY(0) scale(0.3) rotate(0deg); opacity: 1; }
+      50% { opacity: 1; }
+      100% { transform: translateY(var(--fly, -400px)) scale(var(--sc, 1.5)) rotate(var(--rot, 30deg)); opacity: 0; }
+    }
+
+    /* Confetti particles */
+    .conf-p {
+      position: absolute;
+      width: var(--s, 8px); height: var(--s, 8px);
+      border-radius: var(--br, 50%);
+      background: var(--c);
+      animation: confBurst var(--cd, 1.2s) ease-out forwards;
+    }
+    @keyframes confBurst {
+      0% { transform: translate(0,0) scale(1) rotate(0deg); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--cr, 360deg)); opacity: 0; }
+    }
+
+    /* Screen effects */
+    .screen-flash {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 140;
+      animation: screenFlash 0.4s ease-out forwards;
+    }
+    @keyframes screenFlash { 0% { opacity: 0.6; } 100% { opacity: 0; } }
+
+    /* Rainbow wave overlay */
+    .rainbow-wave {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 139;
+      background: linear-gradient(45deg,
+        rgba(255,0,0,0.15), rgba(255,165,0,0.15),
+        rgba(255,255,0,0.15), rgba(0,255,0,0.15),
+        rgba(0,0,255,0.15), rgba(128,0,128,0.15));
+      background-size: 600% 600%;
+      animation: rainbowWave 0.8s ease-out forwards;
+    }
+    @keyframes rainbowWave {
+      0% { background-position: 0% 50%; opacity: 0.8; }
+      50% { background-position: 100% 50%; opacity: 0.5; }
+      100% { background-position: 200% 50%; opacity: 0; }
+    }
+
+    /* Score float */
+    .score-float {
+      position: fixed; z-index: 200;
+      font-size: 2.5rem; font-weight: 900;
+      pointer-events: none;
+      text-shadow: 0 2px 15px rgba(0,0,0,0.3);
+      animation: scoreFloat 1.2s ease-out forwards;
+    }
+    @keyframes scoreFloat {
+      0% { transform: translateY(0) scale(0.5) rotate(-10deg); opacity: 1; }
+      40% { transform: translateY(-40px) scale(1.5) rotate(5deg); opacity: 1; }
+      100% { transform: translateY(-120px) scale(1) rotate(0deg); opacity: 0; }
+    }
+
+    /* Flying text */
+    .flying-text {
+      position: fixed; z-index: 200;
+      font-family: 'Frank Ruhl Libre', serif;
+      font-weight: 900;
+      pointer-events: none;
+      text-shadow: 0 3px 15px rgba(0,0,0,0.3);
+      animation: flyingText 1.5s ease-out forwards;
+    }
+    @keyframes flyingText {
+      0% { transform: translate(-50%, -50%) scale(0) rotate(-30deg); opacity: 0; }
+      20% { transform: translate(-50%, -50%) scale(1.8) rotate(10deg); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.3) rotate(-5deg); opacity: 1; }
+      100% { transform: translate(-50%, calc(-50% - 80px)) scale(0.8) rotate(0deg); opacity: 0; }
+    }
+
+    /* Wrong X */
+    .wrong-x {
+      position: fixed; z-index: 200;
+      font-size: 6rem; pointer-events: none;
+      animation: wrongX 0.7s ease-out forwards;
+    }
+    @keyframes wrongX {
+      0% { transform: translate(-50%,-50%) scale(0) rotate(0deg); opacity: 1; }
+      40% { transform: translate(-50%,-50%) scale(1.3) rotate(15deg); opacity: 1; }
+      100% { transform: translate(-50%,-50%) scale(0.8) rotate(-5deg); opacity: 0; }
+    }
+
+    /* Firework */
+    .firework-burst { position: fixed; pointer-events: none; z-index: 155; }
+    .fw-p {
+      position: absolute;
+      width: var(--fws, 5px); height: var(--fws, 5px);
+      border-radius: 50%;
+      animation: fwPop var(--fwd, 1s) ease-out forwards;
+    }
+    @keyframes fwPop {
+      0% { transform: translate(0,0) scale(1.5); opacity: 1; }
+      60% { opacity: 1; }
+      100% { transform: translate(var(--fx), var(--fy)) scale(0); opacity: 0; }
+    }
+
+    /* Star spin */
+    .star-spin {
+      position: fixed; pointer-events: none; z-index: 160;
+      font-size: 4rem;
+      animation: starSpin 1.5s ease-out forwards;
+    }
+    @keyframes starSpin {
+      0% { transform: translate(-50%,-50%) scale(0) rotate(0deg); opacity: 1; }
+      30% { transform: translate(-50%,-50%) scale(1.5) rotate(360deg); opacity: 1; }
+      100% { transform: translate(-50%,-50%) scale(0.3) rotate(1080deg); opacity: 0; }
+    }
+
+    /* Results */
+    .results {
+      text-align: center; display: none;
+      max-width: 600px; width: 100%;
+      background: #fff; border-radius: 24px;
+      padding: 35px; box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .results.active { display: block; }
+    .results-emoji { font-size: 5rem; margin: 15px 0; animation: bounce 1s ease-in-out infinite; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    .results-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2.4rem; color: #0284c7; }
+    .results-score { font-size: 1.3rem; color: #6b7280; margin: 12px 0; line-height: 1.8; }
+    .results-message { font-size: 1rem; color: #9ca3af; margin-bottom: 20px; }
+    .results-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .res-btn {
+      font-family: 'Heebo', sans-serif;
+      padding: 12px 28px; border: none; border-radius: 14px;
+      cursor: pointer; font-size: 1rem; font-weight: 700;
+      transition: all 0.3s;
+    }
+    .res-btn:hover { transform: translateY(-3px); }
+    .res-btn.primary { background: linear-gradient(135deg, #0284c7, #059669); color: #fff; box-shadow: 0 4px 15px rgba(124,58,237,0.3); }
+    .res-btn.share { background: #25d366; color: #fff; }
+    .res-btn.home { background: #f3f4f6; color: #4b5563; }
+
+    /* ══ Sticker Collection ══ */
+    .sticker-bar { display:flex; align-items:center; gap:6px; background:linear-gradient(135deg,#fef3c7,#fde68a); padding:7px 14px; border-radius:14px; cursor:pointer; transition:all 0.3s; box-shadow:0 3px 10px rgba(251,191,36,0.3); border:2px solid rgba(251,191,36,0.4); animation:stickerPulse 3s ease-in-out infinite; }
+    .sticker-bar:hover { transform:translateY(-2px) scale(1.05); box-shadow:0 5px 16px rgba(251,191,36,0.4); }
+    @keyframes stickerPulse { 0%,100% { box-shadow:0 3px 10px rgba(251,191,36,0.3); } 50% { box-shadow:0 3px 16px rgba(251,191,36,0.5); } }
+    .sticker-bar .sb-label { font-size:0.9rem; font-weight:700; color:#92400e; }
+    .sticker-bar .sb-count { font-size:1.2rem; font-weight:900; color:#d97706; }
+    .sticker-bar .sb-icons { display:flex; gap:2px; font-size:1rem; }
+    @keyframes stickerPop { 0%{transform:translate(-50%,-50%) scale(0) rotate(-180deg);opacity:1} 40%{transform:translate(-50%,-50%) scale(1.6) rotate(10deg);opacity:1} 100%{transform:translate(-50%,-50%) scale(0.3) translateY(-80px);opacity:0} }
+    .sticker-fly { position:fixed; top:50%; left:50%; font-size:3.5rem; z-index:800; pointer-events:none; animation:stickerPop 1s ease-out forwards; }
+
+    /* ══ Sticker Album Overlay ══ */
+    .album-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:900; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+    .album-overlay.visible { display:flex; }
+    .album-box { background:#fff; border-radius:24px; padding:25px; max-width:420px; width:90%; max-height:80vh; overflow-y:auto; text-align:center; box-shadow:0 15px 50px rgba(0,0,0,0.2); }
+    .album-box h2 { font-family:'Frank Ruhl Libre',serif; font-size:1.6rem; color:#0284c7; margin-bottom:8px; }
+    .album-box .album-count { font-size:0.9rem; color:#9ca3af; margin-bottom:15px; }
+    .album-grid { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+    .album-cell { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; border:2px solid #bae6fd; background:#faf5ff; transition:all 0.3s; }
+    .album-cell.empty { opacity:0.2; border-color:#e5e7eb; background:#f9fafb; font-size:1rem; }
+    .album-close { margin-top:15px; padding:8px 24px; border:none; border-radius:10px; background:#f3f4f6; color:#4b5563; font-family:'Heebo'; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+    .album-close:hover { background:#e5e7eb; }
+
+    /* ══ Stage Overlay ══ */
+    .stage-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:950; display:none; align-items:center; justify-content:center; flex-direction:column; gap:12px; text-align:center; }
+    .stage-overlay.visible { display:flex; }
+    .stage-medal { font-size:5rem; animation:stageSpin 1.2s cubic-bezier(0.175,0.885,0.32,1.275); }
+    @keyframes stageSpin { 0%{transform:scale(0) rotate(-360deg)} 50%{transform:scale(1.3) rotate(10deg)} 100%{transform:scale(1) rotate(0)} }
+    .stage-title { font-family:'Frank Ruhl Libre',serif; font-size:1.8rem; color:#0284c7; }
+    .stage-sub { font-size:1rem; color:#9ca3af; }
+    .stage-stats { display:flex; gap:18px; }
+    .stage-stats .ss { text-align:center; }
+    .stage-stats .ss .sv { font-size:1.5rem; font-weight:900; display:block; }
+    .stage-stats .ss .sl { font-size:0.7rem; color:#9ca3af; }
+    .stage-next-btn { padding:14px 40px; border:none; border-radius:14px; font-size:1.1rem; font-weight:900; cursor:pointer; background:linear-gradient(135deg,#0284c7,#059669); color:#fff; font-family:'Heebo'; box-shadow:0 6px 20px rgba(124,58,237,0.3); transition:all 0.3s; }
+    .stage-next-btn:hover { transform:translateY(-3px); }
+
+    /* ══ Medal Tray ══ */
+    .medal-tray { position:fixed; top:80px; left:8px; z-index:100; display:none; flex-direction:column; gap:3px; align-items:center; }
+    .medal-tray.visible { display:flex; }
+    .medal-badge { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; background:#fff; border:2px solid #e5e7eb; opacity:0.3; filter:grayscale(1); transition:all 0.4s; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+    .medal-badge.earned { opacity:1; filter:none; border-color:#fbbf24; box-shadow:0 2px 8px rgba(251,191,36,0.3); }
+    .medal-badge.just-earned { animation:medalPop 0.7s cubic-bezier(0.175,0.885,0.32,1.275); }
+    @keyframes medalPop { 0%{transform:scale(0) rotate(-180deg)} 50%{transform:scale(1.4) rotate(10deg)} 100%{transform:scale(1) rotate(0)} }
+    .medal-count { font-size:0.65rem; font-weight:900; color:#d97706; background:#fef3c7; padding:2px 6px; border-radius:6px; margin-top:2px; }
+    @media(max-width:600px) { .medal-tray { display:none !important; } }
+  </style>
+</head>
+<body>
+
+<div class="effect-layer" id="effects"></div>
+<div class="combo-display" id="comboDisplay"></div>
+<a href="../index.html" class="back-link">→ חזרה</a>
+<h1>❓ חידון פסח</h1>
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+<div class="top-bar">
+  <span id="qNum" style="color:#9ca3af;">שאלה 1/20</span>
+  <div class="score-box" id="scoreBox">🏆 0</div>
+  <div class="streak-box" id="streakBox">🔥 רצף: 0</div>
+  <div class="sticker-bar" onclick="showAlbum()"><span class="sb-label">🎭 מדבקות:</span><span class="sb-count" id="stickerCount">0</span><span class="sb-icons" id="stickerIcons"></span></div>
+</div>
+
+<div class="question-card" id="questionCard">
+  <div class="question-emoji" id="qEmoji">📜</div>
+  <div class="question-text" id="qText">טוען...</div>
+  <div class="options" id="options"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="next-btn" id="nextBtn" onclick="nextQuestion()">השאלה הבאה ←</button>
+</div>
+
+<div class="results" id="results">
+  <div class="results-emoji" id="resEmoji">🏆</div>
+  <h2 class="results-title" id="resTitle">סיימתם!</h2>
+  <div class="results-score" id="resScore"></div>
+  <div class="results-message" id="resMsg"></div>
+  <div class="results-btns">
+    <button class="res-btn primary" onclick="startQuiz()">🔄 שחקו שוב!</button>
+    <button class="res-btn share" onclick="shareResult()">📱 שתפו</button>
+    <button class="res-btn home" onclick="location.href='../index.html'">🏠 חזרה</button>
+  </div>
+  <div id="resStickers" style="margin:15px 0;display:flex;flex-wrap:wrap;gap:4px;justify-content:center"></div>
+</div>
+
+<div class="medal-tray" id="medalTray"></div>
+<div class="stage-overlay" id="stageOverlay">
+  <div class="stage-medal" id="stageMedal">🥉</div>
+  <div class="stage-title" id="stageTitle"></div>
+  <div class="stage-sub" id="stageSub"></div>
+  <div class="stage-stats">
+    <div class="ss"><span class="sv" id="ssScore" style="color:#d97706">0</span><span class="sl">נקודות</span></div>
+    <div class="ss"><span class="sv" id="ssCorrect" style="color:#22c55e">0</span><span class="sl">נכונות</span></div>
+    <div class="ss"><span class="sv" id="ssStreak" style="color:#ef4444">0</span><span class="sl">רצף מקס׳</span></div>
+  </div>
+  <button class="stage-next-btn" onclick="continueAfterStage()">▶ המשך לשלב הבא!</button>
+</div>
+<div class="album-overlay" id="albumOverlay" onclick="if(event.target===this)closeAlbum()">
+  <div class="album-box">
+    <h2>🎭 אלבום המדבקות שלי</h2>
+    <div class="album-count" id="albumCount">אספתם 0 מדבקות!</div>
+    <div class="album-grid" id="albumGrid"></div>
+    <button class="album-close" onclick="closeAlbum()">סגור ✕</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { q: "כמה מכות הכה ה' את מצרים?", options: ["7", "10", "12", "40"], correct: 1, emoji: "⚡", fact: "עשר מכות! דם, צפרדע, כינים, ערוב, דבר, שחין, ברד, ארבה, חושך, מכת בכורות!" },
+  { q: "מי הוציא את בני ישראל ממצרים?", options: ["אברהם", "יוסף", "משה רבנו", "יהושע"], correct: 2, emoji: "🧔", fact: "משה רבנו הוביל את עם ישראל מעבדות לחירות!" },
+  { q: "כמה שנים היו בני ישראל במצרים?", options: ["40", "100", "210", "400"], correct: 2, emoji: "⏳", fact: "210 שנים! מיעקב ועד יציאת מצרים!" },
+  { q: "מה המכה הראשונה?", options: ["צפרדע", "דם", "חושך", "ברד"], correct: 1, emoji: "🩸", fact: "מכת דם — כל המים במצרים הפכו לדם!" },
+  { q: "למה אוכלים מצה בפסח?", options: ["כי זה טעים", "כי הבצק לא הספיק לתפוח", "בגלל משה", "מצווה בלבד"], correct: 1, emoji: "🫓", fact: "בני ישראל יצאו בחיפזון — הבצק לא הספיק להחמיץ!" },
+  { q: "כמה כוסות יין שותים בליל הסדר?", options: ["2", "3", "4", "5"], correct: 2, emoji: "🍷", fact: "ארבע כוסות — כנגד ארבע לשונות של גאולה!" },
+  { q: "מה שם הספר שקוראים בליל הסדר?", options: ["התורה", "ההגדה", "התלמוד", "המגילה"], correct: 1, emoji: "📖", fact: "הגדה של פסח — מספרת את סיפור יציאת מצרים!" },
+  { q: "מה המכה האחרונה?", options: ["חושך", "ברד", "מכת בכורות", "ארבה"], correct: 2, emoji: "💀", fact: "מכת בכורות — אחריה שילח פרעה את בני ישראל!" },
+  { q: "מה נקרע לבני ישראל?", options: ["הר סיני", "ים סוף", "נהר הירדן", "הכותל"], correct: 1, emoji: "🌊", fact: "ים סוף נקרע לשניים — בני ישראל עברו ביבשה!" },
+  { q: "כמה ימים חג הפסח?", options: ["1", "3", "7", "8"], correct: 2, emoji: "📅", fact: "שבעה ימים בארץ ישראל, שמונה בחו״ל!" },
+  { q: "מה המרור מסמל?", options: ["חירות", "שמחה", "מרירות העבדות", "אביב"], correct: 2, emoji: "🥬", fact: "המרור מזכיר את חיי המרירות של העבדות במצרים!" },
+  { q: "מה החרוסת מסמלת?", options: ["הטיט והלבנים", "פירות", "חירות", "הים"], correct: 0, emoji: "🍎", fact: "חרוסת מסמלת את הטיט שממנו בנו בני ישראל לבנים!" },
+  { q: "מה הכרפס מסמל?", options: ["אביב", "עבדות קשה", "חירות", "הים"], correct: 1, emoji: "🥒", fact: "הכרפס מסמל את העבודה הקשה — טובלים במי מלח כמו דמעות!" },
+  { q: "מה הזרוע בקערת הסדר?", options: ["עצם של כבש", "ירק", "ביצה", "מצה"], correct: 0, emoji: "🦴", fact: "הזרוע מסמלת את קרבן הפסח שהקריבו בבית המקדש!" },
+  { q: "מה הביצה בקערת הסדר מסמלת?", options: ["אביב", "קרבן חגיגה", "חירות", "משה"], correct: 1, emoji: "🥚", fact: "הביצה מסמלת את קרבן החגיגה ואת האבל על חורבן המקדש!" },
+  { q: "מה שם אחותו של משה?", options: ["שרה", "מרים", "רחל", "דבורה"], correct: 1, emoji: "👩", fact: "מרים הנביאה — שמרה על משה ביאור ושרה שירה בים!" },
+  { q: "מה שם אחיו של משה?", options: ["יהושע", "אהרון", "כלב", "פנחס"], correct: 1, emoji: "👨", fact: "אהרון הכהן — היה דובר משה ועזר לו מול פרעה!" },
+  { q: "מה מחביאים בליל הסדר?", options: ["ביצה", "כרפס", "אפיקומן", "כוס אליהו"], correct: 2, emoji: "🔍", fact: "האפיקומן — חצי מצה שהילדים מחפשים ומקבלים פרס!" },
+  { q: "למי פותחים את הדלת בסוף הסדר?", options: ["לשכנים", "לאליהו הנביא", "למשה", "לפרעה"], correct: 1, emoji: "🚪", fact: "פותחים את הדלת לאליהו הנביא ומוזגים לו כוס יין!" },
+  { q: "מה אומרים בסוף ליל הסדר?", options: ["שלום!", "לשנה הבאה בירושלים!", "תודה!", "חג שמח!"], correct: 1, emoji: "🏛️", fact: "לשנה הבאה בירושלים הבנויה! — תקווה לגאולה שלמה!" },
+  { q: "באיזה חודש חל פסח?", options: ["תשרי", "אדר", "ניסן", "אייר"], correct: 2, emoji: "🌸", fact: "חודש ניסן — חודש האביב והגאולה!" },
+  { q: "מה עושים בערב פסח?", options: ["ישנים", "בודקים חמץ", "אופים עוגות", "צמים"], correct: 1, emoji: "🔦", fact: "בדיקת חמץ — מחפשים חמץ עם נר ונוצה!" },
+  { q: "מה אסור לאכול בפסח?", options: ["ירקות", "בשר", "חמץ", "פירות"], correct: 2, emoji: "🚫", fact: "חמץ — לחם, עוגות, פסטה וכל מה שתופח!" },
+  { q: "מה שם שירת הים?", options: ["הלל", "אז ישיר", "שיר השירים", "שיר המעלות"], correct: 1, emoji: "🎵", fact: "'אז ישיר משה' — שירה גדולה אחרי קריעת ים סוף!" },
+  { q: "כמה בני ישראל יצאו ממצרים?", options: ["1,000", "60,000", "600,000 גברים", "מיליון"], correct: 2, emoji: "👥", fact: "שש מאות אלף גברים — ועם נשים וילדים הרבה יותר!" }
+];
+
+const BONUS_QUESTIONS = [
+  { q: "מה שם אמו של משה?", options: ["מרים", "שרה", "יוכבד", "ציפורה"], correct: 2, emoji: "👩‍👦", fact: "יוכבד — הסתירה את משה שלושה חודשים מפני פרעה!" },
+  { q: "מי הציל את משה מהיאור?", options: ["מרים", "בתיה בת פרעה", "ציפורה", "שרה"], correct: 1, emoji: "👸", fact: "בתיה בת פרעה — גידלה את משה בארמון!" },
+  { q: "מה ראה משה בסנה?", options: ["מלאך", "סנה בוער ואינו אוכל", "עמוד ענן", "קשת"], correct: 1, emoji: "🔥", fact: "הסנה בער באש אבל לא נשרף — נס!" },
+  { q: "מי היו שפרה ופועה?", options: ["נשות משה", "מיילדות עבריות", "בנות פרעה", "נביאות"], correct: 1, emoji: "👶", fact: "שפרה ופועה סירבו להרוג תינוקות — גיבורות!" },
+  { q: "כמה שנים נדדו בני ישראל במדבר?", options: ["7", "20", "40", "70"], correct: 2, emoji: "🏜️", fact: "40 שנה במדבר — עד שנכנסו לארץ ישראל!" },
+  { q: "מה ירד משמיים במדבר?", options: ["גשם", "מן", "כוכבים", "שלג"], correct: 1, emoji: "✨", fact: "המן — לחם מהשמיים שטעמו ככל מה שרצית!" },
+  { q: "איפה קיבלו את התורה?", options: ["בירושלים", "בהר סיני", "במצרים", "בבבל"], correct: 1, emoji: "⛰️", fact: "הר סיני — שם קיבל משה את עשרת הדברות!" },
+  { q: "מה הדבר הראשון בעשרת הדברות?", options: ["לא תרצח", "אנוכי ה' אלוקיך", "כבד את אביך", "לא תגנוב"], correct: 1, emoji: "📋", fact: "אנוכי ה' אלוקיך אשר הוצאתיך מארץ מצרים!" }
+];
+
+const ALL_QUESTIONS = [...QUESTIONS, ...BONUS_QUESTIONS];
+
+let currentQ = 0, score = 0, streak = 0, maxStreak = 0, answered = false, shuffledQ = [];
+let stickerCount = 0, stickers = [], correctCount = 0, currentStage = 1;
+const PESACH_STICKERS = ['🎭','👑','📜','🍷','🎪','🎉','🎊','🕍','🔯','🌟','💫','🎵','🕎','🛡️','⚔️','🦁','🐴','👸','🤴','🧙','🃏','🎯','💎','🪙','🏆','🥇','🎁','🍬','🍪','🍩','🎂','🫓','🏰','📯','🪘','🎺','✡️','🫒','🕊️','🔥'];
+const BONUS_STICKERS = ['🇮🇱','✈️','🛩️','🚀','🛡️','⚔️','🦅','💪','🕊️','✡️','🎖️','🏅'];
+const MEDALS = [
+  {id:'first',i:'⭐',t:'תשובה ראשונה!'},{id:'s3',i:'🔥',t:'רצף 3!'},{id:'s5',i:'⚡',t:'רצף 5!'},
+  {id:'s7',i:'🌟',t:'רצף 7!'},{id:'s10',i:'🏆',t:'רצף 10!'},{id:'p50',i:'💰',t:'50 נקודות'},
+  {id:'p100',i:'💯',t:'100 נקודות'},{id:'p200',i:'💎',t:'200 נקודות'},{id:'p300',i:'👑',t:'300 נקודות'},
+  {id:'stage1',i:'🥉',t:'שלב 1'},{id:'stage2',i:'🥈',t:'שלב 2'},{id:'stage3',i:'🥇',t:'שלב 3'},{id:'stage4',i:'🏅',t:'שלב 4'},{id:'stage5',i:'🇮🇱',t:'שלב מיוחד — ונהפוך הוא!'}
+];
+let earnedMedals = new Set();
+const effectsEl = document.getElementById('effects');
+
+function initMedals() {
+  const tray = document.getElementById('medalTray'); tray.innerHTML = '';
+  MEDALS.forEach(m => {
+    const el = document.createElement('div'); el.className = 'medal-badge'; el.id = 'medal_'+m.id;
+    el.textContent = m.i; el.title = m.t; tray.appendChild(el);
+  });
+  const c = document.createElement('div'); c.className = 'medal-count'; c.id = 'medalCount'; c.textContent = '0/'+MEDALS.length;
+  tray.appendChild(c); tray.classList.add('visible');
+}
+function earnMedal(id) {
+  if (earnedMedals.has(id)) return; earnedMedals.add(id);
+  const el = document.getElementById('medal_'+id);
+  if (el) { el.classList.add('earned','just-earned'); setTimeout(()=>el.classList.remove('just-earned'),2000); }
+  document.getElementById('medalCount').textContent = earnedMedals.size+'/'+MEDALS.length;
+}
+function checkMedals() {
+  if (correctCount===1) earnMedal('first');
+  if (streak>=3) earnMedal('s3'); if (streak>=5) earnMedal('s5');
+  if (streak>=7) earnMedal('s7'); if (streak>=10) earnMedal('s10');
+  if (score>=50) earnMedal('p50'); if (score>=100) earnMedal('p100');
+  if (score>=200) earnMedal('p200'); if (score>=300) earnMedal('p300');
+}
+function awardSticker() {
+  const isWarStage = currentQ >= QUESTIONS.length;
+  const pool = isWarStage ? BONUS_STICKERS : PESACH_STICKERS;
+  const s = pool[stickerCount % pool.length];
+  stickerCount++; stickers.push(s);
+  document.getElementById('stickerCount').textContent = stickerCount;
+  const icons = document.getElementById('stickerIcons');
+  if (stickers.length <= 5) icons.textContent = stickers.slice(-5).join('');
+  else icons.textContent = stickers.slice(-3).join('') + '...';
+  const el = document.createElement('div'); el.className = 'sticker-fly'; el.textContent = s;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),1100);
+}
+function showAlbum() {
+  const grid = document.getElementById('albumGrid'); grid.innerHTML = '';
+  stickers.forEach(s => { const c=document.createElement('div');c.className='album-cell';c.textContent=s;grid.appendChild(c); });
+  for (let i=0;i<Math.max(0,40-stickers.length);i++) { const c=document.createElement('div');c.className='album-cell empty';c.textContent='❓';grid.appendChild(c); }
+  document.getElementById('albumCount').textContent = 'אספתם '+stickerCount+' מדבקות!';
+  document.getElementById('albumOverlay').classList.add('visible');
+}
+function closeAlbum() { document.getElementById('albumOverlay').classList.remove('visible'); }
+function showStageComplete(stageNum, isWarStage) {
+  const medals=['🥉','🥈','🥇','🏅','🇮🇱'], names=['שלב ראשון','שלב שני','שלב שלישי','שלב רביעי','שלב מיוחד — ונהפוך הוא!'];
+  const subs=['מתחממים! 🔥','כבר בקצב! ⚡','כמעט שם! 💪','עכשיו הסיפור של הדור שלנו!','עם ישראל חי! 🇮🇱💪'];
+  const idx = isWarStage ? 4 : stageNum - 1;
+  document.getElementById('stageMedal').textContent=medals[idx]||'🏅';
+  document.getElementById('stageTitle').textContent=names[idx]+' '+(isWarStage?'':'הושלם! ')+medals[idx];
+  document.getElementById('stageSub').textContent=subs[idx]||'';
+  document.getElementById('ssScore').textContent=score;
+  document.getElementById('ssCorrect').textContent=correctCount;
+  document.getElementById('ssStreak').textContent=maxStreak;
+  document.getElementById('stageOverlay').classList.add('visible');
+  earnMedal('stage'+(isWarStage?5:stageNum));
+  if (isWarStage) {
+    FX.emojiRain(['🇮🇱','✡️','🛡️','⚔️','✈️','🦅','💪','🕊️'],25); FX.starSpin(8);
+  } else {
+    FX.emojiRain(['🎉','⭐','🏆','✨','👑'],15); FX.starSpin(5);
+  }
+  playVictoryFanfare();
+  currentStage=(isWarStage?5:stageNum)+1;
+}
+function continueAfterStage() { document.getElementById('stageOverlay').classList.remove('visible'); showQuestion(); }
+
+// ══════════ AUDIO ENGINE ══════════
+let audioCtx = null;
+function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+
+function playCorrectSound(streakLevel) {
+  const ctx = getAudio(), now = ctx.currentTime;
+  // Base melody gets more epic with streak
+  const baseFreqs = [523.25, 659.25, 783.99];
+  const epicFreqs = [523.25, 659.25, 783.99, 1046.5];
+  const megaFreqs = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+  const freqs = streakLevel >= 5 ? megaFreqs : streakLevel >= 3 ? epicFreqs : baseFreqs;
+  const vol = Math.min(0.2, 0.1 + streakLevel * 0.02);
+
+  freqs.forEach((freq, i) => {
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = streakLevel >= 5 ? 'triangle' : streakLevel >= 3 ? 'square' : 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, now + i * 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.4);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.4);
+  });
+
+  // Bass drop for big streaks
+  if (streakLevel >= 4) {
+    const bass = ctx.createOscillator(), bassGain = ctx.createGain();
+    bass.type = 'sine'; bass.frequency.setValueAtTime(80, now);
+    bass.frequency.exponentialRampToValueAtTime(40, now + 0.5);
+    bassGain.gain.setValueAtTime(0.3, now);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    bass.connect(bassGain); bassGain.connect(ctx.destination);
+    bass.start(now); bass.stop(now + 0.5);
+  }
+}
+
+function playWrongSound() {
+  const ctx = getAudio(), now = ctx.currentTime;
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.type = 'sawtooth'; osc.frequency.setValueAtTime(250, now);
+  osc.frequency.linearRampToValueAtTime(80, now + 0.4);
+  gain.gain.setValueAtTime(0.08, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(now); osc.stop(now + 0.4);
+}
+
+function playVictoryFanfare() {
+  const ctx = getAudio(), now = ctx.currentTime;
+  [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568].forEach((freq, i) => {
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.15, now + i * 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.6);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.6);
+  });
+}
+
+// ══════════ MEGA EFFECTS ENGINE ══════════
+const FX = {
+  // Emoji rain — dozens of emojis flying from everywhere
+  emojiRain(emojis, count, opts = {}) {
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'flying-emoji';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      const size = 1.5 + Math.random() * 2.5;
+      const x = Math.random() * 100;
+      const fly = -(200 + Math.random() * 500);
+      const dur = 1 + Math.random() * 1.5;
+      const rot = Math.random() * 90 - 45;
+      el.style.cssText = `
+        left:${x}%; bottom:${opts.fromTop ? 'auto' : '10%'};
+        ${opts.fromTop ? 'top: -50px;' : ''}
+        font-size:${size}rem;
+        --fly:${fly}px; --sc:${0.8 + Math.random()}; --rot:${rot}deg; --dur:${dur}s;
+        animation-delay:${Math.random() * 0.8}s;
+      `;
+      effectsEl.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 1) * 1000);
+    }
+  },
+
+  // Confetti burst — from a point
+  confettiBurst(x, y, count = 40) {
+    const colors = ['#fbbf24','#059669','#0284c7','#3b82f6','#22c55e','#ef4444','#f97316','#06b6d4','#e879f9'];
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'conf-p';
+      const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
+      const dist = 80 + Math.random() * 180;
+      const size = Math.random() * 10 + 4;
+      p.style.cssText = `
+        left:${x}px; top:${y}px;
+        --c:${colors[Math.floor(Math.random()*colors.length)]};
+        --s:${size}px; --br:${Math.random() > 0.5 ? '50%' : '2px'};
+        --tx:${Math.cos(angle)*dist}px; --ty:${Math.sin(angle)*dist}px;
+        --cr:${Math.random()*720}deg; --cd:${0.8 + Math.random()*0.6}s;
+      `;
+      effectsEl.appendChild(p);
+      setTimeout(() => p.remove(), 1600);
+    }
+  },
+
+  // Particle explosion — hundreds of tiny particles
+  particleExplosion(x, y, count = 150) {
+    const colors = ['#fbbf24','#059669','#0284c7','#22c55e','#ef4444','#f97316','#3b82f6'];
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'conf-p';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 30 + Math.random() * 250;
+      p.style.cssText = `
+        left:${x}px; top:${y}px;
+        --c:${colors[Math.floor(Math.random()*colors.length)]};
+        --s:${Math.random() * 6 + 2}px; --br:50%;
+        --tx:${Math.cos(angle)*dist}px; --ty:${Math.sin(angle)*dist}px;
+        --cr:${Math.random()*360}deg; --cd:${0.5 + Math.random()*1}s;
+      `;
+      effectsEl.appendChild(p);
+      setTimeout(() => p.remove(), 1800);
+    }
+  },
+
+  // Firework — big beautiful burst
+  firework(x, y, size = 'normal') {
+    const fw = document.createElement('div');
+    fw.className = 'firework-burst';
+    fw.style.left = x + 'px'; fw.style.top = y + 'px';
+    const colors = ['#fbbf24','#059669','#0284c7','#22c55e','#ef4444','#f97316','#06b6d4','#e879f9'];
+    const count = size === 'mega' ? 60 : size === 'big' ? 40 : 24;
+    const dist = size === 'mega' ? 120 : size === 'big' ? 80 : 50;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'fw-p';
+      const angle = (i / count) * Math.PI * 2;
+      const d = dist + Math.random() * (dist * 0.5);
+      p.style.cssText = `
+        background:${colors[i%colors.length]};
+        --fx:${Math.cos(angle)*d}px; --fy:${Math.sin(angle)*d}px;
+        --fws:${Math.random()*5+3}px; --fwd:${0.6+Math.random()*0.6}s;
+      `;
+      fw.appendChild(p);
+    }
+    effectsEl.appendChild(fw);
+    setTimeout(() => fw.remove(), 1500);
+  },
+
+  // Screen flash
+  flash(color) {
+    const el = document.createElement('div');
+    el.className = 'screen-flash';
+    el.style.background = color;
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 500);
+  },
+
+  // Rainbow wave
+  rainbowWave() {
+    const el = document.createElement('div');
+    el.className = 'rainbow-wave';
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  },
+
+  // Screen shake
+  shake(intensity = 1) {
+    const dur = 300 + intensity * 100;
+    const str = 3 + intensity * 4;
+    let start = null;
+    function frame(time) {
+      if (!start) start = time;
+      const elapsed = time - start;
+      if (elapsed < dur) {
+        const decay = 1 - elapsed / dur;
+        const x = (Math.random() - 0.5) * str * decay * 2;
+        const y = (Math.random() - 0.5) * str * decay * 2;
+        const r = (Math.random() - 0.5) * decay * 2;
+        document.body.style.transform = `translate(${x}px, ${y}px) rotate(${r}deg)`;
+        requestAnimationFrame(frame);
+      } else {
+        document.body.style.transform = '';
+      }
+    }
+    requestAnimationFrame(frame);
+  },
+
+  // Score float
+  scoreFloat(points, x, y) {
+    const el = document.createElement('div');
+    el.className = 'score-float';
+    el.textContent = `+${points}`;
+    el.style.cssText = `left:${x || '50%'}; top:${y || '40%'}; color:#fbbf24;`;
+    if (typeof x !== 'string') el.style.transform = 'translateX(-50%)';
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 1300);
+  },
+
+  // Flying Hebrew text
+  flyingText(text, opts = {}) {
+    const el = document.createElement('div');
+    el.className = 'flying-text';
+    el.textContent = text;
+    el.style.cssText = `
+      left:${opts.x || '50%'}; top:${opts.y || '50%'};
+      font-size:${opts.size || 'clamp(2rem, 8vw, 4rem)'};
+      color:${opts.color || '#fbbf24'};
+    `;
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 1800);
+  },
+
+  // Star spin
+  starSpin(count = 3) {
+    const stars = ['⭐','🌟','✨','💫'];
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'star-spin';
+      el.textContent = stars[Math.floor(Math.random() * stars.length)];
+      el.style.cssText = `
+        left:${20 + Math.random()*60}%; top:${20 + Math.random()*60}%;
+        animation-delay:${i * 0.15}s;
+      `;
+      effectsEl.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }
+  },
+
+  // Camera flash (white)
+  cameraFlash() {
+    const el = document.createElement('div');
+    el.className = 'screen-flash';
+    el.style.background = '#fff';
+    el.style.animation = 'screenFlash 0.15s ease-out forwards';
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 200);
+  },
+
+  // Bass drop zoom
+  bassDrop() {
+    document.body.style.transition = 'transform 0.15s ease-out';
+    document.body.style.transform = 'scale(1.08)';
+    setTimeout(() => {
+      document.body.style.transform = 'scale(0.97)';
+      setTimeout(() => {
+        document.body.style.transition = 'transform 0.3s ease-out';
+        document.body.style.transform = '';
+      }, 100);
+    }, 150);
+  },
+
+  // Combo display (huge text in center)
+  showCombo(streak) {
+    const el = document.getElementById('comboDisplay');
+    const texts = {
+      3: '🔥 רצף 3!',
+      4: '💥 רצף 4!!',
+      5: '⚡ COMBO x5!!!',
+      6: '🌟 MEGA x6!!!!',
+      7: '👑 ULTRA x7!!!!!',
+      8: '💎 INSANE x8!!!!!!',
+      9: '🔮 LEGENDARY x9!!!!!!!',
+      10: '🏆 GODLIKE x10!!!!!!!!'
+    };
+    el.textContent = texts[Math.min(streak, 10)] || `🔥 x${streak}!!!!`;
+    el.classList.remove('active');
+    void el.offsetWidth;
+    el.classList.add('active');
+    setTimeout(() => el.classList.remove('active'), 1300);
+  },
+
+  // Wrong X
+  wrongX() {
+    const el = document.createElement('div');
+    el.className = 'wrong-x';
+    el.textContent = '❌';
+    el.style.cssText = 'left:50%; top:45%;';
+    effectsEl.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+  },
+
+  // Victory dance — ultimate celebration
+  victoryDance() {
+    // Multi-firework cascade
+    for (let i = 0; i < 12; i++) {
+      setTimeout(() => {
+        this.firework(
+          Math.random() * window.innerWidth,
+          Math.random() * window.innerHeight * 0.7,
+          i % 3 === 0 ? 'mega' : 'big'
+        );
+      }, i * 250);
+    }
+    // Massive emoji rain
+    this.emojiRain(['🎉','🏆','⭐','🎭','👑','🎊','✨','💫','🌟','🥳','🎶','💃'], 40);
+    // Particle explosions
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        this.particleExplosion(
+          Math.random() * window.innerWidth,
+          Math.random() * window.innerHeight * 0.6,
+          100
+        );
+      }, i * 400);
+    }
+    // Star spins
+    this.starSpin(8);
+    // Rainbow
+    this.rainbowWave();
+    setTimeout(() => this.rainbowWave(), 500);
+    // Camera flashes
+    setTimeout(() => this.cameraFlash(), 200);
+    setTimeout(() => this.cameraFlash(), 800);
+    // Flying texts
+    this.flyingText('!כל הכבוד', { size: 'clamp(3rem, 10vw, 6rem)', color: '#fbbf24' });
+    setTimeout(() => this.flyingText('!מדהים', { size: 'clamp(2.5rem, 8vw, 5rem)', color: '#059669', y: '60%' }), 600);
+    setTimeout(() => this.flyingText('🎭 פורים שמח', { size: 'clamp(2rem, 7vw, 4rem)', color: '#22c55e', y: '40%' }), 1200);
+  }
+};
+
+// ══════════ STREAK-BASED EFFECT LEVELS ══════════
+function triggerCorrectEffects(streakLevel, btnRect) {
+  const cx = btnRect.left + btnRect.width / 2;
+  const cy = btnRect.top;
+  const wx = window.innerWidth;
+  const wy = window.innerHeight;
+
+  // LEVEL 1: Basic (streak 1) — confetti + emojis + flash + sound
+  FX.flash('rgba(34,197,94,0.25)');
+  FX.confettiBurst(cx, cy, 30);
+  FX.emojiRain(['⭐','🎉','✨','👑'], 6);
+  FX.scoreFloat(10 + (streakLevel > 1 ? streakLevel * 5 : 0), '50%', '40%');
+  playCorrectSound(streakLevel);
+
+  if (streakLevel < 2) return;
+
+  // LEVEL 2: Streak 2 — add firework + more emojis
+  FX.firework(wx * 0.3, wy * 0.3);
+  FX.emojiRain(['⭐','🎉','🏆','✨','👑','🎭','🎊'], 10);
+  FX.shake(1);
+
+  if (streakLevel < 3) return;
+
+  // LEVEL 3: Streak 3 — COMBO display + rainbow + star spin + double firework
+  FX.showCombo(streakLevel);
+  FX.rainbowWave();
+  FX.starSpin(3);
+  setTimeout(() => FX.firework(wx * 0.7, wy * 0.4, 'big'), 200);
+  FX.flyingText('!נכון', { color: '#22c55e', size: 'clamp(2rem, 6vw, 3.5rem)' });
+  document.getElementById('questionCard').classList.add('rainbow-border');
+  setTimeout(() => document.getElementById('questionCard').classList.remove('rainbow-border'), 1200);
+
+  if (streakLevel < 4) return;
+
+  // LEVEL 4: Streak 4 — bass drop + particle explosion + camera flash
+  FX.bassDrop();
+  FX.particleExplosion(wx / 2, wy / 2, 100);
+  FX.cameraFlash();
+  FX.emojiRain(['🔥','🔥','💥','💥','⚡','⚡'], 15);
+
+  if (streakLevel < 5) return;
+
+  // LEVEL 5+: MEGA — everything maxed out
+  FX.showCombo(streakLevel);
+  FX.shake(Math.min(streakLevel - 3, 4));
+  FX.particleExplosion(wx * 0.3, wy * 0.3, 80);
+  FX.particleExplosion(wx * 0.7, wy * 0.5, 80);
+  FX.flyingText(streakLevel >= 7 ? '!!!LEGENDARY' : '!!!MEGA', {
+    color: '#059669',
+    size: 'clamp(2.5rem, 10vw, 5rem)',
+    y: '35%'
+  });
+
+  // Triple fireworks
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => FX.firework(
+      Math.random() * wx,
+      Math.random() * wy * 0.5,
+      'mega'
+    ), i * 150);
+  }
+
+  // Extra emoji tsunami for insane streaks
+  if (streakLevel >= 7) {
+    FX.emojiRain(['🔥','⚡','💎','🌟','👑','🏆','💫','🎆','🎇'], 30);
+    setTimeout(() => FX.cameraFlash(), 300);
+    setTimeout(() => FX.rainbowWave(), 400);
+  }
+
+  if (streakLevel >= 10) {
+    FX.victoryDance();
+  }
+}
+
+// ══════════ GAME LOGIC ══════════
+function shuffle(a) { const b=[...a]; for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];} return b; }
+
+function startQuiz() {
+  shuffledQ = [...shuffle(QUESTIONS), ...shuffle(BONUS_QUESTIONS)];
+  currentQ = 0; score = 0; streak = 0; maxStreak = 0; answered = false;
+  stickerCount = 0; stickers = []; correctCount = 0; currentStage = 1; earnedMedals = new Set();
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('questionCard').style.display = 'block';
+  document.getElementById('scoreBox').textContent = '🏆 0';
+  document.getElementById('streakBox').classList.remove('active');
+  document.getElementById('stickerCount').textContent = '0';
+  document.getElementById('stickerIcons').textContent = '';
+  initMedals();
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = shuffledQ[currentQ]; answered = false;
+  document.getElementById('progress').style.width = `${(currentQ/shuffledQ.length)*100}%`;
+  const purimLen = QUESTIONS.length;
+  const warLen = BONUS_QUESTIONS.length;
+  const purimStageSize = Math.ceil(purimLen / 4);
+  let stageNum, stageName;
+  if (currentQ < purimLen) {
+    stageNum = Math.floor(currentQ / purimStageSize) + 1;
+    const stageNames = ['שלב א׳','שלב ב׳','שלב ג׳','שלב ד׳'];
+    stageName = stageNames[stageNum-1] || '';
+  } else {
+    stageNum = 5;
+    stageName = '🇮🇱 שלב מיוחד — ונהפוך הוא!';
+  }
+  document.getElementById('qNum').textContent = `${stageName} | שאלה ${currentQ+1}/${shuffledQ.length}`;
+  document.getElementById('qEmoji').textContent = q.emoji;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextBtn').classList.remove('visible');
+
+  const optionsEl = document.getElementById('options');
+  optionsEl.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(i, btn);
+    optionsEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(index, clickedBtn) {
+  if (answered) return;
+  answered = true;
+
+  const q = shuffledQ[currentQ];
+  const buttons = document.querySelectorAll('.option-btn');
+  const feedbackEl = document.getElementById('feedback');
+  const scoreBox = document.getElementById('scoreBox');
+  const streakBox = document.getElementById('streakBox');
+  const rect = clickedBtn.getBoundingClientRect();
+
+  buttons.forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === q.correct) btn.classList.add('correct');
+  });
+
+  if (index === q.correct) {
+    // ═══ CORRECT! GO ABSOLUTELY INSANE! ═══
+    streak++; correctCount++;
+    if (streak > maxStreak) maxStreak = streak;
+    const points = 10 + (streak > 1 ? streak * 5 : 0);
+    score += points;
+    awardSticker(); checkMedals();
+
+    clickedBtn.classList.add('correct');
+
+    // Feedback text
+    let streakText = '';
+    if (streak >= 10) streakText = `<b>🏆💎 GODLIKE! רצף ${streak}! +${points} נקודות!</b>`;
+    else if (streak >= 7) streakText = `<b>⚡👑 LEGENDARY! רצף ${streak}! +${points} נקודות!</b>`;
+    else if (streak >= 5) streakText = `<b>🔥💥 MEGA COMBO! רצף ${streak}! +${points} נקודות!</b>`;
+    else if (streak >= 3) streakText = `<b>🔥 רצף ${streak}! +${points} נקודות!</b>`;
+    else if (streak >= 2) streakText = `<b>רצף ${streak}! +${points}</b>`;
+    feedbackEl.innerHTML = `✅ נכון! ${streakText}<br>💡 ${q.fact}`;
+    feedbackEl.className = 'feedback correct-fb';
+
+    // Update score with animation
+    scoreBox.textContent = `🏆 ${score}`;
+    scoreBox.classList.remove('bump');
+    void scoreBox.offsetWidth;
+    scoreBox.classList.add('bump');
+
+    // Streak display
+    if (streak >= 2) {
+      const fireEmojis = streak >= 7 ? '💎⚡🔥' : streak >= 5 ? '⚡🔥🔥' : streak >= 3 ? '🔥🔥' : '🔥';
+      streakBox.textContent = `${fireEmojis} רצף: ${streak}`;
+      streakBox.classList.remove('active');
+      void streakBox.offsetWidth;
+      streakBox.classList.add('active');
+    }
+
+    // TRIGGER MEGA EFFECTS
+    triggerCorrectEffects(streak, rect);
+
+  } else {
+    // ═══ WRONG ═══
+    streak = 0;
+    clickedBtn.classList.add('wrong');
+    feedbackEl.innerHTML = `❌ לא נכון! 💡 ${q.fact}`;
+    feedbackEl.className = 'feedback wrong-fb';
+    streakBox.classList.remove('active');
+
+    playWrongSound();
+    FX.flash('rgba(239,68,68,0.2)');
+    FX.wrongX();
+    FX.shake(1);
+  }
+
+  document.getElementById('nextBtn').classList.add('visible');
+}
+
+function nextQuestion() {
+  currentQ++;
+  const purimLen = QUESTIONS.length;
+  const purimStageSize = Math.ceil(purimLen / 4);
+  // Check purim stage boundaries (stages 1-4)
+  if (currentQ < purimLen && currentQ > 0 && currentQ % purimStageSize === 0) {
+    showStageComplete(Math.floor(currentQ / purimStageSize));
+    return;
+  }
+  // Transition to special war stage
+  if (currentQ === purimLen) {
+    showStageComplete(4, true);
+    return;
+  }
+  if (currentQ >= shuffledQ.length) showResults();
+  else showQuestion();
+}
+
+function showResults() {
+  document.getElementById('questionCard').style.display = 'none';
+  document.getElementById('progress').style.width = '100%';
+
+  let emoji, title, msg;
+  if (score >= shuffledQ.length * 12) { emoji = '🏆'; title = 'גאון הפסח!'; msg = 'מדהים! אתם מומחי מגילה אמיתיים!'; }
+  else if (score >= shuffledQ.length * 8) { emoji = '⭐'; title = 'כל הכבוד!'; msg = 'ידע מרשים! חכמי הפסח!'; }
+  else if (score >= shuffledQ.length * 5) { emoji = '👍'; title = 'לא רע בכלל!'; msg = 'נסו שוב לשיא חדש!'; }
+  else { emoji = '📖'; title = 'יש מה ללמוד!'; msg = 'קראו את המגילה ונסו שוב!'; }
+
+  document.getElementById('resEmoji').textContent = emoji;
+  document.getElementById('resTitle').textContent = title;
+  document.getElementById('resScore').innerHTML = `🏆 ${score} נקודות<br>🔥 רצף שיא: ${maxStreak}<br>⭐ ${Math.round((score / (shuffledQ.length * 15)) * 100)}% הצלחה<br>🎭 ${stickerCount} מדבקות נאספו!`;
+  document.getElementById('resStickers').innerHTML = stickers.map(s=>'<span style="font-size:1.4rem">'+s+'</span>').join('');
+  document.getElementById('medalTray').classList.remove('visible');
+  document.getElementById('resMsg').textContent = msg;
+  document.getElementById('results').classList.add('active');
+
+  // VICTORY CELEBRATION
+  playVictoryFanfare();
+  FX.victoryDance();
+}
+
+function shareResult() {
+  const text = `🎭 *חידון פסח — יציאת מצרים!*\n\n🏆 ${score} נקודות!\n🔥 רצף שיא: ${maxStreak}\n\nנסו גם!\n${window.location.href.split('/games/')[0]}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+startQuiz();
+</script>
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:100;background:linear-gradient(135deg,#0284c7,#6d28d9);padding:10px 16px;text-align:center;direction:rtl;">
+  <a href="../sticker-album/?quiz-reward=3" style="color:#fff;text-decoration:none;font-weight:700;font-size:0.9rem;">
+    🌟 רוצים חידון עם מדבקות? לחצו כאן! →
+  </a>
+</div>
+<!-- Analytics -->
+<script async src="https://cdn.counter.dev/script.js" data-id="shemesh613" data-utcoffset="2"></script>
+</body>
+</html>
