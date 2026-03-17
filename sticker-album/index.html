@@ -1361,7 +1361,7 @@ function checkQuizReward() {
   if (!reward || reward < 1 || reward > 5) return;
   if (!state.student) return;
   // Prevent double-reward on page refresh
-  const rewardKey = 'quiz-reward-' + Date.now().toString().slice(0,-4);
+  const rewardKey = 'quiz-reward-claimed';
   if (sessionStorage.getItem(rewardKey)) return;
   sessionStorage.setItem(rewardKey, '1');
 
@@ -1379,6 +1379,7 @@ function checkQuizReward() {
     updateStats();
     playSound('award');
     showToast(`🎓 כל הכבוד על החידון! קיבלת ${awarded} חלקי פאזל!`, 'gold');
+    if (state.student?.joinCode) studentCloudSync(state.student.joinCode);
   }
 }
 
@@ -1615,6 +1616,7 @@ function playSound(type) {
 }
 
 function handleDrop(cellIndex, data) {
+  const _scrollY = window.scrollY;
   const {sid, targetIndex, theme} = data;
   if (cellIndex === targetIndex) {
     // Correct placement!
@@ -1624,9 +1626,12 @@ function handleDrop(cellIndex, data) {
       state._lastPlaced = sid;
       state.points += 10;
       saveState();
+      // Immediate cloud sync for sticker placement (skip debounce)
+      if (state.student?.joinCode) studentCloudSync(state.student.joinCode);
       playSound('place');
       renderPuzzle(theme);
       updateStats();
+      requestAnimationFrame(() => window.scrollTo({top: _scrollY, behavior: 'instant'}));
       const s = STICKERS[theme].find(st => st.id === sid);
       showToast('✅ ' + s.name + ' שובץ נכון! +10 נקודות', 'success');
     }
