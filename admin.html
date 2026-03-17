@@ -251,6 +251,7 @@
     <h3>📋 מרחבים קיימים</h3>
     <div id="spacesList"><div class="empty-state">⏳ טוען...</div></div>
   </div>
+</div>  <!-- Feedback / Ideas -->  <div class="section-box">    <h3>💡 רעיונות ומשוב מגולשים</h3>    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">      <button class="btn btn-primary btn-sm" onclick="loadFeedback()">🔄 רענן</button>      <button class="btn btn-danger btn-sm" onclick="clearAllFeedback()">🗑️ מחק הכל</button>      <span id="fbCount" style="color:#94a3b8;font-size:.85rem;display:flex;align-items:center;margin-right:auto;">⏳</span>    </div>    <div id="feedbackList"><div class="empty-state">לחצו "רענן" לטעינה</div></div>  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -575,7 +576,76 @@ async function deleteSpace(code) {
 // Enter key for task input
 document.getElementById('adminTaskName').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') { e.preventDefault(); adminAddTask(); }
+
+// ══ Feedback Management ══
+const FB_FEEDBACK = "https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim-feedback";
+
+async function loadFeedback() {
+  const list = document.getElementById("feedbackList");
+  const count = document.getElementById("fbCount");
+  list.innerHTML = "<div class="empty-state">⏳ טוען...</div>";
+  try {
+    const res = await fetch(FB_FEEDBACK + ".json");
+    const data = await res.json();
+    if (!data) { list.innerHTML = "<div class="empty-state">📭 אין רעיונות עדיין</div>"; count.textContent = "0 רעיונות"; return; }
+    const items = Object.entries(data).map(([k,v]) => ({...v, _key: k})).sort((a,b) => (b.ts||0) - (a.ts||0));
+    count.textContent = items.length + " רעיונות";
+    list.innerHTML = items.map(fb => {
+      const d = fb.ts ? new Date(fb.ts) : null;
+      const dateStr = d ? d.toLocaleDateString("he-IL") + " " + d.toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"}) : "?";
+      return "<div class="fb-card">" +
+        "<button class="fb-del" onclick="deleteFeedback('" + fb._key + "')" title="מחק">✕</button>" +
+        "<div class="fb-name">👤 " + escHtml(fb.name || "אנונימי") + "</div>" +
+        "<div class="fb-text">" + escHtml(fb.text || "") + "</div>" +
+        "<div class="fb-meta"><span>📅 " + dateStr + "</span>" +
+        (fb.page ? "<span>📄 " + escHtml(fb.page) + "</span>" : "") +
+        "</div></div>";
+    }).join("");
+  } catch(e) { list.innerHTML = "<div class="empty-state">❌ שגיאה בטעינה</div>"; }
+}
+
+function escHtml(s) {
+  if (!s) return "";
+  var d = document.createElement("div"); d.textContent = s; return d.innerHTML;
+}
+
+async function deleteFeedback(key) {
+  if (!confirm("למחוק את הרעיון הזה?")) return;
+  try {
+    await fetch(FB_FEEDBACK + "/" + key + ".json", {method:"DELETE"});
+    toast("🗑️ נמחק");
+    loadFeedback();
+  } catch(e) { toast("❌ שגיאה"); }
+}
+
+async function clearAllFeedback() {
+  if (!confirm("⚠️ למחוק את כל הרעיונות? פעולה זו בלתי הפיכה!")) return;
+  try {
+    await fetch(FB_FEEDBACK + ".json", {method:"DELETE"});
+    toast("🗑️ כל הרעיונות נמחקו");
+    loadFeedback();
+  } catch(e) { toast("❌ שגיאה"); }
+}
+
+// Auto-load feedback when admin panel opens
+var origLogin = window.adminLogin;
+if (typeof origLogin === "function") {
+  var _origLogin = origLogin;
+  window.adminLogin = function() { _origLogin(); setTimeout(loadFeedback, 1000); };
+}
 });
 </script>
 </body>
 </html>
+<style>
+.fb-card{background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:14px;padding:16px;margin-bottom:10px;position:relative}
+.fb-card .fb-name{font-weight:700;color:#c084fc;font-size:.95rem}
+.fb-card .fb-text{color:#e2e8f0;margin:8px 0;line-height:1.6;font-size:.95rem}
+.fb-card .fb-meta{font-size:.75rem;color:#64748b;display:flex;justify-content:space-between;align-items:center}
+.fb-card .fb-del{position:absolute;top:10px;left:10px;background:none;border:none;color:#ef4444;cursor:pointer;font-size:1.1rem;opacity:.5;transition:opacity .2s}
+.fb-card .fb-del:hover{opacity:1}
+.fb-card .fb-score{display:inline-block;padding:2px 10px;border-radius:10px;font-size:.8rem;font-weight:900}
+.fb-card .fb-score.high{background:#065f46;color:#34d399}
+.fb-card .fb-score.mid{background:#713f12;color:#fbbf24}
+.fb-card .fb-score.low{background:#7f1d1d;color:#fca5a5}
+</style>
