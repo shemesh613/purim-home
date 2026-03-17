@@ -420,6 +420,21 @@ const ALL_STICKERS = [
 
 const TOTAL_QUESTIONS = 15;
 
+// ===== QUIZ IMAGE MAPPING (high-quality Gemini images) =====
+const QUIZ_IMAGES = {
+  'purim-0-0': 'quiz-images/purim-megila.png',
+  'purim-0-2': 'quiz-images/purim-costumes.png',
+  'purim-1-2': 'quiz-images/purim-mishloach.png',
+  'pesach-0-2': 'quiz-images/pesach-seder.png',
+  'pesach-0-0': 'quiz-images/pesach-sea.png',
+  'pesach-0-1': 'quiz-images/pesach-matzah.png',
+  'heroes-0-0': 'quiz-images/heroes-soldiers.png',
+  'heroes-0-1': 'quiz-images/heroes-medics.png',
+  'gooddeeds-0-0': 'quiz-images/gooddeeds-helping.png',
+  'gooddeeds-0-1': 'quiz-images/gooddeeds-packages.png',
+};
+
+
 // ===== STATE =====
 let questions = [];
 let currentQ = 0;
@@ -546,7 +561,8 @@ function initGame() {
 function showQuestion() {
   answered = false;
   const sticker = questions[currentQ];
-  const imgPath = `../sticker-album/images/${sticker.theme}-${sticker.row}-${sticker.col}.jpg`;
+  const stickerKey = `${sticker.theme}-${sticker.row}-${sticker.col}`;
+  const imgPath = QUIZ_IMAGES[stickerKey] ? QUIZ_IMAGES[stickerKey] : `../sticker-album/images/${stickerKey}.jpg`;
 
   // Update progress
   const pct = (currentQ / TOTAL_QUESTIONS) * 100;
