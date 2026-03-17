@@ -1141,6 +1141,28 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+// Quick reliable save of student sticker data via fetch+keepalive
+function quickBeaconSave() {
+  if (!state.student?.joinCode) return;
+  const member = state.admin?.members?.find(m => m.name === state.student.name);
+  if (!member) return;
+  if (!member.collected) member.collected = {};
+  for (const theme in state.collected) {
+    if (!member.collected[theme]) member.collected[theme] = [];
+    state.collected[theme].forEach(id => {
+      if (!member.collected[theme].includes(id)) member.collected[theme].push(id);
+    });
+  }
+  if (!member.stickers) member.stickers = [];
+  Object.values(state.collected).flat().forEach(id => {
+    if (!member.stickers.includes(id)) member.stickers.push(id);
+  });
+  const url = FIREBASE_URL + '/spaces/' + state.student.joinCode + '/studentSync/' + encodeURIComponent(member.name) + '.json';
+  try {
+    fetch(url, { method: 'PUT', keepalive: true, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(member) });
+  } catch(e) {}
+}
+
 // Last-chance sync when page is closing or hidden
 function emergencySync() {
   if (!state.student?.joinCode) return;
@@ -1379,7 +1401,7 @@ function checkQuizReward() {
     updateStats();
     playSound('award');
     showToast(`🎓 כל הכבוד על החידון! קיבלת ${awarded} חלקי פאזל!`, 'gold');
-    if (state.student?.joinCode) studentCloudSync(state.student.joinCode);
+    if (state.student?.joinCode) { quickBeaconSave(); studentCloudSync(state.student.joinCode); }
   }
 }
 
@@ -1627,7 +1649,7 @@ function handleDrop(cellIndex, data) {
       state.points += 10;
       saveState();
       // Immediate cloud sync for sticker placement (skip debounce)
-      if (state.student?.joinCode) studentCloudSync(state.student.joinCode);
+      if (state.student?.joinCode) { quickBeaconSave(); studentCloudSync(state.student.joinCode); }
       playSound('place');
       renderPuzzle(theme);
       updateStats();
@@ -2748,6 +2770,7 @@ function awardRandomPiece() {
   state.points += 5;
 
   showTabBadge(pick.theme);
+  quickBeaconSave();
   return pick;
 }
 
