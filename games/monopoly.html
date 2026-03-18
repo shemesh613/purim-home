@@ -301,7 +301,7 @@ async function syncLoop(){
   const rooms=await fetchRooms();if(!rooms||!rooms[roomCode])return;
   roomData=rooms[roomCode];
   if(roomData.players[myId])roomData.players[myId].lastSeen=Date.now();
-  if(!gameStarted&&roomData.started){gameStarted=true;showGameScreen()}
+  if(!gameStarted&&roomData.started){gameStarted=true;console.log("GAME STARTING - calling showGameScreen");showGameScreen()}
   if(!gameStarted)renderLobby();else renderGame()}
 
 async function writeMyState(){
@@ -317,7 +317,7 @@ function renderLobby(){
 
 async function startGame(){if(!isHost)return;roomData.started=true;roomData.round=1;roomData.turnIdx=0;await writeMyState()}
 
-function showGameScreen(){document.getElementById('lobby-screen').style.display='none';document.getElementById('game-screen').style.display='block';buildBoard();renderGame()}
+function showGameScreen(){try{console.log('showGameScreen called');document.getElementById('lobby-screen').style.display='none';document.getElementById('game-screen').style.display='block';buildBoard();renderGame();console.log('showGameScreen done OK')}catch(e){console.error('showGameScreen ERROR:',e);alert('שגיאה בטעינת המשחק: '+e.message)}}
 
 function buildBoard(){
   const b=document.getElementById('board');b.style.gridTemplateColumns='repeat(8,1fr)';b.style.gridTemplateRows='repeat(6,1fr)';
