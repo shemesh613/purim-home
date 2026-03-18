@@ -256,9 +256,13 @@ function genId(){return Math.random().toString(36).substr(2,9)}
 function genCode(){return Math.random().toString(36).substr(2,6).toUpperCase()}
 
 // SYNC
-async function fetchRooms(){// returns null on error, {} on empty
-  try{const r=await fetch(GIST_API+'?_='+Date.now(),{headers:{'Authorization':'Bearer '+GH_TOKEN,'Accept':'application/vnd.github+json'},cache:'no-store'});
-  if(r.ok){const g=await r.json();return JSON.parse(g.files['rooms.json'].content||'{}')}}catch(e){return null}return null}
+let _lastRooms=null;
+async function fetchRooms(){
+  for(let attempt=0;attempt<2;attempt++){
+    try{const r=await fetch(GIST_API+'?_='+Date.now(),{headers:{'Authorization':'Bearer '+GH_TOKEN,'Accept':'application/vnd.github+json'},cache:'no-store'});
+    if(r.ok){const g=await r.json();_lastRooms=JSON.parse(g.files['rooms.json'].content||'{}');return _lastRooms}
+    if(r.status===403){await new Promise(x=>setTimeout(x,2000+Math.random()*2000));continue}
+    return _lastRooms}catch(e){return _lastRooms}}return _lastRooms}
 
 async function writeRooms(rooms){
   for(let a=0;a<3;a++){try{const r=await fetch(GIST_API,{method:'PATCH',headers:{'Authorization':'Bearer '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({files:{'rooms.json':{content:JSON.stringify(rooms)}}})});
@@ -299,7 +303,7 @@ async function joinRoom(){
   document.getElementById('room-code-display').textContent=roomCode;
   startSync()}
 
-function startSync(){syncTimer=setInterval(syncLoop,3000);syncLoop()}
+function startSync(){syncTimer=setInterval(syncLoop,6000);syncLoop()}
 async function syncLoop(){
   const rooms=await fetchRooms();if(!rooms||!rooms[roomCode])return;
   roomData=rooms[roomCode];
