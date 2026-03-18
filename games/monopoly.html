@@ -317,7 +317,7 @@ function renderLobby(){
 
 async function startGame(){if(!isHost)return;roomData.started=true;roomData.round=1;roomData.turnIdx=0;await writeMyState()}
 
-function showGameScreen(){document.getElementById('lobby-screen').style.display='none';document.getElementById('game-screen').style.display='';buildBoard();renderGame()}
+function showGameScreen(){document.getElementById('lobby-screen').style.display='none';document.getElementById('game-screen').style.display='block';buildBoard();renderGame()}
 
 function buildBoard(){
   const b=document.getElementById('board');b.style.gridTemplateColumns='repeat(8,1fr)';b.style.gridTemplateRows='repeat(6,1fr)';
