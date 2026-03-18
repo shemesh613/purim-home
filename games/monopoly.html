@@ -256,9 +256,9 @@ function genId(){return Math.random().toString(36).substr(2,9)}
 function genCode(){return Math.random().toString(36).substr(2,6).toUpperCase()}
 
 // SYNC
-async function fetchRooms(){
+async function fetchRooms(){// returns null on error, {} on empty
   try{const r=await fetch(GIST_API+'?_='+Date.now(),{headers:{'Authorization':'Bearer '+GH_TOKEN,'Accept':'application/vnd.github+json'},cache:'no-store'});
-  if(r.ok){const g=await r.json();return JSON.parse(g.files['rooms.json'].content||'{}')}}catch(e){}return{}}
+  if(r.ok){const g=await r.json();return JSON.parse(g.files['rooms.json'].content||'{}')}}catch(e){return null}return null}
 
 async function writeRooms(rooms){
   for(let a=0;a<3;a++){try{const r=await fetch(GIST_API,{method:'PATCH',headers:{'Authorization':'Bearer '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({files:{'rooms.json':{content:JSON.stringify(rooms)}}})});
@@ -274,7 +274,8 @@ async function createRoom(){
   document.getElementById('room-code-display').textContent=roomCode;
   document.getElementById('start-game-btn').style.display='';
   document.getElementById('waiting-msg').textContent='כשכולם פה — לחץ התחל!';
-  const rooms=await fetchRooms();
+  var rooms=await fetchRooms();
+  if(!rooms)rooms={};
   rooms[roomCode]={host:myId,started:false,round:0,turnIdx:0,maxRounds:20,players:{},owned:{},createdAt:Date.now()};
   rooms[roomCode].players[myId]={name:myName,pos:0,coins:500,points:0,idx:0,lastSeen:Date.now()};
   await writeRooms(rooms);startSync()}
@@ -286,6 +287,7 @@ async function joinRoom(){
   if(!code){document.getElementById('lobby-error').textContent='הכנס קוד!';return}
   myId=genId();roomCode=code;
   const rooms=await fetchRooms();
+  if(!rooms){document.getElementById('lobby-error').textContent='שגיאת תקשורת — נסו שוב!';return}
   if(!rooms[roomCode]){document.getElementById('lobby-error').textContent='חדר לא נמצא!';return}
   if(rooms[roomCode].started){document.getElementById('lobby-error').textContent='המשחק כבר התחיל!';return}
   const n=Object.keys(rooms[roomCode].players).length;
@@ -305,7 +307,7 @@ async function syncLoop(){
   if(!gameStarted&&roomData.started){gameStarted=true;showGameScreen()}
   if(!gameStarted)renderLobby();else renderGame()}
 
-async function writeMyState(){const rooms=await fetchRooms();if(!rooms||!rooms[roomCode])return;rooms[roomCode]=roomData;await writeRooms(rooms)}
+async function writeMyState(){const rooms=await fetchRooms();if(!rooms)return;if(!rooms[roomCode])rooms[roomCode]={};rooms[roomCode]=roomData;await writeRooms(rooms)}
 
 function renderLobby(){
   const pl=document.getElementById('players-list');
@@ -446,7 +448,7 @@ function addLog(m){const l=document.getElementById('log-box'),p=document.createE
 
 renderDie(1,1);renderDie(2,1);
 // Clean old rooms
-(async()=>{const r=await fetchRooms();const c=Date.now()-24*3600000;let ch=false;
+(async()=>{const r=await fetchRooms();if(!r)return;const c=Date.now()-24*3600000;let ch=false;
 Object.entries(r).forEach(([k,v])=>{if(v.createdAt&&v.createdAt<c){delete r[k];ch=true}});if(ch)await writeRooms(r)})();
 </script>
 <script src="sticker-reward.js"></script>
