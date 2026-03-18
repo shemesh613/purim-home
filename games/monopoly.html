@@ -256,13 +256,12 @@ function genId(){return Math.random().toString(36).substr(2,9)}
 function genCode(){return Math.random().toString(36).substr(2,6).toUpperCase()}
 
 // SYNC
-let _lastRooms=null;
 async function fetchRooms(){
   for(let attempt=0;attempt<2;attempt++){
     try{const r=await fetch(GIST_API+'?_='+Date.now(),{headers:{'Authorization':'Bearer '+GH_TOKEN,'Accept':'application/vnd.github+json'},cache:'no-store'});
-    if(r.ok){const g=await r.json();_lastRooms=JSON.parse(g.files['rooms.json'].content||'{}');return _lastRooms}
+    if(r.ok){const g=await r.json();return JSON.parse(g.files['rooms.json'].content||'{}')}
     if(r.status===403){await new Promise(x=>setTimeout(x,2000+Math.random()*2000));continue}
-    return _lastRooms}catch(e){return _lastRooms}}return _lastRooms}
+    return null}catch(e){if(attempt===0){await new Promise(x=>setTimeout(x,1000));continue}return null}}return null}
 
 async function writeRooms(rooms){
   for(let a=0;a<3;a++){try{const r=await fetch(GIST_API,{method:'PATCH',headers:{'Authorization':'Bearer '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({files:{'rooms.json':{content:JSON.stringify(rooms)}}})});
