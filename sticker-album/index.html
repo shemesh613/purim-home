@@ -996,6 +996,8 @@ async function studentCloudSync(joinCode) {
       Object.values(state.collected).flat().forEach(id => {
         if (!localMember.stickers.includes(id)) localMember.stickers.push(id);
       });
+      // Save placed data to member for cloud sync
+      if (state.placed) { localMember.placed = JSON.parse(JSON.stringify(state.placed)); }
     }
 
     // Check for emergency sync data saved via sendBeacon
@@ -1017,6 +1019,8 @@ async function studentCloudSync(joinCode) {
             if (!localMember.stickers.includes(id)) localMember.stickers.push(id);
           });
         }
+        // Merge placed from emergency data
+        if (emergencyData?.placed && !localMember.placed) { localMember.placed = emergencyData.placed; }
         // Clean up emergency data after merging
         fetch(`${FIREBASE_URL}/spaces/${joinCode}/studentSync/${encodeURIComponent(myName)}.json`, {method: 'DELETE'});
       }
@@ -1038,6 +1042,9 @@ async function studentCloudSync(joinCode) {
       }
       // Merge stickers array too (union)
       mergedMember.stickers = [...new Set([...(cloudMember.stickers||[]), ...(localMember?.stickers||[])])];
+      // Merge placed data (prefer local — most recent interaction)
+      if (localMember?.placed) { mergedMember.placed = localMember.placed; }
+      else if (cloudMember.placed) { mergedMember.placed = cloudMember.placed; }
       merged[cloudIdx] = mergedMember;
     } else if (localMember) {
       merged.push(localMember);
@@ -1157,6 +1164,8 @@ function quickBeaconSave() {
   Object.values(state.collected).flat().forEach(id => {
     if (!member.stickers.includes(id)) member.stickers.push(id);
   });
+  // Save placed data
+  if (state.placed) { member.placed = JSON.parse(JSON.stringify(state.placed)); }
   const url = FIREBASE_URL + '/spaces/' + state.student.joinCode + '/studentSync/' + encodeURIComponent(member.name) + '.json';
   try {
     fetch(url, { method: 'PUT', keepalive: true, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(member) });
@@ -1179,6 +1188,8 @@ function emergencySync() {
     Object.values(state.collected).flat().forEach(id => {
       if (!member.stickers.includes(id)) member.stickers.push(id);
     });
+    // Save placed data
+    if (state.placed) { member.placed = JSON.parse(JSON.stringify(state.placed)); }
   }
   if (globalState.activeSpace) {
     localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
@@ -1299,6 +1310,15 @@ function restoreStudentCollected() {
       }
     });
   }
+  // Restore placed data from member
+  if (member.placed) {
+    for (const theme in member.placed) {
+      if (!state.placed[theme]) state.placed[theme] = [];
+      member.placed[theme].forEach(id => {
+        if (!state.placed[theme].includes(id)) state.placed[theme].push(id);
+      });
+    }
+  }
   const total = Object.values(state.collected).reduce((s,a) => s+a.length, 0);
   console.log('🔑 restoreStudentCollected:', state.student.name, '→', total, 'stickers');
 }
@@ -1323,6 +1343,8 @@ function saveState() {
       }
       if (!_m.stickers) _m.stickers = [];
       Object.values(state.collected).flat().forEach(id => { if (!_m.stickers.includes(id)) _m.stickers.push(id); });
+      // Save placed data to member (prevents loss on reload)
+      if (state.placed) { _m.placed = JSON.parse(JSON.stringify(state.placed)); }
     }
   }
   if (globalState.activeSpace) {
@@ -2638,6 +2660,8 @@ async function studentLogout() {
       }
       if (!_m.stickers) _m.stickers = [];
       Object.values(state.collected).flat().forEach(id => { if (!_m.stickers.includes(id)) _m.stickers.push(id); });
+      // Save placed data to member (prevents loss on reload)
+      if (state.placed) { _m.placed = JSON.parse(JSON.stringify(state.placed)); }
     }
     // Save synced data to localStorage
     if (globalState.activeSpace) localStorage.setItem(spaceKey(globalState.activeSpace), JSON.stringify(state));
