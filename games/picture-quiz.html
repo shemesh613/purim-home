@@ -384,33 +384,20 @@
 <div class="credit">🎨 רעיון: לביא | 💡 הוגש דרך כפתור הרעיונות</div>
 
 <script>
-// ===== DATA =====
-const ALL_STICKERS = [
-  {theme:'purim',name:'ילדים בתחפושות',desc:'ילדים בתחפושות צבעוניות.',row:0,col:2},
-  {theme:'purim',name:'מתנות לאביונים',desc:'אנשים נותנים מתנות לנזקקים.',row:1,col:2},
-  {theme:'pesach',name:'מעבר בים',desc:'משפחות הולכות דרך הים שנחצה.',row:0,col:0},
-  {theme:'pesach',name:'נושאי המצות',desc:'אנשים נושאים מצות ביציאה ממצרים.',row:0,col:1},
-  {theme:'pesach',name:'ליל הסדר',desc:'משפחה סביב שולחן הסדר.',row:0,col:2},
-  {theme:'heroes',name:'שמירה על הגבול',desc:'חיילים שומרים על הגבול.',row:0,col:0},
-  {theme:'heroes',name:'חובשים מצילים',desc:'חובשים מטפלים בפצועים.',row:0,col:1},
-  {theme:'gooddeeds',name:'עזרה לקשיש',desc:'ילד עוזר לסבתא.',row:0,col:0},
-  {theme:'gooddeeds',name:'חבילות לחיילים',desc:'ילדים אורזים חבילות אהבה.',row:0,col:1}
+// ===== DATA — 9 approved images only =====
+const ALL_QUESTIONS = [
+  {name:'ילדים בתחפושות פורים',img:'quiz-images/purim-costumes.png'},
+  {name:'משלוח מנות',img:'quiz-images/purim-mishloach.png'},
+  {name:'קריעת ים סוף',img:'quiz-images/pesach-sea.png'},
+  {name:'אפיית מצות',img:'quiz-images/pesach-matzah.png'},
+  {name:'ליל הסדר',img:'quiz-images/pesach-seder.png'},
+  {name:'חיילים שומרים על הגבול',img:'quiz-images/heroes-soldiers.png'},
+  {name:'חובשים מטפלים בפצוע',img:'quiz-images/heroes-medics.png'},
+  {name:'ילד עוזר לסבתא',img:'quiz-images/gooddeeds-helping.png'},
+  {name:'ילדים אורזים חבילות לחיילים',img:'quiz-images/gooddeeds-packages.png'}
 ];
 
 const TOTAL_QUESTIONS = 9;
-
-// ===== QUIZ IMAGE MAPPING (high-quality Gemini images) =====
-const QUIZ_IMAGES = {
-  'purim-0-2': 'quiz-images/purim-costumes.png',
-  'purim-1-2': 'quiz-images/purim-mishloach.png',
-  'pesach-0-2': 'quiz-images/pesach-seder.png',
-  'pesach-0-0': 'quiz-images/pesach-sea.png',
-  'pesach-0-1': 'quiz-images/pesach-matzah.png',
-  'heroes-0-0': 'quiz-images/heroes-soldiers.png',
-  'heroes-0-1': 'quiz-images/heroes-medics.png',
-  'gooddeeds-0-0': 'quiz-images/gooddeeds-helping.png',
-  'gooddeeds-0-1': 'quiz-images/gooddeeds-packages.png',
-};
 
 
 // ===== STATE =====
@@ -524,7 +511,7 @@ function shuffle(arr) {
 
 // ===== INIT GAME =====
 function initGame() {
-  questions = shuffle(ALL_STICKERS).slice(0, TOTAL_QUESTIONS);
+  questions = shuffle(ALL_QUESTIONS);
   currentQ = 0; score = 0; correctCount = 0; wrongCount = 0;
   streak = 0; maxStreak = 0; answered = false;
   updateStats();
@@ -538,9 +525,7 @@ function initGame() {
 // ===== SHOW QUESTION =====
 function showQuestion() {
   answered = false;
-  const sticker = questions[currentQ];
-  const stickerKey = `${sticker.theme}-${sticker.row}-${sticker.col}`;
-  const imgPath = QUIZ_IMAGES[stickerKey] ? QUIZ_IMAGES[stickerKey] : `../sticker-album/images/${stickerKey}.jpg`;
+  const q = questions[currentQ];
 
   // Update progress
   const pct = (currentQ / TOTAL_QUESTIONS) * 100;
@@ -552,7 +537,7 @@ function showQuestion() {
   // Image
   const img = document.getElementById('sticker-img');
   img.style.opacity = '0';
-  img.src = imgPath;
+  img.src = q.img;
   img.onload = () => { img.style.transition = 'opacity 0.4s'; img.style.opacity = '1'; };
   img.onerror = () => {
     img.style.opacity = '1';
@@ -560,9 +545,9 @@ function showQuestion() {
   };
 
   // Build answer options: 1 correct + 3 wrong
-  const allNames = ALL_STICKERS.map(s => s.name).filter(n => n !== sticker.name);
+  const allNames = ALL_QUESTIONS.map(s => s.name).filter(n => n !== q.name);
   const wrongs = shuffle(allNames).slice(0, 3);
-  const options = shuffle([sticker.name, ...wrongs]);
+  const options = shuffle([q.name, ...wrongs]);
 
   const grid = document.getElementById('answers-grid');
   grid.innerHTML = '';
@@ -570,7 +555,7 @@ function showQuestion() {
     const btn = document.createElement('button');
     btn.className = 'answer-btn';
     btn.textContent = opt;
-    btn.onclick = () => handleAnswer(btn, opt, sticker.name);
+    btn.onclick = () => handleAnswer(btn, opt, q.name);
     grid.appendChild(btn);
   });
 
