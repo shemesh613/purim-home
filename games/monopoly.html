@@ -440,8 +440,7 @@ function showEnd(){
   res.sort((a,b)=>b.total-a.total);
   let h='<span class="winner">'+PI[res[0].idx]+' '+esc(res[0].name)+' ניצח! 🎉</span>';
   res.forEach((r,i)=>{h+='<div>'+(i+1)+'. '+PI[r.idx]+' '+esc(r.name)+' — '+r.total+' (💰'+r.coins+' ⭐'+r.points+' 🏠'+r.owned+')</div>'});
-  document.getElementById('end-results').innerHTML=h;soundFan();document.getElementById('end-modal').classList.add('show')}
-  setTimeout(() => StickerReward.award(2, 'מונופול'), 2000);
+  document.getElementById('end-results').innerHTML=h;soundFan();document.getElementById('end-modal').classList.add('show');setTimeout(()=>StickerReward.award(2,'מונופול'),2000)}
 
 function addLog(m){const l=document.getElementById('log-box'),p=document.createElement('p');p.textContent=m;l.insertBefore(p,l.firstChild);while(l.children.length>6)l.removeChild(l.lastChild)}
 
