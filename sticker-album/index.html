@@ -1493,7 +1493,7 @@ function renderPuzzle(theme) {
 
     const piece = document.createElement('div');
     piece.className = 'tray-piece';
-    piece.style.backgroundImage = `url('images/${theme}-${row}-${col}.jpg')`;
+    piece.style.backgroundImage = `url('images/${theme}-${row}-${col}.jpg?v=2')`;
     piece.dataset.stickerId = sid;
     piece.dataset.targetIndex = i;
     piece.innerHTML = `<div class="tray-number">${i + 1}</div>`;
@@ -1550,7 +1550,7 @@ function renderPuzzle(theme) {
 
   // When complete, show seamless full image; otherwise clean white grid
   if (isComplete) {
-    grid.style.backgroundImage = `url('images/${theme}-full.jpg')`;
+    grid.style.backgroundImage = `url('images/${theme}-full.jpg?v=2')`;
     grid.style.backgroundColor = 'transparent';
   } else {
     grid.style.backgroundImage = 'none';
@@ -1566,7 +1566,7 @@ function renderPuzzle(theme) {
 
     if (isPlaced) {
       cell.classList.add('filled');
-      cell.innerHTML = `<img src="images/${theme}-${row}-${col}.jpg" alt="${s.name}" draggable="false"><div class="cell-number-badge">${i + 1}</div>`;
+      cell.innerHTML = `<img src="images/${theme}-${row}-${col}.jpg?v=2" alt="${s.name}" draggable="false"><div class="cell-number-badge">${i + 1}</div>`;
       cell.onclick = () => showStickerDetail(s, theme);
       if (state._lastPlaced === s.id) {
         cell.classList.add('reveal-anim');
@@ -1574,7 +1574,7 @@ function renderPuzzle(theme) {
       }
     } else {
       cell.classList.add('empty');
-      cell.style.backgroundImage = `url('images/${theme}-${row}-${col}.jpg')`;
+      cell.style.backgroundImage = `url('images/${theme}-${row}-${col}.jpg?v=2')`;
       cell.style.backgroundSize = 'cover';
       cell.style.backgroundPosition = 'center';
       cell.style.filter = 'blur(3px) saturate(0.6) brightness(1.15) opacity(0.35)';
@@ -1738,7 +1738,7 @@ function updateStats() {
 function showStickerDetail(sticker, theme) {
   const idx = STICKERS[theme].indexOf(sticker);
   const row = Math.floor(idx / 3), col = idx % 3;
-  document.getElementById('modalImage').style.backgroundImage = `url('images/${theme}-${row}-${col}.jpg')`;
+  document.getElementById('modalImage').style.backgroundImage = `url('images/${theme}-${row}-${col}.jpg?v=2')`;
   document.getElementById('modalName').textContent = sticker.name;
   document.getElementById('modalCategory').textContent = ALBUM_META[theme].name;
   document.getElementById('modalDescription').textContent = sticker.desc;
@@ -1769,7 +1769,7 @@ function openScratchCard(theme) {
   const themeColors = {purim:'#9333ea',pesach:'#2563eb',heroes:'#d97706',relaxation:'#059669',military:'#4b5563',gooddeeds:'#e11d48'};
   const idx = STICKERS[theme].indexOf(pick);
   const row = Math.floor(idx / 3), col = idx % 3;
-  document.getElementById('scratchImage').style.backgroundImage = `url('images/${theme}-${row}-${col}.jpg')`;
+  document.getElementById('scratchImage').style.backgroundImage = `url('images/${theme}-${row}-${col}.jpg?v=2')`;
   document.getElementById('scratchName').textContent = pick.name;
   document.getElementById('scratchCat').textContent = ALBUM_META[theme].name;
   document.getElementById('scratchReveal').style.background =
@@ -2835,7 +2835,7 @@ function renderMyStickers() {
     if (!info) return '';
     const row = Math.floor(info.idx / 3), col = info.idx % 3;
     return `<div style="text-align:center;padding:8px;background:rgba(0,0,0,0.02);border-radius:12px;min-width:70px">
-      <div style="width:60px;height:60px;border-radius:8px;background:url('images/${info.theme}-${row}-${col}.jpg') center/cover;margin:0 auto"></div>
+      <div style="width:60px;height:60px;border-radius:8px;background:url('images/${info.theme}-${row}-${col}.jpg?v=2') center/cover;margin:0 auto"></div>
       <div style="font-size:.65rem;color:var(--text-soft);margin-top:4px">${info.s.name}</div>
     </div>`;
   }).join('');
@@ -2978,7 +2978,7 @@ h1{font-family:'Frank Ruhl Libre',serif;font-size:2.5rem;color:${color};margin-b
 .desc{font-size:1rem;color:#6b7280;line-height:1.8;margin:16px 0}
 .date{font-size:.85rem;color:#9ca3af;margin-top:24px}
 .footer{font-size:.75rem;color:#bbb;margin-top:16px}
-.img-wrap{width:200px;height:200px;margin:16px auto;border-radius:16px;background:url('images/${theme}-full.jpg') center/cover;box-shadow:0 4px 20px rgba(0,0,0,0.15)}
+.img-wrap{width:200px;height:200px;margin:16px auto;border-radius:16px;background:url('images/${theme}-full.jpg?v=2') center/cover;box-shadow:0 4px 20px rgba(0,0,0,0.15)}
 @media print{body{background:white}.cert{box-shadow:none;border-width:4px}}
 
     /* Mobile performance */
