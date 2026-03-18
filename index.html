@@ -11,7 +11,7 @@
   <meta property="og:description" content="10+ משחקים חינמיים לילדים בבית! אלבום מדבקות פאזל, חידונים, חדרי בריחה, מרוץ מצוות ועוד. תוכן ערכי על גיבורי ישראל ופורים-פסח. בלי הרשמה!">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://shemesh613.github.io/purim-home/">
-  <meta property="og:image" content="https://shemesh613.github.io/purim-home/logo.png">
+  <meta property="og:image" content="https://shemesh613.github.io/purim-home/logo.jpeg">
   <meta property="og:locale" content="he_IL">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🎭 מפורים עד פסח — למידה וחוויה בבית!">
@@ -27,7 +27,7 @@
     "alternateName": "פורים ופסח לילדים - משחקים חינוכיים",
     "description": "פלטפורמת משחקים וחוויות חינוכיות חינם לילדים בישראל, עם דגש על פורים ופסח, ופעילויות מתאימות לשהייה בבית",
     "url": "https://shemesh613.github.io/purim-home/",
-    "image": "https://shemesh613.github.io/purim-home/logo.png",
+    "image": "https://shemesh613.github.io/purim-home/logo.jpeg",
     "applicationCategory": "EducationalApplication",
     "operatingSystem": "Any",
     "offers": {
@@ -2255,13 +2255,6 @@ function showToast(msg, duration) {
   }, duration);
 }
 
-
-
-// HTML Escape Utility
-function escapeHtml(str) {
-  if (!str) return '';
-  const div = document.createElement('div');
-  div.textContent = str;
   return div.innerHTML;
 }
 
@@ -2532,7 +2525,6 @@ function compressImage(dataUrl) {
 function handleUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
-  if (!file.type.startsWith("image/")) { alert("please select image"); return; }
   if (!file.type.startsWith('image/')) { alert('נא לבחור קובץ תמונה בלבד!'); return; }
   const reader = new FileReader();
   reader.onload = async (ev) => {
