@@ -1342,7 +1342,7 @@
 
 <!-- ══ Header ══ -->
 <header class="header">
-  <div id="auth-status" style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.9);padding:4px 12px;border-radius:20px;font-size:0.8rem;color:#4b5563;border:1px solid #e5e7eb;cursor:pointer;z-index:20;" onclick="showUserMenu()">👤 אורח</div>
+  <div id="auth-status" style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.9);padding:8px 16px;border-radius:20px;font-size:0.85rem;min-height:44px;display:flex;align-items:center;color:#4b5563;border:1px solid #e5e7eb;cursor:pointer;z-index:20;" onclick="showUserMenu()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showUserMenu()">👤 אורח</div>
   <div class="header-masks">🎭</div>
   <h1>מפורים עד פסח!</h1>
   <div class="flag-row">✡️ 🔯 ✡️</div>
@@ -1583,14 +1583,14 @@
       <div class="gallery-section" id="gallerySection" style="display:none;">
         <div style="text-align:center; margin-bottom:10px;">
           <span style="font-size:0.8rem; color:#7c3aed; background:#ede9fe; padding:4px 12px; border-radius:8px;" id="gallerySchoolLabel">🏫</span>
-          <button onclick="leaveGallery()" style="font-family:'Heebo',sans-serif; font-size:0.75rem; color:#6b7280; background:none; border:1px solid #d1d5db; padding:3px 10px; border-radius:6px; cursor:pointer; margin-right:8px;">🔄 החלפת בי״ס</button>
+          <button onclick="leaveGallery()" style="font-family:'Heebo',sans-serif; font-size:0.75rem; color:#6b7280; background:none; border:1px solid #d1d5db; padding:8px 14px; border-radius:8px; cursor:pointer; min-height:44px; margin-right:8px;">🔄 החלפת בי״ס</button>
         </div>
         <div class="class-selector">
           <label>🏫 כיתה:</label>
           <select class="class-select" id="classSelect" onchange="renderGallery()"><option value="all">כל הכיתות</option></select>
           <button class="add-class-btn" onclick="addNewClass()">+ הוסיפו כיתה</button>
         </div>
-        <div class="upload-area" id="uploadArea" onclick="document.getElementById('photoInput').click()">
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('photoInput').click()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')document.getElementById('photoInput').click()">
           <div class="icon">📷</div>
           <p>לחצו להעלות תמונת תחפושת!</p>
         </div>
@@ -2025,7 +2025,7 @@
 
     <!-- Quick Access: Manage Class (visible when logged in) -->
     <div id="teacherQuickAccess" style="display:none;margin-bottom:20px;">
-      <div onclick="openTeacherPanel()" style="cursor:pointer;background:linear-gradient(135deg,#059669,#10b981);border-radius:18px;padding:20px 24px;color:#fff;display:flex;align-items:center;gap:16px;box-shadow:0 4px 20px rgba(5,150,105,0.3);transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(5,150,105,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(5,150,105,0.3)'">
+      <div onclick="openTeacherPanel()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')openTeacherPanel()" style="cursor:pointer;background:linear-gradient(135deg,#059669,#10b981);border-radius:18px;padding:20px 24px;color:#fff;display:flex;align-items:center;gap:16px;box-shadow:0 4px 20px rgba(5,150,105,0.3);transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(5,150,105,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(5,150,105,0.3)'">
         <div style="font-size:2.2rem;">🏫</div>
         <div style="flex:1;text-align:right;">
           <div style="font-size:1.15rem;font-weight:800;margin-bottom:4px;">ניהול כיתה</div>
@@ -2247,6 +2247,11 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+function safeImgSrc(url) {
+  if (!url) return "";
+  if (url.startsWith("data:image/")) return url;
+  try { const u = new URL(url); return ["https:","http:"].includes(u.protocol) ? url : ""; } catch(e) { return ""; }
+}
 // ══ Toast Notification ══
 function showToast(msg, duration) {
   duration = duration || 3000;
@@ -2598,7 +2603,7 @@ function renderGallery() {
   empty.style.display = 'none';
   grid.innerHTML = filtered.map(c => `
     <div class="costume-item">
-      <img src="${c.image}" alt="${c.name}" loading="lazy">
+      <img src="${safeImgSrc(c.image)}" alt="${c.name}" loading="lazy">
       <div class="name">${escapeHtml(c.name)}${c.cls ? ' | ' + escapeHtml(c.cls) : ''}</div>
     </div>
   `).join('');
