@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#7c3aed">
   <title>🎭 מפורים עד פסח — למידה וחוויה בבית!</title>
   <meta name="description" content="משחקים וחוויות חינוכיות מפורים עד פסח לילדים בבית — חינם! פעילויות בשעת חירום, משחקים לילדים בבית, חידונים, מדבקות, חדרי אתגר. למידה כיפית בעת צורך להישאר בבית.">
   <meta name="keywords" content="פורים, פסח, ילדים, משחקים, מדבקות, חידונים, חדרי אתגר, חינוך, בית, פעילויות בבית, משחקים בחירום, פעילויות לילדים, למידה בבית, בית ספר, כיתה, גיבורי ישראל, פעילויות בעת חירום, ילדים בבית">
@@ -2423,7 +2425,7 @@ function firework(x, y) {
   document.body.appendChild(fw);
   setTimeout(() => fw.remove(), 1500);
 }
-const _fwInterval = setInterval(() => firework(Math.random()*window.innerWidth, Math.random()*window.innerHeight*0.6), 5000); document.addEventListener("visibilitychange", () => { if(document.hidden) clearInterval(_fwInterval); });
+const _fwInterval = setInterval(() => firework(Math.random()*window.innerWidth, Math.random()*window.innerHeight*0.6), 5000); document.addEventListener("visibilitychange", () => { if(document.hidden) { clearInterval(_fwInterval); document.getElementById("confettiBg").style.animationPlayState="paused"; } else { document.getElementById("confettiBg").style.animationPlayState="running"; } });
 setTimeout(() => firework(window.innerWidth/2, 200), 500);
 setTimeout(() => firework(window.innerWidth*0.3, 300), 1000);
 setTimeout(() => firework(window.innerWidth*0.7, 250), 1500);
@@ -2475,14 +2477,14 @@ async function syncGallery() {
   grid.innerHTML = '<div class="gallery-loading">⏳ טוען תמונות...</div>';
   empty.style.display = 'none';
   try {
-    const r = await fetch(`${FB_GAL}/${encodeURIComponent(galleryCode)}/photos.json`);
+    const r = await fetch(`${FB_GAL}/${encodeURIComponent(galleryCode)}/photos.json`); if(!r.ok) throw new Error(r.status);
     const data = await r.json();
     if (data) {
       galleryCostumes = Object.values(data).sort((a, b) => (b.time || 0) - (a.time || 0));
     } else {
       galleryCostumes = [];
     }
-  } catch(e) { galleryCostumes = []; }
+  } catch(e) { galleryCostumes = []; showToast('⚠️ שגיאה בטעינת גלריה — נסו שוב'); }
   renderGallery();
 }
 
@@ -2554,7 +2556,6 @@ async function savePhoto() {
 
   // Save to Firebase
   const btn = document.querySelector('.upload-btn');
-  if (btn.disabled) return;
   if (btn.disabled) return;
   btn.textContent = '⏳ מעלה...';
   btn.disabled = true;
@@ -2933,5 +2934,6 @@ async function submitFeedback() {
 
 <!-- Visitor Analytics -->
 <script async src="https://cdn.counter.dev/script.js" data-id="shemesh613" data-utcoffset="2"></script>
+<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
 </body>
 </html>
