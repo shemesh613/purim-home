@@ -170,10 +170,7 @@ footer{text-align:center;padding:12px;font-size:11px;color:#475569}
 <footer>🎨 רעיון: לביא | 🎲 מונופול רב-משתתפים</footer>
 
 <script>
-const GIST_ID='aa084151e7365e7a35278547e5a470de';
-const _a='gho_wSFUGE2Xzt',_b='AJ9mJgWJKLYit',_c='Shq7gpD0Jziiz';
-const GH_TOKEN=_a+_b+_c;
-const GIST_API='https://api.github.com/gists/'+GIST_ID;
+const FB_URL='https://album-bea15-default-rtdb.firebaseio.com/monopoly';
 const PI=['🔴','🔵','🟢','🟣'],PC=['#f87171','#60a5fa','#4ade80','#c084fc'];
 
 const SQUARES=[
@@ -257,15 +254,12 @@ function genCode(){return Math.random().toString(36).substr(2,6).toUpperCase()}
 
 // SYNC
 async function fetchRooms(){
-  for(let attempt=0;attempt<2;attempt++){
-    try{const r=await fetch(GIST_API+'?_='+Date.now(),{headers:{'Authorization':'Bearer '+GH_TOKEN,'Accept':'application/vnd.github+json'},cache:'no-store'});
-    if(r.ok){const g=await r.json();return JSON.parse(g.files['rooms.json'].content||'{}')}
-    if(r.status===403){await new Promise(x=>setTimeout(x,2000+Math.random()*2000));continue}
-    return null}catch(e){if(attempt===0){await new Promise(x=>setTimeout(x,1000));continue}return null}}return null}
+  try{const r=await fetch(FB_URL+'/rooms.json');
+  if(r.ok){return await r.json()||{}}return null}catch(e){return null}}
 
 async function writeRooms(rooms){
-  for(let a=0;a<3;a++){try{const r=await fetch(GIST_API,{method:'PATCH',headers:{'Authorization':'Bearer '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({files:{'rooms.json':{content:JSON.stringify(rooms)}}})});
-  if(r.ok){const g=await r.json();return JSON.parse(g.files['rooms.json'].content)}}catch(e){}await new Promise(r=>setTimeout(r,500+Math.random()*1000))}return null}
+  try{const r=await fetch(FB_URL+'/rooms.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(rooms)});
+  if(r.ok)return await r.json();return null}catch(e){return null}}
 
 // LOBBY
 async function createRoom(){
@@ -310,7 +304,8 @@ async function syncLoop(){
   if(!gameStarted&&roomData.started){gameStarted=true;showGameScreen()}
   if(!gameStarted)renderLobby();else renderGame()}
 
-async function writeMyState(){const rooms=await fetchRooms();if(!rooms)return;if(!rooms[roomCode])rooms[roomCode]={};rooms[roomCode]=roomData;await writeRooms(rooms)}
+async function writeMyState(){
+  try{await fetch(FB_URL+'/rooms/'+roomCode+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(roomData)})}catch(e){}}
 
 function renderLobby(){
   const pl=document.getElementById('players-list');
@@ -451,8 +446,8 @@ function addLog(m){const l=document.getElementById('log-box'),p=document.createE
 
 renderDie(1,1);renderDie(2,1);
 // Clean old rooms
-(async()=>{const r=await fetchRooms();if(!r)return;const c=Date.now()-24*3600000;let ch=false;
-Object.entries(r).forEach(([k,v])=>{if(v.createdAt&&v.createdAt<c){delete r[k];ch=true}});if(ch)await writeRooms(r)})();
+(async()=>{const r=await fetchRooms();if(!r)return;const c=Date.now()-24*3600000;
+Object.entries(r).forEach(([k,v])=>{if(v.createdAt&&v.createdAt<c){fetch(FB_URL+'/rooms/'+k+'.json',{method:'DELETE'})}})})();
 </script>
 <script src="sticker-reward.js"></script>
 </body>
