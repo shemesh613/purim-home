@@ -824,6 +824,7 @@
 
       document.getElementById('phase-puzzle').classList.add('hidden');
       document.getElementById('phase-success').classList.remove('hidden');
+      setTimeout(() => StickerReward.award(2, 'חדר בריחה 5'), 1500);
       document.getElementById('clue-display').textContent = CONFIG.clueText;
       spawnConfetti();
     }
@@ -880,5 +881,6 @@
   </script>
 <!-- Analytics -->
 <script async src="https://cdn.counter.dev/script.js" data-id="shemesh613" data-utcoffset="2"></script>
+<script src="../sticker-reward.js"></script>
 </body>
 </html>

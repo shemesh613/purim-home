@@ -595,6 +595,7 @@ function showWin(totalPairsCount) {
   FX.emojiRain(['🎉','🏆','⭐','🎭','👑','🎊','✨','🌟'], 25);
   FX.starSpin(6);
   FX.matchText('!כל הכבוד', { size: 'clamp(2.5rem, 8vw, 5rem)', color: '#fbbf24', y: '30%' });
+  setTimeout(() => StickerReward.award(2, "משחק זיכרון"), 1500);
 }
 
 function shuffle(a) { for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } }
@@ -602,5 +603,6 @@ startGame(4);
 </script>
 <!-- Analytics -->
 <script async src="https://cdn.counter.dev/script.js" data-id="shemesh613" data-utcoffset="2"></script>
+<script src="sticker-reward.js"></script>
 </body>
 </html>

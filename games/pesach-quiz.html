@@ -1121,6 +1121,7 @@ function showResults() {
   // VICTORY CELEBRATION
   playVictoryFanfare();
   FX.victoryDance();
+  setTimeout(() => StickerReward.award(2, "חידון פסח"), 2000);
 }
 
 function shareResult() {
@@ -1137,5 +1138,6 @@ startQuiz();
 </div>
 <!-- Analytics -->
 <script async src="https://cdn.counter.dev/script.js" data-id="shemesh613" data-utcoffset="2"></script>
+<script src="sticker-reward.js"></script>
 </body>
 </html>

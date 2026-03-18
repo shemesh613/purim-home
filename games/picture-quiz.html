@@ -657,6 +657,7 @@ function showEnd() {
   // Big confetti at end
   setTimeout(launchConfetti, 200);
   setTimeout(launchConfetti, 700);
+  setTimeout(() => StickerReward.award(2, 'חידון תמונות'), 1500);
 }
 
 // ===== WHATSAPP SHARE =====
@@ -685,5 +686,6 @@ window.addEventListener('resize', () => {
   if (animFrame) { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 });
 </script>
+<script src="sticker-reward.js"></script>
 </body>
 </html>

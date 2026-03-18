@@ -266,6 +266,7 @@ function gameLoop() {
         document.getElementById('goScore').textContent = Math.floor(distance) + 'm';
         document.getElementById('goEmoji').textContent = distance > 200 ? '🏆' : distance > 100 ? '⭐' : '💪';
         document.getElementById('gameOver').classList.remove('hidden');
+        setTimeout(() => StickerReward.award(1, 'מרוץ מצווה'), 1500);
         return;
       }
     }
@@ -283,5 +284,6 @@ function shareScore() {
 </script>
 <!-- Analytics -->
 <script async src="https://cdn.counter.dev/script.js" data-id="shemesh613" data-utcoffset="2"></script>
+<script src="sticker-reward.js"></script>
 </body>
 </html>
