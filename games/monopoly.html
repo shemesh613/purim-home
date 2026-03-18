@@ -446,7 +446,7 @@ function addLog(m){const l=document.getElementById('log-box'),p=document.createE
 
 renderDie(1,1);renderDie(2,1);
 // Clean old rooms
-(async()=>{const r=await fetchRooms();const c=Date.now()-2*3600000;let ch=false;
+(async()=>{const r=await fetchRooms();const c=Date.now()-24*3600000;let ch=false;
 Object.entries(r).forEach(([k,v])=>{if(v.createdAt&&v.createdAt<c){delete r[k];ch=true}});if(ch)await writeRooms(r)})();
 </script>
 <script src="sticker-reward.js"></script>
