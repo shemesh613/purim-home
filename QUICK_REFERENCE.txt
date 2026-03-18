@@ -1,0 +1,110 @@
+================================================================================
+                         QUICK REFERENCE CARD
+                   Image Generation for Quiz Game
+================================================================================
+
+🚀 FASTEST START (2 minutes)
+────────────────────────────────────────────────────────────────────────────
+
+1. export GEMINI_API_KEY='your-key-from-ai.google.dev'
+2. cd /tmp/purim-home
+3. ./generate-images.sh
+4. Check /tmp/purim-home/games/quiz-images/ for images
+
+💰 COST COMPARISON
+────────────────────────────────────────────────────────────────────────────
+
+Gemini API:        FREE (recommended)
+OpenAI DALL-E 3:   $0.80 for 10 images
+Stability AI:      $0.03 for 10 images
+
+🎨 WHAT YOU GET
+────────────────────────────────────────────────────────────────────────────
+
+10 beautiful illustrations:
+
+Purim (3):
+  • Queen Esther with Megillah scroll
+  • Kids in colorful Purim costumes
+  • Hamantaschen gift baskets
+
+Pesach (3):
+  • Family at Seder table
+  • Splitting of the Red Sea
+  • People baking matzah
+
+Heroes (2):
+  • Soldiers at sunset
+  • Medics helping people
+
+Good Deeds (2):
+  • Kids helping elderly
+  • Care packages for soldiers
+
+📂 IMPORTANT PATHS
+────────────────────────────────────────────────────────────────────────────
+
+Scripts:
+  /tmp/purim-home/generate-images.sh (use this)
+  /tmp/purim-home/generate_images_v2.py
+  /tmp/purim-home/generate_images.js
+
+Docs:
+  /tmp/purim-home/README_IMAGES.txt
+
+Output:
+  /tmp/purim-home/games/quiz-images/
+
+🔑 API KEY SETUP
+────────────────────────────────────────────────────────────────────────────
+
+Linux/Mac:
+  export GEMINI_API_KEY='sk-...'
+
+Windows PowerShell:
+  $env:GEMINI_API_KEY = 'sk-...'
+
+Verify:
+  echo $GEMINI_API_KEY
+
+💡 QUICK COMMANDS
+────────────────────────────────────────────────────────────────────────────
+
+Get key:         https://ai.google.dev/
+Set key:         export GEMINI_API_KEY='your-key'
+Run generator:   ./generate-images.sh
+Check images:    ls /tmp/purim-home/games/quiz-images/
+View guide:      cat /tmp/purim-home/README_IMAGES.txt
+
+❓ COMMON ISSUES
+────────────────────────────────────────────────────────────────────────────
+
+No API key?      → Generate one at https://ai.google.dev/
+Script fails?    → Make sure GEMINI_API_KEY is set: echo $GEMINI_API_KEY
+No Python/Node?  → Install from python.org or nodejs.org
+Rate limit?      → Wait 30 sec or use different API
+
+🏃 ONE-LINER TO START
+────────────────────────────────────────────────────────────────────────────
+
+export GEMINI_API_KEY='your-key' && cd /tmp/purim-home && ./generate-images.sh
+
+📧 HTML INTEGRATION EXAMPLE
+────────────────────────────────────────────────────────────────────────────
+
+<img src="/games/quiz-images/purim-megila.jpg" style="max-width: 500px;">
+
+🎯 NEXT STEPS
+────────────────────────────────────────────────────────────────────────────
+
+1. Get API key ✓
+2. Set environment variable ✓
+3. Run generator ← YOU ARE HERE
+4. Verify 10 images generated
+5. Add to HTML quiz
+6. Create questions
+7. Test in game
+
+================================================================================
+Ready? Run: ./generate-images.sh
+================================================================================
