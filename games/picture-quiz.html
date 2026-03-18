@@ -328,7 +328,7 @@
 <!-- PROGRESS -->
 <div class="progress-area" id="game-ui">
   <div class="progress-info">
-    <span id="progress-label">שאלה 1 מתוך 15</span>
+    <span id="progress-label">שאלה 1 מתוך 9</span>
     <span id="streak-label">🔥 רצף: 0</span>
   </div>
   <div class="progress-bar-bg">
@@ -345,7 +345,7 @@
 
 <!-- QUESTION CARD -->
 <div class="question-card" id="question-card">
-  <div class="question-num" id="q-num">שאלה 1 / 15</div>
+  <div class="question-num" id="q-num">שאלה 1 / 9</div>
   <div class="question-text">מה רואים בתמונה? 🤔</div>
   <img class="sticker-img" id="sticker-img" src="" alt="תמונה לזיהוי" />
   <div class="answers-grid" id="answers-grid"></div>
@@ -386,43 +386,21 @@
 <script>
 // ===== DATA =====
 const ALL_STICKERS = [
-  {theme:'purim',name:'המלכה קוראת במגילה',desc:'המלכה אסתר קוראת במגילת אסתר.',row:0,col:0},
-  {theme:'purim',name:'הצדיק מתפלל',desc:'מרדכי מתפלל לישועה בשער המלך.',row:0,col:1},
   {theme:'purim',name:'ילדים בתחפושות',desc:'ילדים בתחפושות צבעוניות.',row:0,col:2},
-  {theme:'purim',name:'שולחן עם מאכלים',desc:'שולחן חגיגי עם אוזני המן.',row:1,col:0},
-  {theme:'purim',name:'נגנים מנגנים',desc:'תזמורת חגיגית מנגנת.',row:1,col:1},
   {theme:'purim',name:'מתנות לאביונים',desc:'אנשים נותנים מתנות לנזקקים.',row:1,col:2},
-  {theme:'purim',name:'משפחה קוראת',desc:'משפחה קוראת את סיפור הפורים.',row:2,col:0},
-  {theme:'purim',name:'ילדים עם רעשנים',desc:'ילדים מרעישים ברעשנים.',row:2,col:1},
-  {theme:'purim',name:'תהלוכה חגיגית',desc:'תהלוכת פורים צבעונית.',row:2,col:2},
   {theme:'pesach',name:'מעבר בים',desc:'משפחות הולכות דרך הים שנחצה.',row:0,col:0},
   {theme:'pesach',name:'נושאי המצות',desc:'אנשים נושאים מצות ביציאה ממצרים.',row:0,col:1},
   {theme:'pesach',name:'ליל הסדר',desc:'משפחה סביב שולחן הסדר.',row:0,col:2},
-  {theme:'pesach',name:'ילדים שואלים',desc:'ילדים שואלים ארבע שאלות.',row:1,col:0},
-  {theme:'pesach',name:'המנהיג עם המטה',desc:'משה רבנו מוביל את העם.',row:1,col:1},
-  {theme:'pesach',name:'שירה ותופים',desc:'נשים שרות אחרי חציית הים.',row:1,col:2},
-  {theme:'pesach',name:'בונים במדבר',desc:'בני ישראל בונים את המשכן.',row:2,col:0},
-  {theme:'pesach',name:'חיפוש חמץ',desc:'ילדים מחפשים חמץ עם נר.',row:2,col:1},
-  {theme:'pesach',name:'זריחת החירות',desc:'שקיעה זהובה — סמל לחירות.',row:2,col:2},
   {theme:'heroes',name:'שמירה על הגבול',desc:'חיילים שומרים על הגבול.',row:0,col:0},
   {theme:'heroes',name:'חובשים מצילים',desc:'חובשים מטפלים בפצועים.',row:0,col:1},
-  {theme:'heroes',name:'מתנדבים אורזים',desc:'מתנדבים אורזים חבילות מזון.',row:0,col:2},
-  {theme:'heroes',name:'סרטים צהובים',desc:'ילדים קושרים סרטים צהובים.',row:1,col:0},
-  {theme:'heroes',name:'מורה עם תלמידים',desc:'מורה מלמדת ילדים.',row:1,col:1},
-  {theme:'heroes',name:'כבאים מצילים',desc:'כבאים מצילים חתול.',row:1,col:2},
   {theme:'gooddeeds',name:'עזרה לקשיש',desc:'ילד עוזר לסבתא.',row:0,col:0},
-  {theme:'gooddeeds',name:'חבילות לחיילים',desc:'ילדים אורזים חבילות אהבה.',row:0,col:1},
-  {theme:'gooddeeds',name:'ביקור חולים',desc:'ילדים מביאים פרחים לחולים.',row:0,col:2},
-  {theme:'gooddeeds',name:'תרומת בגדים',desc:'משפחה תורמת בגדים.',row:1,col:0},
-  {theme:'gooddeeds',name:'עזרה בשיעורים',desc:'תלמידה עוזרת לקטנים.',row:1,col:1},
-  {theme:'gooddeeds',name:'ניקוי חוף',desc:'ילדים מנקים חוף ים.',row:1,col:2}
+  {theme:'gooddeeds',name:'חבילות לחיילים',desc:'ילדים אורזים חבילות אהבה.',row:0,col:1}
 ];
 
-const TOTAL_QUESTIONS = 15;
+const TOTAL_QUESTIONS = 9;
 
 // ===== QUIZ IMAGE MAPPING (high-quality Gemini images) =====
 const QUIZ_IMAGES = {
-  'purim-0-0': 'quiz-images/purim-megila.png',
   'purim-0-2': 'quiz-images/purim-costumes.png',
   'purim-1-2': 'quiz-images/purim-mishloach.png',
   'pesach-0-2': 'quiz-images/pesach-seder.png',
