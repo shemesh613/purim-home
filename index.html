@@ -1216,6 +1216,10 @@
     }
     
     /* Print styles */
+    @media (prefers-reduced-motion: reduce) {
+      .confetti-bg, .sparkle { display: none !important; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
     @media print {
       .confetti-bg, .sparkle, .share-fab, .share-fab-label, .tabs, .corner-logo { display: none !important; }
       body { background: white !important; }
@@ -1440,6 +1444,12 @@
         <h3 class="card-title">עשר המכות</h3>
         <p class="card-desc">סדרו את עשר המכות בסדר הנכון — עם עובדות מגניבות!</p>
         <span class="card-badge" style="background:#059669;color:#fff;">⚡ שחקו!</span>
+      </a>
+      <a href="games/stations/station-pesach.html" class="game-card pesach-card" style="--card-shadow: rgba(29,78,216,0.2); --card-border: #60a5fa; background:linear-gradient(135deg,#eff6ff,#dbeafe);">
+        <span class="card-emoji">🏠</span>
+        <h3 class="card-title">חדר הפסח — משימת חירות</h3>
+        <p class="card-desc">עברו שלבים של יציאת מצרים — צבעים, חידות ומשימות אינטראקטיביות!</p>
+        <span class="card-badge" style="background:#2563eb;color:#fff;">🎮 שחקו!</span>
       </a>
       <div class="game-card pesach-card" style="--card-shadow: rgba(30,136,229,0.2); --card-border: #64b5f6; background:linear-gradient(135deg,#e3f2fd,#bbdefb); cursor:default; opacity:0.8;">
         <span class="card-emoji">🎤</span>
@@ -2294,9 +2304,7 @@ if (localStorage.getItem('videosSeenV2')) {
 }
 
 // ══ Direct Album Access (gate removed) ══
-const FB_SPACES = 'https://moria-1d5c0-default-rtdb.europe-west1.firebasedatabase.app/purim-spaces';
 function openGate(target) { window.location.href = target || 'sticker-album/'; }
-function closeGate() {}
 
 // ══ User Status & Menu ══
 (function initUserStatus() {
@@ -2327,7 +2335,7 @@ function showUserMenu() {
   menu.style.cssText = 'position:fixed;top:50px;left:14px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.15);padding:16px;z-index:100;min-width:220px;direction:rtl;text-align:right;';
   menu.innerHTML = `
     <div style="font-weight:700;color:#1e1b4b;margin-bottom:8px;">👤 ${escapeHtml(saved.studentName)}</div>
-    <div style="font-size:0.8rem;color:#6b7280;margin-bottom:12px;">🔑 ${saved.classCode}</div>
+    <div style="font-size:0.8rem;color:#6b7280;margin-bottom:12px;">🔑 ${escapeHtml(saved.classCode)}</div>
     <button onclick="window.location.href='sticker-album/'" style="width:100%;font-family:'Heebo',sans-serif;padding:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:6px;">🏅 לאלבום המדבקות</button>
     <button onclick="openTeacherPanel()" style="width:100%;font-family:'Heebo',sans-serif;padding:8px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:6px;">🏫 ניהול כיתה (מורה)</button>
     <button onclick="logoutUser()" style="width:100%;font-family:'Heebo',sans-serif;padding:8px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;border-radius:10px;font-size:0.85rem;cursor:pointer;">🔄 החלפת משתמש</button>
@@ -2415,7 +2423,7 @@ function firework(x, y) {
   document.body.appendChild(fw);
   setTimeout(() => fw.remove(), 1500);
 }
-setInterval(() => firework(Math.random()*window.innerWidth, Math.random()*window.innerHeight*0.6), 5000);
+const _fwInterval = setInterval(() => firework(Math.random()*window.innerWidth, Math.random()*window.innerHeight*0.6), 5000); document.addEventListener("visibilitychange", () => { if(document.hidden) clearInterval(_fwInterval); });
 setTimeout(() => firework(window.innerWidth/2, 200), 500);
 setTimeout(() => firework(window.innerWidth*0.3, 300), 1000);
 setTimeout(() => firework(window.innerWidth*0.7, 250), 1500);

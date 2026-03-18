@@ -123,8 +123,8 @@ function recalcPerSec() {
   owned.forEach((n,i) => coinsPerSec += n * UPGRADES[i].perSec);
 }
 
-function save() {
-  localStorage.setItem('tzedaka-clicker', JSON.stringify({c:coins,t:totalCoins,o:owned,cp:clickPower}));
+function save() { try {
+  localStorage.setItem('tzedaka-clicker', JSON.stringify({c:coins,t:totalCoins,o:owned,cp:clickPower})); } catch(e){}
 }
 
 function formatNum(n) {
