@@ -287,7 +287,7 @@ function spin(){
   if(spinning)return;spinning=true;
   document.getElementById("spBtn").disabled=true;document.getElementById("wRes").textContent="";
   var sa=Math.PI*2/SEGS.length,ti=Math.floor(Math.random()*SEGS.length);
-  var ta2=ti*sa+sa/2,total=Math.PI*2*(5+Math.random()*3)+ta2;
+  var ta2=2*Math.PI-ti*sa-sa/2,total=Math.PI*2*(5+Math.random()*3)+ta2;
   var t0=null,dur=3800,lastS=-1;
   function anim(ts){
     if(!t0)t0=ts;var el=ts-t0,p=Math.min(el/dur,1),e=1-Math.pow(1-p,3),cr=total*e;
