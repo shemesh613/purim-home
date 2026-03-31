@@ -388,11 +388,7 @@ function applyWheelResult(idx){
     currentQ++;correctInRound=0;updateUI();showQuestion();
     btn.textContent='🎡 סובבו!';btn.onclick=spinWheel;
   };
-  // game never ends;
-  }
 }
-
-// endGame removed - infinite game
 
 function shareResult(){
   var pct=totalAnswered>0?Math.round((totalCorrect/totalAnswered)*100):0;
