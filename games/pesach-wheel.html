@@ -220,7 +220,9 @@ let wheelSpinning=false,leaderboardData=[];
 
 const nameInput=document.getElementById('playerName');
 const startBtn=document.getElementById('startBtn');
-nameInput.addEventListener('input',function(){startBtn.disabled=nameInput.value.trim().length<2});
+var savedName=localStorage.getItem('pesach-wheel-name');
+if(savedName){nameInput.value=savedName;startBtn.disabled=false}
+nameInput.addEventListener('input',function(){startBtn.disabled=nameInput.value.trim().length<1});
 nameInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!startBtn.disabled)startGame()});
 loadLeaderboard();
 
@@ -244,8 +246,7 @@ function renderPodium(){
 
 async function saveScore(){
   try{
-    var existing=leaderboardData.find(function(p){return p.name===playerName});
-    if(existing&&existing.score>=score)return;
+    // always save current score
     await fetch(FB+LB_PATH+'/'+encodeURIComponent(playerName)+'.json',{
       method:'PUT',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({score:score,rounds:roundNum-1,correct:totalCorrect,date:new Date().toISOString().slice(0,10)})
@@ -262,10 +263,17 @@ function showLeaderboard(){
 }
 function closeLeaderboard(){document.getElementById('lbOverlay').classList.remove('visible')}
 
-function startGame(){
+async function startGame(){
   playerName=nameInput.value.trim();
-  if(playerName.length<2)return;
+  if(playerName.length<1)return;
+  localStorage.setItem('pesach-wheel-name',playerName);
+  // Load existing score from Firebase
   score=0;hasShield=false;correctInRound=0;roundNum=1;totalCorrect=0;totalAnswered=0;
+  try{
+    var r=await fetch(FB+LB_PATH+'/'+encodeURIComponent(playerName)+'.json');
+    var data=await r.json();
+    if(data&&data.score){score=data.score;roundNum=(data.rounds||0)+1;totalCorrect=data.correct||0;totalAnswered=data.correct||0;}
+  }catch(e){}
   shuffledQ=QUESTIONS.slice().sort(function(){return Math.random()-0.5});
   currentQ=0;
   document.getElementById('welcomeScreen').style.display='none';
