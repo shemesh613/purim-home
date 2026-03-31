@@ -118,13 +118,14 @@
   <div class="welcome-emoji">🎡</div>
   <h2>גלגל המזל של פסח!</h2>
   <p>ענו נכון על 4 שאלות ← סובבו את גלגל המזל!<br>💣 מוקש • 🛡️ מגן • ×2 כפול • 💰 נקודות</p>
-  <input type="text" class="welcome-input" id="playerName" placeholder="הכניסו שם..." maxlength="20" autocomplete="off">
-  <button class="start-btn" id="startBtn" onclick="startGame()" disabled>🎡 יאללה!</button>
   <div id="podiumArea">
     <h3 style="color:#a78bfa;font-size:0.95rem;margin:10px 0 6px">🏆 טבלת המובילים</h3>
     <div class="podium" id="podium"></div>
   </div>
-  <button class="leaderboard-btn" onclick="showLeaderboard()">📊 טבלת כל המשתתפים</button>
+  <button class="leaderboard-btn" onclick="showLeaderboard()" style="margin-bottom:12px">📊 טבלת כל המשתתפים</button>
+  <div style="width:80%;max-width:280px;height:1px;background:rgba(255,255,255,0.15);margin:4px 0"></div>
+  <input type="text" class="welcome-input" id="playerName" placeholder="הכניסו שם..." maxlength="20" autocomplete="off">
+  <button class="start-btn" id="startBtn" onclick="startGame()" disabled>🎡 התחילו לשחק!</button>
 </div>
 <div class="game-area" id="gameArea">
   <div class="top-bar">
@@ -154,17 +155,7 @@
   <button class="spin-btn" id="spinBtn" onclick="spinWheel()">🎡 סובבו!</button>
   <div class="wheel-result" id="wheelResult"></div>
 </div>
-<div class="results-screen" id="resultsScreen">
-  <div class="results-emoji" id="resEmoji">🏆</div>
-  <h2 class="results-title">סיימתם!</h2>
-  <div class="results-score" id="resScore"></div>
-  <div class="results-btns">
-    <button class="res-btn primary" onclick="location.reload()">🔄 שחקו שוב!</button>
-    <button class="res-btn share" onclick="shareResult()">📱 שתפו בוואטסאפ</button>
-    <button class="res-btn" style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1e1b4b" onclick="showLeaderboard()">📊 טבלת תוצאות</button>
-    <button class="res-btn home" onclick="location.href='../index.html'">🏠 חזרה</button>
-  </div>
-</div>
+<!-- no results screen - infinite game -->
 <div class="lb-overlay" id="lbOverlay" onclick="if(event.target===this)closeLeaderboard()">
   <div class="lb-box">
     <h2>🏆 טבלת כל המשתתפים</h2>
@@ -383,6 +374,7 @@ function applyWheelResult(idx){
     case 'double':var before=score;score=score*2;msg='🔥 ×2! '+before+' → '+score+' נקודות!';resultDiv.style.background='rgba(217,119,6,0.2)';resultDiv.style.color='#fde68a';spawnConfetti(60);floatScore('×2!','#fde68a');playSound(1200,0.2,0.2);break;
   }
   resultDiv.textContent=msg;updateWheelUI();roundNum++;
+  saveScore();
   var btn=document.getElementById('spinBtn');
   btn.textContent='▶ המשך לשאלות!';btn.disabled=false;
   btn.onclick=function(){
@@ -391,27 +383,11 @@ function applyWheelResult(idx){
     currentQ++;correctInRound=0;updateUI();showQuestion();
     btn.textContent='🎡 סובבו!';btn.onclick=spinWheel;
   };
-  if(totalAnswered>=28){
-    btn.textContent='🏁 סיום המשחק!';
-    btn.onclick=function(){endGame()};
+  // game never ends;
   }
 }
 
-function endGame(){
-  document.getElementById('wheelScreen').classList.remove('active');
-  document.getElementById('gameArea').classList.remove('active');
-  var rs=document.getElementById('resultsScreen');rs.classList.add('active');
-  var pct=totalAnswered>0?Math.round((totalCorrect/totalAnswered)*100):0;
-  var emoji='🏆',title='מדהים!';
-  if(score<100){emoji='🌟';title='יפה!'}
-  else if(score<300){emoji='⭐';title='מעולה!'}
-  else if(score<500){emoji='🔥';title='אלוף!'}
-  else{emoji='👑';title='אגדה!'}
-  document.getElementById('resEmoji').textContent=emoji;
-  document.querySelector('.results-title').textContent=title;
-  document.getElementById('resScore').innerHTML='<b>'+escHtml(playerName)+'</b><br>🏆 '+score+' נקודות<br>✅ '+totalCorrect+'/'+totalAnswered+' תשובות נכונות ('+pct+'%)<br>🎡 '+(roundNum-1)+' סבבי גלגל';
-  spawnConfetti(80);saveScore();
-}
+// endGame removed - infinite game
 
 function shareResult(){
   var pct=totalAnswered>0?Math.round((totalCorrect/totalAnswered)*100):0;
