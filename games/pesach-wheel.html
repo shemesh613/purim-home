@@ -125,7 +125,7 @@
   <button class="leaderboard-btn" onclick="showLeaderboard()" style="margin-bottom:12px">📊 טבלת כל המשתתפים</button>
   <div style="width:80%;max-width:280px;height:1px;background:rgba(255,255,255,0.15);margin:4px 0"></div>
   <input type="text" class="welcome-input" id="playerName" placeholder="הכניסו שם..." maxlength="20" autocomplete="off">
-  <button class="start-btn" id="startBtn" onclick="startGame()" disabled>🎡 התחילו לשחק!</button>
+  <button class="start-btn" id="startBtn" onclick="startGame()">🎡 התחילו לשחק!</button>
 </div>
 <div class="game-area" id="gameArea">
   <div class="top-bar">
@@ -221,9 +221,8 @@ let wheelSpinning=false,leaderboardData=[];
 const nameInput=document.getElementById('playerName');
 const startBtn=document.getElementById('startBtn');
 var savedName=localStorage.getItem('pesach-wheel-name');
-if(savedName){nameInput.value=savedName;startBtn.disabled=false}
-nameInput.addEventListener('input',function(){startBtn.disabled=nameInput.value.trim().length<1});
-nameInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!startBtn.disabled)startGame()});
+if(savedName){nameInput.value=savedName}
+nameInput.addEventListener('keydown',function(e){if(e.key==='Enter')startGame()});
 loadLeaderboard();
 
 async function loadLeaderboard(){
@@ -265,7 +264,7 @@ function closeLeaderboard(){document.getElementById('lbOverlay').classList.remov
 
 async function startGame(){
   playerName=nameInput.value.trim();
-  if(playerName.length<1)return;
+  if(!playerName){nameInput.focus();nameInput.style.borderColor='#dc2626';return}
   localStorage.setItem('pesach-wheel-name',playerName);
   // Load existing score from Firebase
   score=0;hasShield=false;correctInRound=0;roundNum=1;totalCorrect=0;totalAnswered=0;
