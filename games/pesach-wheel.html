@@ -324,12 +324,8 @@ function flash(c){var f=document.createElement("div");f.className="flash";f.styl
 function beep(fr,v,d){try{var a=new(window.AudioContext||window.webkitAudioContext),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=fr;g.gain.value=v;o.start();g.gain.exponentialRampToValueAtTime(.001,a.currentTime+d);o.stop(a.currentTime+d)}catch(e){}}
 function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
 
-// Admin - triple click back link to open
-var bClicks=0,bTimer=null;
-document.getElementById("backLink").addEventListener("click",function(e){
-  bClicks++;if(bClicks===1)bTimer=setTimeout(function(){bClicks=0},800);
-  if(bClicks>=3){e.preventDefault();bClicks=0;clearTimeout(bTimer);openAdm()}
-});
+// Admin - press ~ key to open
+document.addEventListener("keydown",function(e){if(e.key==="~"||e.key==="`")openAdm()});
 function openAdm(){document.getElementById("admO").classList.add("vis");document.getElementById("admLogin").style.display="";document.getElementById("admPanel").style.display="none";document.getElementById("admErr").style.display="none";document.getElementById("admPass").value=""}
 function closeAdm(){document.getElementById("admO").classList.remove("vis")}
 function admAuth(){
