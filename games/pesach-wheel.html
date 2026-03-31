@@ -262,17 +262,15 @@ function showLeaderboard(){
 }
 function closeLeaderboard(){document.getElementById('lbOverlay').classList.remove('visible')}
 
-async function startGame(){
+function startGame(){
   playerName=nameInput.value.trim();
   if(!playerName){nameInput.focus();nameInput.style.borderColor='#dc2626';return}
   localStorage.setItem('pesach-wheel-name',playerName);
-  // Load existing score from Firebase
-  score=0;hasShield=false;correctInRound=0;roundNum=1;totalCorrect=0;totalAnswered=0;
-  try{
-    var r=await fetch(FB+LB_PATH+'/'+encodeURIComponent(playerName)+'.json');
-    var data=await r.json();
-    if(data&&data.score){score=data.score;roundNum=(data.rounds||0)+1;totalCorrect=data.correct||0;totalAnswered=data.correct||0;}
-  }catch(e){}
+  hasShield=false;correctInRound=0;
+  // Load existing score or start fresh
+  var saved=leaderboardData.find(function(p){return p.name===playerName});
+  if(saved){score=saved.score;roundNum=(saved.rounds||0)+1;totalCorrect=saved.correct||0;totalAnswered=saved.correct||0;}
+  else{score=0;roundNum=1;totalCorrect=0;totalAnswered=0;}
   shuffledQ=QUESTIONS.slice().sort(function(){return Math.random()-0.5});
   currentQ=0;
   document.getElementById('welcomeScreen').style.display='none';
