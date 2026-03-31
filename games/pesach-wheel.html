@@ -325,7 +325,7 @@ function beep(fr,v,d){try{var a=new(window.AudioContext||window.webkitAudioConte
 function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
 
 // Admin - press ~ key to open
-document.addEventListener("keydown",function(e){if(e.key==="~"||e.key==="`")openAdm()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")openAdm()});
 function openAdm(){document.getElementById("admO").classList.add("vis");document.getElementById("admLogin").style.display="";document.getElementById("admPanel").style.display="none";document.getElementById("admErr").style.display="none";document.getElementById("admPass").value=""}
 function closeAdm(){document.getElementById("admO").classList.remove("vis")}
 function admAuth(){
