@@ -122,7 +122,7 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
 <div class="screen active" id="scrWelcome">
   <div class="welcome-emoji">🎡</div>
   <h2 class="wtitle">גלגל המזל של פסח!</h2>
-  <p class="wdesc">ענו נכון על 4 שאלות → סובבו את הגלגל!<br>💣 מוקש • 🛡️ מגן • ×2 כפול • 💰 נקודות</p>
+  <p class="wdesc">ענו נכון על 4 שאלות → סובבו את הגלגל!<br>💣 מוקש • 🛡️ מגן • ×2 כפול • 💰 נקודות<br><span style="font-size:.8rem;color:#a78bfa">5 שלבים: 🏺→🌊→📜→🏔️→🕍 הפרסים גדלים!</span></p>
   <div id="podDiv">
     <h3 style="color:#a78bfa;font-size:.93rem;margin:8px 0 5px">🏆 טבלת המובילים</h3>
     <div class="podium" id="podium"></div>
@@ -160,7 +160,7 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
     <div class="shbox" id="wshBox">🛡️ מגן</div>
     <div class="stbar" onclick="openAlb()"><span class="stl">🌟</span><span class="stc" id="wstCnt">0</span></div>
   </div>
-  <h2 class="wtitle2">🎉 סובבו את הגלגל!</h2>
+  <h2 class="wtitle2" id="wTitle">🎉 סובבו את הגלגל!</h2>
   <div class="wcon">
     <div class="wptr">▼</div>
     <canvas class="wcan" id="wCan" width="300" height="300"></canvas>
@@ -221,14 +221,53 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
 
 <script>
 var QS=[{"q": "כמה מכות היו במצרים?", "o": ["שבע", "עשר", "שתים-עשרה", "תשע"], "c": 1, "e": "🦟", "f": "עשר מכות! דם, צפרדע, כינים, ערוב, דבר, שחין, ברד, ארבה, חושך, מכת בכורות!"}, {"q": "מה הייתה המכה הראשונה?", "o": ["ארבה", "ברד", "דם", "צפרדע"], "c": 2, "e": "🩸", "f": "הנילוס נהפך לדם!"}, {"q": "מה שמים על הקערה לזכר קרבן הפסח?", "o": ["ביצה ועצם", "מצה ומרור", "יין ומים", "חרוסת ולחם"], "c": 0, "e": "🍽️", "f": "עצם (זרוע) לזכר קרבן הפסח, וביצה לזכר קרבן החגיגה!"}, {"q": "מה המצה מסמלת?", "o": ["עושר", "לחם העוני", "חגיגה", "ניצחון"], "c": 1, "e": "🫓", "f": "בני ישראל יצאו בחיפזון — הבצק לא הספיק לתפוח!"}, {"q": "מה הוא חמץ?", "o": ["כל אוכל מתוק", "בצק שתפח — אסור בפסח", "גבינה", "בשר"], "c": 1, "e": "🍞", "f": "חמץ הוא דגן שהותפח — חייבים לבער לפני פסח!"}, {"q": "כמה כוסות יין שותים בסדר?", "o": ["שתיים", "שלוש", "ארבע", "חמש"], "c": 2, "e": "🍷", "f": "ארבע כוסות כנגד ארבע לשונות גאולה!"}, {"q": "מי פיצל את ים סוף?", "o": ["משה", "אהרן", "יהושע", "ה' — דרך משה"], "c": 3, "e": "🌊", "f": "ה' אמר למשה: הרם את מטך — והים נקרע!"}, {"q": "כמה שנים שהו בני ישראל במצרים?", "o": ["100", "210", "400", "430"], "c": 3, "e": "⏳", "f": "430 שנה! 210 מהן עבדות קשה."}, {"q": "מה שמו של אחי משה?", "o": ["יהושע", "קלב", "אהרן", "נחשון"], "c": 2, "e": "🗣️", "f": "אהרן היה פה משה."}, {"q": "מה מסמל הכרפס בסדר?", "o": ["דמעות", "ירק האביב", "סדר", "משפחה"], "c": 1, "e": "🥗", "f": "כרפס — ירק האביב! טובלים במי מלח לזכר הדמעות."}, {"q": "כמה שאלות ב'מה נשתנה'?", "o": ["שתיים", "שלוש", "ארבע", "חמש"], "c": 2, "e": "❓", "f": "ארבע שאלות! מצה, מרור, טיבול, הסיבה."}, {"q": "מה הוא ה'אפיקומן'?", "o": ["שיר", "חצי מצה שמחביאים", "ספר", "כוס נוספת"], "c": 1, "e": "🫓", "f": "אפיקומן — חצי מצה שמחביאים; הילדים מוצאים ומשיגים מתנות!"}, {"q": "מה אומרים בסוף הסדר?", "o": ["חג שמח", "לשנה הבאה בירושלים!", "שבת שלום", "עם ישראל חי"], "c": 1, "e": "🕍", "f": "לשנה הבאה בירושלים!"}, {"q": "מה מסמלת החרוסת?", "o": ["ים סוף", "הטיט שבנו ממנו", "לחם", "פרחים"], "c": 1, "e": "🍎", "f": "חרוסת — מזכירה את הטיט עם תפוחים, תמרים, אגוזים ויין!"}, {"q": "כמה ימים חג הפסח?", "o": ["3", "5", "7 (8 בחו\\\"ל)", "10"], "c": 2, "e": "📅", "f": "7 ימים בארץ ו-8 בחוץ לארץ!"}, {"q": "מה מסמל שם 'פסח'?", "o": ["חיפזון", "ה' פסח על בתי ישראל", "שמחה", "חירות"], "c": 1, "e": "🐑", "f": "פסח — ה' פסח (דלג) על בתי ישראל!"}, {"q": "מה שרה מרים בים סוף?", "o": ["שיר הים", "מזמור לדוד", "לכה דודי", "הלל"], "c": 0, "e": "🎵", "f": "מרים לקחה תוף ושרה: שירו לה' כי גאה גאה!"}, {"q": "כמה שנה נדדו במדבר?", "o": ["10", "20", "30", "40"], "c": 3, "e": "🏜️", "f": "ארבעים שנה — כנגד 40 יום של המרגלים!"}, {"q": "מה שם אמו של משה?", "o": ["מרים", "יוכבד", "רחל", "שרה"], "c": 1, "e": "👩", "f": "יוכבד — אמו של משה, אהרן ומרים!"}, {"q": "מה ה' אמר למשה מהסנה?", "o": ["עלה להר", "הוצא את ישראל", "שיר שיר", "צום"], "c": 1, "e": "🔥", "f": "שלח את עמי!"}, {"q": "שמות המיילדות הצדיקות?", "o": ["רחל ולאה", "שיפרה ופועה", "מרים ודבורה", "תמר ורות"], "c": 1, "e": "👩‍⚕️", "f": "שיפרה ופועה — לא הרגו את הילדים!"}, {"q": "מה אסור לאכול בפסח?", "o": ["פירות", "חמץ", "בשר", "דגים"], "c": 1, "e": "🚫", "f": "חמץ אסור! לחם, פסטה, בירה — הכל מבוער!"}, {"q": "מי קפץ לים סוף ראשון?", "o": ["נחשון בן עמינדב", "אהרן", "יהושע", "קלב"], "c": 0, "e": "🦁", "f": "נחשון קפץ ראשון — ואז נקרע הים!"}, {"q": "מה על הקערה לזכר העבדות?", "o": ["ביצה", "מרור", "חרוסת", "כרפס"], "c": 1, "e": "🥬", "f": "מרור — לזכר מרירות העבדות!"}, {"q": "מי גידלה את משה?", "o": ["יוכבד", "בת פרעה", "מרים", "שיפרה"], "c": 1, "e": "👸", "f": "בת פרעה מצאה אותו בתיבה בנילוס!"}, {"q": "מה בנו בני ישראל במצרים?", "o": ["בהמות", "מסחר", "ערי מסכנות", "מתכות"], "c": 2, "e": "🧱", "f": "פיתום ורעמסס — ערי מסכנות!"}, {"q": "איזו מכה הרגה בכורות?", "o": ["ברד", "ארבה", "חושך", "מכת בכורות"], "c": 3, "e": "🌑", "f": "מכת בכורות — העשירית!"}, {"q": "למה טובלים כרפס במי מלח?", "o": ["לטעם", "לזכר דמעות", "למזל", "מנהג"], "c": 1, "e": "💧", "f": "מי מלח = דמעות העבדות."}, {"q": "מה אוכלים אחרון בסדר?", "o": ["מצה", "אפיקומן", "מרור", "ביצה"], "c": 1, "e": "🌙", "f": "האפיקומן — לזכר קרבן הפסח!"}, {"q": "המצווה המיוחדת בליל הסדר?", "o": ["שינה", "סיפור יציאת מצרים", "צום", "שתיקה"], "c": 1, "e": "📖", "f": "והגדת לבנך!"}, {"q": "מי הוביל אחרי משה?", "o": ["אהרן", "יהושע בן נון", "קלב", "נחשון"], "c": 1, "e": "⚔️", "f": "יהושע — הכניס את העם לארץ ישראל!"}, {"q": "כמה מכות בים סוף לפי חז\\\"ל?", "o": ["10", "50", "100", "250"], "c": 1, "e": "🌊", "f": "50 מכות — פי 5 ממצרים!"}];
-var SEGS=[
-  {l:"+200",clr:"#16a34a",em:"💰",t:"pts",v:200},
-  {l:"💣",clr:"#dc2626",em:"💣",t:"mine",v:-150},
-  {l:"+100",clr:"#0284c7",em:"💎",t:"pts",v:100},
-  {l:"🛡️ מגן",clr:"#3b82f6",em:"🛡️",t:"shield",v:0},
-  {l:"+50",clr:"#7c3aed",em:"⭐",t:"pts",v:50},
-  {l:"×2",clr:"#d97706",em:"🔥",t:"x2",v:0}
+// ═══ STAGES ═══
+var STAGES=[
+  {name:"יציאת מצרים",icon:"🏺",bg:"#302b63",segs:[
+    {l:"+50",clr:"#16a34a",em:"💰",t:"pts",v:50},
+    {l:"💣 -50",clr:"#dc2626",em:"💣",t:"mine",v:-50},
+    {l:"+100",clr:"#0284c7",em:"💎",t:"pts",v:100},
+    {l:"🛡️ מגן",clr:"#3b82f6",em:"🛡️",t:"shield",v:0},
+    {l:"+25",clr:"#7c3aed",em:"⭐",t:"pts",v:25},
+    {l:"×2",clr:"#d97706",em:"🔥",t:"x2",v:0}
+  ]},
+  {name:"קריעת ים סוף",icon:"🌊",bg:"#1e3a5f",segs:[
+    {l:"+100",clr:"#16a34a",em:"💰",t:"pts",v:100},
+    {l:"💣 -100",clr:"#dc2626",em:"💣",t:"mine",v:-100},
+    {l:"+200",clr:"#0284c7",em:"💎",t:"pts",v:200},
+    {l:"🛡️ מגן",clr:"#3b82f6",em:"🛡️",t:"shield",v:0},
+    {l:"+50",clr:"#7c3aed",em:"⭐",t:"pts",v:50},
+    {l:"×2",clr:"#d97706",em:"🔥",t:"x2",v:0}
+  ]},
+  {name:"מתן תורה",icon:"📜",bg:"#3b1f2b",segs:[
+    {l:"+200",clr:"#16a34a",em:"💰",t:"pts",v:200},
+    {l:"💣 -150",clr:"#dc2626",em:"💣",t:"mine",v:-150},
+    {l:"+300",clr:"#0284c7",em:"💎",t:"pts",v:300},
+    {l:"🛡️ מגן",clr:"#3b82f6",em:"🛡️",t:"shield",v:0},
+    {l:"+100",clr:"#7c3aed",em:"⭐",t:"pts",v:100},
+    {l:"×2",clr:"#d97706",em:"🔥",t:"x2",v:0}
+  ]},
+  {name:"ארץ ישראל",icon:"🏔️",bg:"#1a3c34",segs:[
+    {l:"+300",clr:"#16a34a",em:"💰",t:"pts",v:300},
+    {l:"💣 -200",clr:"#dc2626",em:"💣",t:"mine",v:-200},
+    {l:"+500",clr:"#0284c7",em:"💎",t:"pts",v:500},
+    {l:"🛡️×2",clr:"#3b82f6",em:"🛡️",t:"shield",v:0},
+    {l:"+150",clr:"#7c3aed",em:"⭐",t:"pts",v:150},
+    {l:"×2",clr:"#d97706",em:"🔥",t:"x2",v:0}
+  ]},
+  {name:"בית המקדש",icon:"🕍",bg:"#3d2b1f",segs:[
+    {l:"+500",clr:"#16a34a",em:"💰",t:"pts",v:500},
+    {l:"💣 -300",clr:"#dc2626",em:"💣",t:"mine",v:-300},
+    {l:"+1000",clr:"#0284c7",em:"💎",t:"pts",v:1000},
+    {l:"🛡️ מגן",clr:"#3b82f6",em:"🛡️",t:"shield",v:0},
+    {l:"+250",clr:"#7c3aed",em:"⭐",t:"pts",v:250},
+    {l:"×3!",clr:"#d97706",em:"🔥",t:"x3",v:0}
+  ]}
 ];
+function getSegs(){return STAGES[Math.min(lvl-1,STAGES.length-1)].segs}
+function getStageName(){return STAGES[Math.min(lvl-1,STAGES.length-1)].name}
+function getStageIcon(){return STAGES[Math.min(lvl-1,STAGES.length-1)].icon}
+var SEGS=STAGES[0].segs;
 var FB="https://album-bea15-default-rtdb.firebaseio.com",LP="/pesach-wheel-lb";
 var name="",sc=0,shield=false,cor=0,rnd=1,qi=0,ans=false,sq=[],tc=0,ta=0,spinning=false,lb=[];
 var lvl=1,streak=0,maxStreak=0,roundMistakes=0,totalWheelSpins=0;
@@ -333,7 +372,7 @@ function nxt(){
   }
   qi++;ask();
 }
-function goToWheel(){show("scrWheel");wui();drawW(0);cor=0;roundMistakes=0;}
+function goToWheel(){show("scrWheel");wui();drawW(0);cor=0;roundMistakes=0;document.getElementById("wTitle").textContent="🎉 "+getStageName()+" — סובבו!";}
 
 function ui(){
   var s=document.getElementById("sBox");s.textContent="🏆 "+sc;s.classList.remove("bump");void s.offsetWidth;s.classList.add("bump");
@@ -349,7 +388,7 @@ function wui(){
 function drawW(rot){
   var cv=document.getElementById("wCan"),sz=cv.width,ctx=cv.getContext("2d"),cx=sz/2,cy=sz/2,r=sz/2-3;
   ctx.clearRect(0,0,sz,sz);ctx.save();ctx.translate(cx,cy);ctx.rotate(rot);
-  var sa=Math.PI*2/SEGS.length;
+  SEGS=getSegs();var sa=Math.PI*2/SEGS.length;
   SEGS.forEach(function(sg,i){
     var st=i*sa-Math.PI/2,en=st+sa;
     ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,st,en);ctx.closePath();ctx.fillStyle=sg.clr;ctx.fill();
@@ -366,7 +405,7 @@ function drawW(rot){
 function spin(){
   if(spinning)return;spinning=true;
   document.getElementById("spBtn").disabled=true;document.getElementById("wRes").textContent="";
-  var sa=Math.PI*2/SEGS.length,ti=Math.floor(Math.random()*SEGS.length);
+  SEGS=getSegs();var sa=Math.PI*2/SEGS.length,ti=Math.floor(Math.random()*SEGS.length);
   var ta2=2*Math.PI-ti*sa-sa/2,total=Math.PI*2*(5+Math.random()*3)+ta2;
   var t0=null,dur=3800,lastS=-1;
   function anim(ts){
@@ -386,7 +425,7 @@ function result(i){
     if(shield){shield=false;msg="🛡️💣 המגן הציל! 0 הורדו!";rd.style.background="rgba(59,130,246,.18)";rd.style.color="#93c5fd";beep(500,.18,.12)}
     else{sc=Math.max(0,sc+sg.v);msg="💣 מוקש! "+sg.v+" נקודות! סה\"כ: "+sc;rd.style.background="rgba(220,38,38,.18)";rd.style.color="#fca5a5";flash("#dc2626");fsc(""+sg.v,"#fca5a5");beep(200,.2,.25)}
   }else if(sg.t==="shield"){shield=true;msg="🛡️ מגן! יגן מהמוקש הבא!";rd.style.background="rgba(59,130,246,.18)";rd.style.color="#93c5fd";beep(900,.12,.15)}
-  else if(sg.t==="x2"){var bf=sc;sc*=2;msg="🔥 ×2! "+bf+" → "+sc;rd.style.background="rgba(217,119,6,.18)";rd.style.color="#fde68a";confetti(50);fsc("×2!","#fde68a");beep(1200,.18,.15)}
+  else if(sg.t==="x2"||sg.t==="x3"){var mult=sg.t==="x3"?3:2;var bf=sc;sc*=mult;msg="🔥 ×"+mult+"! "+bf+" → "+sc;rd.style.background="rgba(217,119,6,.18)";rd.style.color="#fde68a";confetti(50);fsc("×2!","#fde68a");beep(1200,.18,.15)}
   rd.textContent=msg;wui();rnd++;totalWheelSpins++;save();checkStickers();checkLvl();
   var btn=document.getElementById("spBtn");
   btn.textContent="▶ המשך לשאלות!";btn.disabled=false;
@@ -432,22 +471,22 @@ function showCombo(txt){
   setTimeout(function(){cp.classList.remove("on")},1100);
 }
 function checkLvl(){
-  var newLvl=Math.floor(totalWheelSpins/3)+1;
+  var newLvl=Math.min(Math.floor(totalWheelSpins/2)+1,STAGES.length);
   if(newLvl>lvl){lvl=newLvl;showLvlUp()}
-  document.getElementById("lvlBox").textContent=getLvlIcon()+" שלב "+lvl;
+  document.getElementById("lvlBox").textContent=getStageIcon()+" "+getStageName();
 }
-function getLvlIcon(){
-  if(lvl>=10)return"👑";if(lvl>=7)return"💎";if(lvl>=5)return"🔥";if(lvl>=3)return"⭐";return"⭐";
-}
+function getLvlIcon(){return getStageIcon()}
 function getLvlTitle(){
-  if(lvl>=10)return"אגדה!";if(lvl>=7)return"גאון!";if(lvl>=5)return"מומחה!";if(lvl>=3)return"חכם!";return"מתחיל";
+  var t=["מתחיל","גיבור","מומחה","אלוף","אגדה!"];
+  return t[Math.min(lvl-1,t.length-1)];
 }
 function showLvlUp(){
-  var titles=["","","🌟","⭐","⭐","🔥","🔥","💎","💎","💎","👑"];
-  document.getElementById("lvlE").textContent=titles[Math.min(lvl,10)]||"🎉";
-  document.getElementById("lvlT").textContent="שלב "+lvl+"!";
-  document.getElementById("lvlS").textContent=getLvlTitle()+" — כל הכבוד!";
+  document.getElementById("lvlE").textContent=getStageIcon();
+  document.getElementById("lvlT").textContent="שלב "+lvl+" — "+getStageName()+"!";
+  document.getElementById("lvlS").innerHTML=getLvlTitle()+"<br><span style=\'font-size:.85rem;color:#fbbf24\'>הפרסים בגלגל גדלו! 🎡</span>";
   document.getElementById("lvlO").classList.add("vis");
+  // Stage background change
+  document.body.style.background="linear-gradient(180deg,#0f0c29,"+STAGES[Math.min(lvl-1,STAGES.length-1)].bg+",#24243e)";
   confetti(80);beep(1e3,.2,.1);setTimeout(function(){beep(1200,.15,.1)},200);setTimeout(function(){beep(1500,.15,.15)},400);
 }
 function closeLvl(){document.getElementById("lvlO").classList.remove("vis")}
