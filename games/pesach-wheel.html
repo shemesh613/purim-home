@@ -96,6 +96,21 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
 @keyframes stIn{0%{transform:scale(0) rotate(-90deg)}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
 .sfly{position:fixed;top:50%;left:50%;font-size:3rem;z-index:1200;pointer-events:none;animation:sflyA .8s ease-out forwards}
 @keyframes sflyA{0%{transform:translate(-50%,-50%) scale(0) rotate(-180deg);opacity:1}50%{transform:translate(-50%,-50%) scale(1.5) rotate(10deg);opacity:1}100%{transform:translate(-50%,-80px) scale(.5);opacity:0}}
+
+.lvlbox{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:5px 12px;border-radius:12px;font-weight:900;font-size:.82rem;box-shadow:0 2px 8px rgba(124,58,237,.4)}
+.combo-pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Frank Ruhl Libre',serif;font-size:clamp(3rem,12vw,6rem);font-weight:900;color:#fff;text-shadow:0 0 25px rgba(251,191,36,.7),0 0 50px rgba(124,58,237,.5),0 4px 12px rgba(0,0,0,.3);pointer-events:none;z-index:200;opacity:0;display:none}
+.combo-pop.on{display:block;animation:cpop 1s ease-out forwards}
+@keyframes cpop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-15deg)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.4) rotate(8deg)}50%{transform:translate(-50%,-50%) scale(1.1) rotate(-3deg)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.8) rotate(0)}}
+.streak-bar{background:linear-gradient(135deg,#ef4444,#f97316);color:#fff;padding:5px 12px;border-radius:12px;font-weight:900;font-size:.82rem;display:none;box-shadow:0 2px 8px rgba(239,68,68,.4)}
+.streak-bar.on{display:block;animation:sBump .4s ease-out}
+.lvlup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:300;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.lvlup-overlay.vis{display:flex;animation:lvlFade .5s ease-out}
+@keyframes lvlFade{from{opacity:0}to{opacity:1}}
+.lvlup-emoji{font-size:5rem;animation:bounce 1s ease-in-out infinite}
+.lvlup-title{font-family:'Frank Ruhl Libre',serif;font-size:2rem;color:#fbbf24;text-shadow:0 2px 15px rgba(251,191,36,.5)}
+.lvlup-sub{color:#c4b5fd;font-size:1rem}
+.lvlup-btn{font-family:'Heebo',sans-serif;padding:12px 36px;border:none;border-radius:14px;font-size:1.1rem;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1e1b4b;box-shadow:0 5px 20px rgba(251,191,36,.4);margin-top:8px}
+.perfect{background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(245,158,11,.1));border:2px solid rgba(251,191,36,.4);border-radius:16px;padding:12px;margin-top:8px;text-align:center;color:#fbbf24;font-weight:700;font-size:.95rem;animation:fi .4s ease-out}
 </style>
 </head>
 <body>
@@ -124,6 +139,8 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
     <div class="sbox" id="sBox">🏆 0</div>
     <div class="shbox" id="shBox">🛡️ מגן</div>
     <div class="ccnt" id="cCnt">✅ 0/4</div>
+    <div class="lvlbox" id="lvlBox">⭐ שלב 1</div>
+    <div class="streak-bar" id="streakBar">🔥 רצף: 0</div>
     <span class="pinfo" id="pInfo">סבב 1</span>
     <div class="stbar" onclick="openAlb()"><span class="stl">🌟</span><span class="stc" id="stCnt">0</span></div>
   </div>
@@ -191,6 +208,15 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
   </div>
 </div>
 
+
+<!-- LEVEL UP -->
+<div class="lvlup-overlay" id="lvlO">
+  <div class="lvlup-emoji" id="lvlE">🎉</div>
+  <div class="lvlup-title" id="lvlT">עליתם שלב!</div>
+  <div class="lvlup-sub" id="lvlS"></div>
+  <button class="lvlup-btn" onclick="closeLvl()">▶ המשך!</button>
+</div>
+<div class="combo-pop" id="comboPop"></div>
 <!-- Hidden admin link -->
 
 <script>
@@ -205,6 +231,7 @@ var SEGS=[
 ];
 var FB="https://album-bea15-default-rtdb.firebaseio.com",LP="/pesach-wheel-lb";
 var name="",sc=0,shield=false,cor=0,rnd=1,qi=0,ans=false,sq=[],tc=0,ta=0,spinning=false,lb=[];
+var lvl=1,streak=0,maxStreak=0,roundMistakes=0,totalWheelSpins=0;
 
 // Init
 var ni=document.getElementById("nameIn");
@@ -252,7 +279,7 @@ function go(){
   localStorage.setItem("pw-name",name);
   // Load existing score
   var ex=lb.find(function(p){return p.name===name});
-  sc=ex?ex.score:0; shield=false;cor=0;rnd=1;tc=0;ta=0;
+  sc=ex?ex.score:0; shield=false;cor=0;rnd=1;tc=0;ta=0;lvl=1;streak=0;maxStreak=0;roundMistakes=0;totalWheelSpins=0;
   sq=QS.slice().sort(function(){return Math.random()-.5});qi=0;
   loadStickers();
   show("scrQuiz");ui();ask();
@@ -274,17 +301,39 @@ function pick(i){
   var q=sq[qi],bs=document.querySelectorAll(".obtn");
   bs.forEach(function(b,j){b.classList.add("dis");if(j===q.c)b.classList.add("ok");if(j===i&&i!==q.c)b.classList.add("no")});
   var fb=document.getElementById("fb");
-  if(i===q.c){cor++;tc++;fb.textContent="✅ "+q.f;fb.className="fb fbok";confetti(25);beep(800,.12,.1)}
-  else{fb.textContent="❌ "+q.f;fb.className="fb fbno";beep(250,.12,.18)}
-  ui();
+  if(i===q.c){
+    cor++;tc++;streak++;if(streak>maxStreak)maxStreak=streak;
+    var bonus=0;
+    if(streak>=5)bonus=50;else if(streak>=3)bonus=25;else if(streak>=2)bonus=10;
+    sc+=bonus;
+    var msg="✅ "+q.f;
+    if(bonus>0)msg+=" (+"+bonus+" בונוס רצף!)";
+    fb.textContent=msg;fb.className="fb fbok";
+    confetti(20+streak*5);beep(800+streak*50,.12,.1);
+    if(streak>=3){showCombo("🔥 רצף "+streak+"!")}
+  }else{
+    streak=0;roundMistakes++;
+    fb.textContent="❌ "+q.f;fb.className="fb fbno";beep(250,.12,.18);
+  }
+  updStreak();ui();
   document.getElementById("nBtn").textContent=cor>=4?"🎡 לגלגל המזל!":"השאלה הבאה ←";
   document.getElementById("nBtn").classList.add("vis");
 }
 
 function nxt(){
-  if(cor>=4){show("scrWheel");wui();drawW(0);cor=0;return}
+  if(cor>=4){
+    if(roundMistakes===0){
+      sc+=100;
+      var pd=document.createElement("div");pd.className="perfect";pd.textContent="🌟 סבב מושלם! +100 בונוס!";
+      document.querySelector(".qcard").appendChild(pd);
+      confetti(50);beep(1200,.15,.15);
+      setTimeout(function(){pd.remove();goToWheel()},1500);
+    }else{goToWheel()}
+    return;
+  }
   qi++;ask();
 }
+function goToWheel(){show("scrWheel");wui();drawW(0);cor=0;roundMistakes=0;}
 
 function ui(){
   var s=document.getElementById("sBox");s.textContent="🏆 "+sc;s.classList.remove("bump");void s.offsetWidth;s.classList.add("bump");
@@ -338,7 +387,7 @@ function result(i){
     else{sc=Math.max(0,sc+sg.v);msg="💣 מוקש! "+sg.v+" נקודות! סה\"כ: "+sc;rd.style.background="rgba(220,38,38,.18)";rd.style.color="#fca5a5";flash("#dc2626");fsc(""+sg.v,"#fca5a5");beep(200,.2,.25)}
   }else if(sg.t==="shield"){shield=true;msg="🛡️ מגן! יגן מהמוקש הבא!";rd.style.background="rgba(59,130,246,.18)";rd.style.color="#93c5fd";beep(900,.12,.15)}
   else if(sg.t==="x2"){var bf=sc;sc*=2;msg="🔥 ×2! "+bf+" → "+sc;rd.style.background="rgba(217,119,6,.18)";rd.style.color="#fde68a";confetti(50);fsc("×2!","#fde68a");beep(1200,.18,.15)}
-  rd.textContent=msg;wui();rnd++;save();checkStickers();
+  rd.textContent=msg;wui();rnd++;totalWheelSpins++;save();checkStickers();checkLvl();
   var btn=document.getElementById("spBtn");
   btn.textContent="▶ המשך לשאלות!";btn.disabled=false;
   btn.onclick=function(){show("scrQuiz");qi++;cor=0;ui();ask();btn.textContent="🎡 סובבו!";btn.onclick=spin};
@@ -373,6 +422,36 @@ function delPlayer(n){
   if(!confirm("למחוק את "+n+"?"))return;
   fetch(FB+LP+"/"+encodeURIComponent(n)+".json",{method:"DELETE"}).then(function(){loadLB();setTimeout(renderAdm,500)}).catch(function(){});
 }
+function updStreak(){
+  var sb=document.getElementById("streakBar");
+  if(streak>=2){sb.textContent="🔥 רצף: "+streak;sb.classList.add("on");sb.classList.remove("on");void sb.offsetWidth;sb.classList.add("on")}
+  else{sb.classList.remove("on")}
+}
+function showCombo(txt){
+  var cp=document.getElementById("comboPop");cp.textContent=txt;cp.classList.remove("on");void cp.offsetWidth;cp.classList.add("on");
+  setTimeout(function(){cp.classList.remove("on")},1100);
+}
+function checkLvl(){
+  var newLvl=Math.floor(totalWheelSpins/3)+1;
+  if(newLvl>lvl){lvl=newLvl;showLvlUp()}
+  document.getElementById("lvlBox").textContent=getLvlIcon()+" שלב "+lvl;
+}
+function getLvlIcon(){
+  if(lvl>=10)return"👑";if(lvl>=7)return"💎";if(lvl>=5)return"🔥";if(lvl>=3)return"⭐";return"⭐";
+}
+function getLvlTitle(){
+  if(lvl>=10)return"אגדה!";if(lvl>=7)return"גאון!";if(lvl>=5)return"מומחה!";if(lvl>=3)return"חכם!";return"מתחיל";
+}
+function showLvlUp(){
+  var titles=["","","🌟","⭐","⭐","🔥","🔥","💎","💎","💎","👑"];
+  document.getElementById("lvlE").textContent=titles[Math.min(lvl,10)]||"🎉";
+  document.getElementById("lvlT").textContent="שלב "+lvl+"!";
+  document.getElementById("lvlS").textContent=getLvlTitle()+" — כל הכבוד!";
+  document.getElementById("lvlO").classList.add("vis");
+  confetti(80);beep(1e3,.2,.1);setTimeout(function(){beep(1200,.15,.1)},200);setTimeout(function(){beep(1500,.15,.15)},400);
+}
+function closeLvl(){document.getElementById("lvlO").classList.remove("vis")}
+
 // ══ STICKERS ══
 var STICKERS=["🫓","🍷","🥚","🦴","🥬","🍎","🐸","🌊","🔥","🕍","⭐","✡️","🏜️","🎵","💫","🌟","🐑","🕊️","🌾","🏺","🧺","🌸","🦋","🐝","🍋","🌿","🏔️","💎","🥇","🏆","🎁","🪙","🌈","🌺","🎭","💧","🌙","☀️","🌻","🦅","📜","🔔","🎪","🎯","🎲","🧩","🎨","🎻","🪘","🥁","🏅","👑","💫","🌠","🎇","🎆","✨","💥","🔱","⚜️","🛡️","⚔️","🏹","🪬","📿","🕎","🔯","🪷","🌴","🐫","🦁","🐍","🦟","🐄","🐐","🕷️","🦂","🌪️","❄️","⛈️","🌋","🗻","🏛️","⛺","🚶","👨‍👩‍👦","🧓","👶","🫅","🤴","🧙","🦸","💪","🙏","❤️","🕐","📖","🗝️","🎡","🫒"];
 var myStickers=[],STICKER_COST=20000,lastStCheck=0;
