@@ -56,7 +56,7 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
 .wscreen .wtitle2{font-family:'Frank Ruhl Libre',serif;font-size:1.5rem;color:#fbbf24;margin-top:8px}
 .wcon{position:relative;width:300px;height:300px;margin:8px auto}
 @media(max-width:380px){.wcon{width:260px;height:260px}}
-.wcan{width:100%;height:100%;border-radius:50%;box-shadow:0 0 35px rgba(251,191,36,.25)}
+.wcan{width:100%;height:100%;border-radius:50%;box-shadow:0 0 35px rgba(251,191,36,.25);transition:box-shadow .5s}
 .wptr{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:2.3rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));z-index:5}
 .spbtn{font-family:'Heebo',sans-serif;padding:14px 44px;border:none;border-radius:16px;font-size:1.2rem;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1e1b4b;box-shadow:0 5px 20px rgba(251,191,36,.4);transition:.3s;animation:pls 2s ease-in-out infinite}
 @keyframes pls{0%,100%{box-shadow:0 5px 20px rgba(251,191,36,.4)}50%{box-shadow:0 5px 35px rgba(251,191,36,.65)}}
@@ -223,45 +223,45 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
 var QS=[{"q": "כמה מכות היו במצרים?", "o": ["שבע", "עשר", "שתים-עשרה", "תשע"], "c": 1, "e": "🦟", "f": "עשר מכות! דם, צפרדע, כינים, ערוב, דבר, שחין, ברד, ארבה, חושך, מכת בכורות!"}, {"q": "מה הייתה המכה הראשונה?", "o": ["ארבה", "ברד", "דם", "צפרדע"], "c": 2, "e": "🩸", "f": "הנילוס נהפך לדם!"}, {"q": "מה שמים על הקערה לזכר קרבן הפסח?", "o": ["ביצה ועצם", "מצה ומרור", "יין ומים", "חרוסת ולחם"], "c": 0, "e": "🍽️", "f": "עצם (זרוע) לזכר קרבן הפסח, וביצה לזכר קרבן החגיגה!"}, {"q": "מה המצה מסמלת?", "o": ["עושר", "לחם העוני", "חגיגה", "ניצחון"], "c": 1, "e": "🫓", "f": "בני ישראל יצאו בחיפזון — הבצק לא הספיק לתפוח!"}, {"q": "מה הוא חמץ?", "o": ["כל אוכל מתוק", "בצק שתפח — אסור בפסח", "גבינה", "בשר"], "c": 1, "e": "🍞", "f": "חמץ הוא דגן שהותפח — חייבים לבער לפני פסח!"}, {"q": "כמה כוסות יין שותים בסדר?", "o": ["שתיים", "שלוש", "ארבע", "חמש"], "c": 2, "e": "🍷", "f": "ארבע כוסות כנגד ארבע לשונות גאולה!"}, {"q": "מי פיצל את ים סוף?", "o": ["משה", "אהרן", "יהושע", "ה' — דרך משה"], "c": 3, "e": "🌊", "f": "ה' אמר למשה: הרם את מטך — והים נקרע!"}, {"q": "כמה שנים שהו בני ישראל במצרים?", "o": ["100", "210", "400", "430"], "c": 3, "e": "⏳", "f": "430 שנה! 210 מהן עבדות קשה."}, {"q": "מה שמו של אחי משה?", "o": ["יהושע", "קלב", "אהרן", "נחשון"], "c": 2, "e": "🗣️", "f": "אהרן היה פה משה."}, {"q": "מה מסמל הכרפס בסדר?", "o": ["דמעות", "ירק האביב", "סדר", "משפחה"], "c": 1, "e": "🥗", "f": "כרפס — ירק האביב! טובלים במי מלח לזכר הדמעות."}, {"q": "כמה שאלות ב'מה נשתנה'?", "o": ["שתיים", "שלוש", "ארבע", "חמש"], "c": 2, "e": "❓", "f": "ארבע שאלות! מצה, מרור, טיבול, הסיבה."}, {"q": "מה הוא ה'אפיקומן'?", "o": ["שיר", "חצי מצה שמחביאים", "ספר", "כוס נוספת"], "c": 1, "e": "🫓", "f": "אפיקומן — חצי מצה שמחביאים; הילדים מוצאים ומשיגים מתנות!"}, {"q": "מה אומרים בסוף הסדר?", "o": ["חג שמח", "לשנה הבאה בירושלים!", "שבת שלום", "עם ישראל חי"], "c": 1, "e": "🕍", "f": "לשנה הבאה בירושלים!"}, {"q": "מה מסמלת החרוסת?", "o": ["ים סוף", "הטיט שבנו ממנו", "לחם", "פרחים"], "c": 1, "e": "🍎", "f": "חרוסת — מזכירה את הטיט עם תפוחים, תמרים, אגוזים ויין!"}, {"q": "כמה ימים חג הפסח?", "o": ["3", "5", "7 (8 בחו\\\"ל)", "10"], "c": 2, "e": "📅", "f": "7 ימים בארץ ו-8 בחוץ לארץ!"}, {"q": "מה מסמל שם 'פסח'?", "o": ["חיפזון", "ה' פסח על בתי ישראל", "שמחה", "חירות"], "c": 1, "e": "🐑", "f": "פסח — ה' פסח (דלג) על בתי ישראל!"}, {"q": "מה שרה מרים בים סוף?", "o": ["שיר הים", "מזמור לדוד", "לכה דודי", "הלל"], "c": 0, "e": "🎵", "f": "מרים לקחה תוף ושרה: שירו לה' כי גאה גאה!"}, {"q": "כמה שנה נדדו במדבר?", "o": ["10", "20", "30", "40"], "c": 3, "e": "🏜️", "f": "ארבעים שנה — כנגד 40 יום של המרגלים!"}, {"q": "מה שם אמו של משה?", "o": ["מרים", "יוכבד", "רחל", "שרה"], "c": 1, "e": "👩", "f": "יוכבד — אמו של משה, אהרן ומרים!"}, {"q": "מה ה' אמר למשה מהסנה?", "o": ["עלה להר", "הוצא את ישראל", "שיר שיר", "צום"], "c": 1, "e": "🔥", "f": "שלח את עמי!"}, {"q": "שמות המיילדות הצדיקות?", "o": ["רחל ולאה", "שיפרה ופועה", "מרים ודבורה", "תמר ורות"], "c": 1, "e": "👩‍⚕️", "f": "שיפרה ופועה — לא הרגו את הילדים!"}, {"q": "מה אסור לאכול בפסח?", "o": ["פירות", "חמץ", "בשר", "דגים"], "c": 1, "e": "🚫", "f": "חמץ אסור! לחם, פסטה, בירה — הכל מבוער!"}, {"q": "מי קפץ לים סוף ראשון?", "o": ["נחשון בן עמינדב", "אהרן", "יהושע", "קלב"], "c": 0, "e": "🦁", "f": "נחשון קפץ ראשון — ואז נקרע הים!"}, {"q": "מה על הקערה לזכר העבדות?", "o": ["ביצה", "מרור", "חרוסת", "כרפס"], "c": 1, "e": "🥬", "f": "מרור — לזכר מרירות העבדות!"}, {"q": "מי גידלה את משה?", "o": ["יוכבד", "בת פרעה", "מרים", "שיפרה"], "c": 1, "e": "👸", "f": "בת פרעה מצאה אותו בתיבה בנילוס!"}, {"q": "מה בנו בני ישראל במצרים?", "o": ["בהמות", "מסחר", "ערי מסכנות", "מתכות"], "c": 2, "e": "🧱", "f": "פיתום ורעמסס — ערי מסכנות!"}, {"q": "איזו מכה הרגה בכורות?", "o": ["ברד", "ארבה", "חושך", "מכת בכורות"], "c": 3, "e": "🌑", "f": "מכת בכורות — העשירית!"}, {"q": "למה טובלים כרפס במי מלח?", "o": ["לטעם", "לזכר דמעות", "למזל", "מנהג"], "c": 1, "e": "💧", "f": "מי מלח = דמעות העבדות."}, {"q": "מה אוכלים אחרון בסדר?", "o": ["מצה", "אפיקומן", "מרור", "ביצה"], "c": 1, "e": "🌙", "f": "האפיקומן — לזכר קרבן הפסח!"}, {"q": "המצווה המיוחדת בליל הסדר?", "o": ["שינה", "סיפור יציאת מצרים", "צום", "שתיקה"], "c": 1, "e": "📖", "f": "והגדת לבנך!"}, {"q": "מי הוביל אחרי משה?", "o": ["אהרן", "יהושע בן נון", "קלב", "נחשון"], "c": 1, "e": "⚔️", "f": "יהושע — הכניס את העם לארץ ישראל!"}, {"q": "כמה מכות בים סוף לפי חז\\\"ל?", "o": ["10", "50", "100", "250"], "c": 1, "e": "🌊", "f": "50 מכות — פי 5 ממצרים!"}];
 // ═══ STAGES ═══
 var STAGES=[
-  {name:"יציאת מצרים",icon:"🏺",bg:"#302b63",segs:[
-    {l:"+50",clr:"#16a34a",em:"💰",t:"pts",v:50},
+  {name:"יציאת מצרים",icon:"🏺",bg:"#302b63",ring:"#a78bfa",center:"#1e1b4b",segs:[
+    {l:"+50",clr:"#059669",em:"💰",t:"pts",v:50},
     {l:"💣 -50",clr:"#dc2626",em:"💣",t:"mine",v:-50},
-    {l:"+100",clr:"#0284c7",em:"💎",t:"pts",v:100},
-    {l:"🛡️ מגן",clr:"#3b82f6",em:"🛡️",t:"shield",v:0},
+    {l:"+100",clr:"#0369a1",em:"💎",t:"pts",v:100},
+    {l:"🛡️ מגן",clr:"#2563eb",em:"🛡️",t:"shield",v:0},
     {l:"+25",clr:"#7c3aed",em:"⭐",t:"pts",v:25},
-    {l:"×2",clr:"#d97706",em:"🔥",t:"x2",v:0}
+    {l:"×2",clr:"#b45309",em:"🔥",t:"x2",v:0}
   ]},
-  {name:"קריעת ים סוף",icon:"🌊",bg:"#1e3a5f",segs:[
-    {l:"+100",clr:"#16a34a",em:"💰",t:"pts",v:100},
-    {l:"💣 -100",clr:"#dc2626",em:"💣",t:"mine",v:-100},
+  {name:"קריעת ים סוף",icon:"🌊",bg:"#0c4a6e",ring:"#38bdf8",center:"#0c4a6e",segs:[
+    {l:"+100",clr:"#0ea5e9",em:"💰",t:"pts",v:100},
+    {l:"💣 -100",clr:"#b91c1c",em:"💣",t:"mine",v:-100},
     {l:"+200",clr:"#0284c7",em:"💎",t:"pts",v:200},
-    {l:"🛡️ מגן",clr:"#3b82f6",em:"🛡️",t:"shield",v:0},
-    {l:"+50",clr:"#7c3aed",em:"⭐",t:"pts",v:50},
-    {l:"×2",clr:"#d97706",em:"🔥",t:"x2",v:0}
+    {l:"🛡️ מגן",clr:"#1d4ed8",em:"🛡️",t:"shield",v:0},
+    {l:"+50",clr:"#06b6d4",em:"⭐",t:"pts",v:50},
+    {l:"×2",clr:"#0891b2",em:"🌊",t:"x2",v:0}
   ]},
-  {name:"מתן תורה",icon:"📜",bg:"#3b1f2b",segs:[
-    {l:"+200",clr:"#16a34a",em:"💰",t:"pts",v:200},
-    {l:"💣 -150",clr:"#dc2626",em:"💣",t:"mine",v:-150},
-    {l:"+300",clr:"#0284c7",em:"💎",t:"pts",v:300},
-    {l:"🛡️ מגן",clr:"#3b82f6",em:"🛡️",t:"shield",v:0},
-    {l:"+100",clr:"#7c3aed",em:"⭐",t:"pts",v:100},
-    {l:"×2",clr:"#d97706",em:"🔥",t:"x2",v:0}
+  {name:"מתן תורה",icon:"📜",bg:"#451a03",ring:"#fbbf24",center:"#451a03",segs:[
+    {l:"+200",clr:"#ca8a04",em:"💰",t:"pts",v:200},
+    {l:"💣 -150",clr:"#991b1b",em:"💣",t:"mine",v:-150},
+    {l:"+300",clr:"#a16207",em:"💎",t:"pts",v:300},
+    {l:"🛡️ מגן",clr:"#d97706",em:"🛡️",t:"shield",v:0},
+    {l:"+100",clr:"#b45309",em:"⭐",t:"pts",v:100},
+    {l:"×2",clr:"#92400e",em:"🔥",t:"x2",v:0}
   ]},
-  {name:"ארץ ישראל",icon:"🏔️",bg:"#1a3c34",segs:[
+  {name:"ארץ ישראל",icon:"🏔️",bg:"#14532d",ring:"#4ade80",center:"#14532d",segs:[
     {l:"+300",clr:"#16a34a",em:"💰",t:"pts",v:300},
     {l:"💣 -200",clr:"#dc2626",em:"💣",t:"mine",v:-200},
-    {l:"+500",clr:"#0284c7",em:"💎",t:"pts",v:500},
-    {l:"🛡️×2",clr:"#3b82f6",em:"🛡️",t:"shield",v:0},
-    {l:"+150",clr:"#7c3aed",em:"⭐",t:"pts",v:150},
-    {l:"×2",clr:"#d97706",em:"🔥",t:"x2",v:0}
+    {l:"+500",clr:"#15803d",em:"💎",t:"pts",v:500},
+    {l:"🛡️×2",clr:"#059669",em:"🛡️",t:"shield",v:0},
+    {l:"+150",clr:"#047857",em:"⭐",t:"pts",v:150},
+    {l:"×2",clr:"#065f46",em:"🌿",t:"x2",v:0}
   ]},
-  {name:"בית המקדש",icon:"🕍",bg:"#3d2b1f",segs:[
-    {l:"+500",clr:"#16a34a",em:"💰",t:"pts",v:500},
-    {l:"💣 -300",clr:"#dc2626",em:"💣",t:"mine",v:-300},
-    {l:"+1000",clr:"#0284c7",em:"💎",t:"pts",v:1000},
-    {l:"🛡️ מגן",clr:"#3b82f6",em:"🛡️",t:"shield",v:0},
-    {l:"+250",clr:"#7c3aed",em:"⭐",t:"pts",v:250},
-    {l:"×3!",clr:"#d97706",em:"🔥",t:"x3",v:0}
+  {name:"בית המקדש",icon:"🕍",bg:"#3d2b1f",ring:"#fcd34d",center:"#3d2b1f",segs:[
+    {l:"+500",clr:"#854d0e",em:"💰",t:"pts",v:500},
+    {l:"💣 -300",clr:"#7f1d1d",em:"💣",t:"mine",v:-300},
+    {l:"+1000",clr:"#a16207",em:"👑",t:"pts",v:1000},
+    {l:"🛡️ מגן",clr:"#92400e",em:"🛡️",t:"shield",v:0},
+    {l:"+250",clr:"#78350f",em:"💎",t:"pts",v:250},
+    {l:"×3!",clr:"#713f12",em:"🔥",t:"x3",v:0}
   ]}
 ];
 function getSegs(){return STAGES[Math.min(lvl-1,STAGES.length-1)].segs}
@@ -372,7 +372,7 @@ function nxt(){
   }
   qi++;ask();
 }
-function goToWheel(){show("scrWheel");wui();drawW(0);cor=0;roundMistakes=0;document.getElementById("wTitle").textContent="🎉 "+getStageName()+" — סובבו!";}
+function goToWheel(){show("scrWheel");wui();drawW(0);cor=0;roundMistakes=0;document.getElementById("wTitle").textContent="🎉 "+getStageName()+" — סובבו!";var stg=STAGES[Math.min(lvl-1,STAGES.length-1)];document.getElementById("wCan").style.boxShadow="0 0 40px "+stg.ring+"55,0 0 80px "+stg.ring+"22";}
 
 function ui(){
   var s=document.getElementById("sBox");s.textContent="🏆 "+sc;s.classList.remove("bump");void s.offsetWidth;s.classList.add("bump");
@@ -397,8 +397,9 @@ function drawW(rot){
     ctx.fillStyle="#fff";ctx.font="bold 16px Heebo,sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";
     ctx.fillText(sg.em,0,-10);ctx.font="bold 13px Heebo,sans-serif";ctx.fillText(sg.l,0,10);ctx.restore();
   });
-  ctx.beginPath();ctx.arc(0,0,24,0,Math.PI*2);ctx.fillStyle="#1e1b4b";ctx.fill();ctx.strokeStyle="#fbbf24";ctx.lineWidth=3;ctx.stroke();
-  ctx.fillStyle="#fbbf24";ctx.font="bold 14px Heebo";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("🎡",0,0);
+  var stg=STAGES[Math.min(lvl-1,STAGES.length-1)];
+  ctx.beginPath();ctx.arc(0,0,24,0,Math.PI*2);ctx.fillStyle=stg.center;ctx.fill();ctx.strokeStyle=stg.ring;ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle=stg.ring;ctx.font="bold 14px Heebo";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(stg.icon,0,0);
   ctx.restore();
 }
 
