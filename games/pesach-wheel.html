@@ -79,6 +79,23 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
 @keyframes sfl{0%{transform:translateY(0) scale(.5);opacity:1}40%{transform:translateY(-35px) scale(1.4);opacity:1}100%{transform:translateY(-100px) scale(1);opacity:0}}
 .flash{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:140;animation:fl .35s ease-out forwards}
 @keyframes fl{0%{opacity:.55}100%{opacity:0}}
+
+.stbar{background:linear-gradient(135deg,#fef3c7,#fde68a);padding:6px 12px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:5px;border:2px solid rgba(217,119,6,.4);transition:.3s;box-shadow:0 2px 8px rgba(217,119,6,.25)}
+.stbar:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(217,119,6,.35)}
+.stbar .stl{font-size:.82rem;font-weight:700;color:#78350f}.stbar .stc{font-size:1rem;font-weight:900;color:#b45309}
+.albo{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);backdrop-filter:blur(5px);z-index:1100;display:none;align-items:center;justify-content:center}
+.albo.vis{display:flex}
+.albx{background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid rgba(251,191,36,.3);border-radius:22px;padding:22px;max-width:420px;width:92%;max-height:85vh;overflow-y:auto;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.albx h2{font-family:'Frank Ruhl Libre',serif;font-size:1.4rem;color:#fbbf24;margin-bottom:4px}
+.albc{font-size:.85rem;color:#9ca3af;margin-bottom:10px}
+.albg{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+@media(max-width:400px){.albg{grid-template-columns:repeat(8,1fr)}}
+.albs{width:100%;aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);transition:.2s}
+.albs.has{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.35);animation:stIn .4s ease-out}
+.albs.empty{opacity:.15;filter:grayscale(1)}
+@keyframes stIn{0%{transform:scale(0) rotate(-90deg)}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+.sfly{position:fixed;top:50%;left:50%;font-size:3rem;z-index:1200;pointer-events:none;animation:sflyA .8s ease-out forwards}
+@keyframes sflyA{0%{transform:translate(-50%,-50%) scale(0) rotate(-180deg);opacity:1}50%{transform:translate(-50%,-50%) scale(1.5) rotate(10deg);opacity:1}100%{transform:translate(-50%,-80px) scale(.5);opacity:0}}
 </style>
 </head>
 <body>
@@ -108,6 +125,7 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
     <div class="shbox" id="shBox">🛡️ מגן</div>
     <div class="ccnt" id="cCnt">✅ 0/4</div>
     <span class="pinfo" id="pInfo">סבב 1</span>
+    <div class="stbar" onclick="openAlb()"><span class="stl">🌟</span><span class="stc" id="stCnt">0</span></div>
   </div>
   <div class="qcard">
     <div class="qemoji" id="qE">🫓</div>
@@ -123,6 +141,7 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
   <div class="top-bar">
     <div class="sbox" id="wsBox">🏆 0</div>
     <div class="shbox" id="wshBox">🛡️ מגן</div>
+    <div class="stbar" onclick="openAlb()"><span class="stl">🌟</span><span class="stc" id="wstCnt">0</span></div>
   </div>
   <h2 class="wtitle2">🎉 סובבו את הגלגל!</h2>
   <div class="wcon">
@@ -137,7 +156,7 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
 <div class="lbo" id="lbO" onclick="if(event.target===this)closeLB()">
   <div class="lbx">
     <h2>🏆 טבלת כל המשתתפים</h2>
-    <table class="lbt"><thead><tr><th>#</th><th>שם</th><th>נקודות</th></tr></thead><tbody id="lbBody"></tbody></table>
+    <table class="lbt"><thead><tr><th>#</th><th>שם</th><th>נקודות</th><th>🌟</th></tr></thead><tbody id="lbBody"></tbody></table>
     <div id="lbEmpty" style="display:none;color:#9ca3af;padding:16px">עדיין אין — היו הראשונים! 🎡</div>
     <button class="lbcl" onclick="closeLB()">סגור ✕</button>
   </div>
@@ -158,6 +177,17 @@ h2.wtitle{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;color:#fbbf24;ma
       <p style="color:#9ca3af;font-size:.78rem;margin-top:10px">לחצו 🗑️ למחיקת משתתף</p>
     </div>
     <button class="lbcl" onclick="closeAdm()" style="margin-top:12px">סגור ✕</button>
+  </div>
+</div>
+
+
+<!-- ALBUM OVERLAY -->
+<div class="albo" id="albO" onclick="if(event.target===this)closeAlb()">
+  <div class="albx">
+    <h2>🌟 אלבום המדבקות שלי</h2>
+    <div class="albc" id="albCnt">0 / 100 מדבקות</div>
+    <div class="albg" id="albGrid"></div>
+    <button class="lbcl" onclick="closeAlb()" style="margin-top:12px">סגור ✕</button>
   </div>
 </div>
 
@@ -195,7 +225,7 @@ function pod(){
   var el=document.getElementById("podium");
   if(!lb.length){el.innerHTML='<div style="color:#9ca3af;font-size:.83rem;text-align:center;width:100%">עדיין אין — היו הראשונים! 🎡</div>';return}
   var ms=["🥇","🥈","🥉"],cs=["g","s","b"];
-  el.innerHTML=lb.slice(0,3).map(function(p,i){return'<div class="pod '+cs[i]+'"><div class="pod-m">'+ms[i]+'</div><div class="pod-n">'+esc(p.name)+'</div><div class="pod-s">'+p.score+' נק׳</div></div>'}).join("");
+  el.innerHTML=lb.slice(0,3).map(function(p,i){return'<div class="pod '+cs[i]+'"><div class="pod-m">'+ms[i]+'</div><div class="pod-n">'+esc(p.name)+'</div><div class="pod-s">'+p.score+' נק׳</div><div style="font-size:.7rem;color:#c4b5fd;margin-top:2px">🌟 '+Math.min(Math.floor(p.score/20000),100)+'</div></div>'}).join("");
 }
 
 function save(){
@@ -208,7 +238,7 @@ function save(){
 function openLB(){
   var b=document.getElementById("lbBody"),em=document.getElementById("lbEmpty");
   if(!lb.length){b.innerHTML="";em.style.display="block"}
-  else{em.style.display="none";var ms=["🥇","🥈","🥉"];b.innerHTML=lb.map(function(p,i){return"<tr><td>"+(ms[i]||(i+1))+"</td><td>"+esc(p.name)+"</td><td>"+p.score+"</td></tr>"}).join("")}
+  else{em.style.display="none";var ms=["🥇","🥈","🥉"];b.innerHTML=lb.map(function(p,i){return"<tr><td>"+(ms[i]||(i+1))+"</td><td>"+esc(p.name)+"</td><td>"+p.score+"</td><td>"+Math.min(Math.floor(p.score/20000),100)+"</td></tr>"}).join("")}
   document.getElementById("lbO").classList.add("vis");
 }
 function closeLB(){document.getElementById("lbO").classList.remove("vis")}
@@ -224,6 +254,7 @@ function go(){
   var ex=lb.find(function(p){return p.name===name});
   sc=ex?ex.score:0; shield=false;cor=0;rnd=1;tc=0;ta=0;
   sq=QS.slice().sort(function(){return Math.random()-.5});qi=0;
+  loadStickers();
   show("scrQuiz");ui();ask();
 }
 
@@ -307,7 +338,7 @@ function result(i){
     else{sc=Math.max(0,sc+sg.v);msg="💣 מוקש! "+sg.v+" נקודות! סה\"כ: "+sc;rd.style.background="rgba(220,38,38,.18)";rd.style.color="#fca5a5";flash("#dc2626");fsc(""+sg.v,"#fca5a5");beep(200,.2,.25)}
   }else if(sg.t==="shield"){shield=true;msg="🛡️ מגן! יגן מהמוקש הבא!";rd.style.background="rgba(59,130,246,.18)";rd.style.color="#93c5fd";beep(900,.12,.15)}
   else if(sg.t==="x2"){var bf=sc;sc*=2;msg="🔥 ×2! "+bf+" → "+sc;rd.style.background="rgba(217,119,6,.18)";rd.style.color="#fde68a";confetti(50);fsc("×2!","#fde68a");beep(1200,.18,.15)}
-  rd.textContent=msg;wui();rnd++;save();
+  rd.textContent=msg;wui();rnd++;save();checkStickers();
   var btn=document.getElementById("spBtn");
   btn.textContent="▶ המשך לשאלות!";btn.disabled=false;
   btn.onclick=function(){show("scrQuiz");qi++;cor=0;ui();ask();btn.textContent="🎡 סובבו!";btn.onclick=spin};
@@ -342,6 +373,49 @@ function delPlayer(n){
   if(!confirm("למחוק את "+n+"?"))return;
   fetch(FB+LP+"/"+encodeURIComponent(n)+".json",{method:"DELETE"}).then(function(){loadLB();setTimeout(renderAdm,500)}).catch(function(){});
 }
+// ══ STICKERS ══
+var STICKERS=["🫓","🍷","🥚","🦴","🥬","🍎","🐸","🌊","🔥","🕍","⭐","✡️","🏜️","🎵","💫","🌟","🐑","🕊️","🌾","🏺","🧺","🌸","🦋","🐝","🍋","🌿","🏔️","💎","🥇","🏆","🎁","🪙","🌈","🌺","🎭","💧","🌙","☀️","🌻","🦅","📜","🔔","🎪","🎯","🎲","🧩","🎨","🎻","🪘","🥁","🏅","👑","💫","🌠","🎇","🎆","✨","💥","🔱","⚜️","🛡️","⚔️","🏹","🪬","📿","🕎","🔯","🪷","🌴","🐫","🦁","🐍","🦟","🐄","🐐","🕷️","🦂","🌪️","❄️","⛈️","🌋","🗻","🏛️","⛺","🚶","👨‍👩‍👦","🧓","👶","🫅","🤴","🧙","🦸","💪","🙏","❤️","🕐","📖","🗝️","🎡","🫒"];
+var myStickers=[],STICKER_COST=20000,lastStCheck=0;
+
+function loadStickers(){
+  if(!name)return;
+  fetch(FB+"/pesach-wheel-stickers/"+encodeURIComponent(name)+".json").then(function(r){return r.json()}).then(function(d){
+    myStickers=d||[];lastStCheck=myStickers.length*STICKER_COST;updStUI();
+  }).catch(function(){myStickers=[];updStUI()});
+}
+function saveStickers(){
+  if(!name)return;
+  fetch(FB+"/pesach-wheel-stickers/"+encodeURIComponent(name)+".json",{
+    method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(myStickers)
+  }).catch(function(){});
+}
+function checkStickers(){
+  var earned=Math.floor(sc/STICKER_COST);
+  while(myStickers.length<earned&&myStickers.length<100){
+    var idx=myStickers.length;myStickers.push(idx);
+    // Fly animation
+    var f=document.createElement("div");f.className="sfly";f.textContent=STICKERS[idx];document.body.appendChild(f);
+    setTimeout(function(x){return function(){x.remove()}}(f),900);
+    saveStickers();
+  }
+  updStUI();
+}
+function updStUI(){
+  var c=myStickers.length;
+  var el1=document.getElementById("stCnt");if(el1)el1.textContent=c;
+  var el2=document.getElementById("wstCnt");if(el2)el2.textContent=c;
+}
+function openAlb(){
+  var g=document.getElementById("albGrid");
+  document.getElementById("albCnt").textContent=myStickers.length+" / 100 מדבקות";
+  g.innerHTML=STICKERS.map(function(s,i){
+    var has=myStickers.indexOf(i)!==-1;
+    return'<div class="albs '+(has?"has":"empty")+'">'+(has?s:"?")+'</div>';
+  }).join("");
+  document.getElementById("albO").classList.add("vis");
+}
+function closeAlb(){document.getElementById("albO").classList.remove("vis")}
+
 </script>
 </body>
 </html>
