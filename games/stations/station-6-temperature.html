@@ -24,9 +24,34 @@
     .btn { font-family: 'Heebo', sans-serif; font-size: 1.2rem; padding: 14px 40px; border: 2px solid #ffd700; background: rgba(255,215,0,0.15); color: #ffd700; border-radius: 12px; cursor: pointer; transition: all 0.3s; letter-spacing: 1px; }
     .btn:hover { background: rgba(255,215,0,0.3); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,215,0,0.3); }
 
+    /* Intro Phase */
+    #phase-intro { z-index: 25; text-align: center; padding: 24px; }
+    .intro-card {
+      width: min(92vw, 620px);
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,215,0,0.25);
+      border-radius: 18px;
+      padding: 22px 20px;
+      box-shadow: 0 0 40px rgba(255,215,0,0.12);
+    }
+    .intro-title { font-family: 'Frank Ruhl Libre', serif; font-size: 2rem; color: #ffd700; margin-bottom: 8px; }
+    .intro-sub { color: rgba(255,255,255,0.7); margin-bottom: 14px; }
+    .intro-steps { display: grid; gap: 10px; text-align: right; margin-bottom: 16px; }
+    .intro-step {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,215,0,0.15);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.85);
+    }
+    .intro-checks { display: grid; gap: 8px; margin-bottom: 16px; }
+    .intro-check { display: flex; gap: 8px; align-items: center; justify-content: flex-start; font-size: 0.95rem; color: rgba(255,255,255,0.8); }
+    .intro-check input { transform: scale(1.2); }
+
     /* ══ Phase 1: Color Detection ══ */
     #phase-color { z-index: 20; }
-    .camera-container { position: relative; width: 320px; height: 240px; border-radius: 16px; overflow: hidden; border: 3px solid rgba(255,215,0,0.4); box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+    .camera-container { position: relative; width: min(92vw, 520px); aspect-ratio: 4 / 3; height: auto; border-radius: 16px; overflow: hidden; border: 3px solid rgba(255,215,0,0.4); box-shadow: 0 0 30px rgba(139,92,246,0.3); }
     .camera-container video { width: 100%; height: 100%; object-fit: cover; }
     .color-indicator { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin: 20px auto; transition: all 0.5s; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
     .color-status { font-size: 1.3rem; color: rgba(255,255,255,0.7); margin-top: 10px; min-height: 2em; }
@@ -79,6 +104,12 @@
       justify-content: center;
       gap: 14px;
       margin-bottom: 10px;
+    }
+    .puzzle-help {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      margin: 6px 0 12px;
     }
     .temp-label-cold { font-size: 1.4rem; }
     .temp-label-hot  { font-size: 1.4rem; }
@@ -208,8 +239,26 @@
   <!-- Stars Background -->
   <div class="stars" id="stars"></div>
 
+  <!-- Intro -->
+  <div class="phase" id="phase-intro">
+    <div class="intro-card">
+      <div class="intro-title">מה עושים פה?</div>
+      <div class="intro-sub">שלב קצר לפני שמתחילים את החדר</div>
+      <div class="intro-steps">
+        <div class="intro-step">1) צבעו דף לבן בכתום והקריבו למצלמה</div>
+        <div class="intro-step">2) אחר כך תכוונו את המחוונים עד שהפסוק ברור</div>
+        <div class="intro-step">3) מד החום מראה אם אתם “קרים” או “חמים”</div>
+      </div>
+      <div class="intro-checks">
+        <label class="intro-check"><input type="checkbox" id="check-hand"> ✋ עצרנו יד לשנייה</label>
+        <label class="intro-check"><input type="checkbox" id="check-eyes"> 👀 עצמנו עיניים לשנייה</label>
+      </div>
+      <button class="btn" id="startIntroBtn" disabled>🚀 מתחילים</button>
+    </div>
+  </div>
+
   <!-- ═══ Phase 1: Color Detection ═══ -->
-  <div class="phase" id="phase-color">
+  <div class="phase hidden" id="phase-color">
     <div class="station-badge">🌡️ תחנה 5</div>
     <div class="title">חדר הטמפרטורה</div>
     <div class="subtitle">צבעו דף לבן בצבע המתאים והרימו למצלמה</div>
@@ -242,6 +291,7 @@
       <div class="hidden-verse" id="hidden-verse"></div>
       <div class="verse-source" id="verse-source"></div>
     </div>
+    <div class="puzzle-help">הזיזו את המחוונים עד שהפסוק ברור לגמרי. המד מציג אם אתם “קרים” או “חמים”.</div>
 
     <!-- Temperature gauge -->
     <div class="temp-gauge-wrap">
@@ -329,6 +379,22 @@
       starsEl.appendChild(s);
     }
 
+    function initIntro() {
+      const btn = document.getElementById('startIntroBtn');
+      const checkHand = document.getElementById('check-hand');
+      const checkEyes = document.getElementById('check-eyes');
+      if (!btn || !checkHand || !checkEyes) return;
+      const updateBtn = () => { btn.disabled = !(checkHand.checked && checkEyes.checked); };
+      checkHand.addEventListener('change', updateBtn);
+      checkEyes.addEventListener('change', updateBtn);
+      updateBtn();
+      btn.addEventListener('click', () => {
+        document.getElementById('phase-intro').classList.add('hidden');
+        document.getElementById('phase-color').classList.remove('hidden');
+        startCamera();
+      });
+    }
+
     // ══════════════════════════════════════════════════════════
     // Phase 1: Color Detection (identical to station-1)
     // ══════════════════════════════════════════════════════════
@@ -412,7 +478,7 @@
       requestAnimationFrame(detectColor);
     }
 
-    startCamera();
+    initIntro();
 
     // ══════════════════════════════════════════════════════════
     // Phase 2: Temperature / Filter Puzzle
