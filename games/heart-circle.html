@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>מעגל הלב שלי</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', 'Heebo', sans-serif;
+    background: linear-gradient(135deg, #ffe5ec 0%, #fff4e6 50%, #e5f3ff 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    font-size: 2.5em;
+    color: #d63384;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  }
+  .subtitle {
+    text-align: center;
+    color: #555;
+    margin-bottom: 25px;
+    font-size: 1.1em;
+  }
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+  .heart-panel {
+    background: white;
+    border-radius: 25px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .heart-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  svg.heart {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 5px 15px rgba(214,51,132,0.25));
+  }
+  .heart-cell {
+    cursor: crosshair;
+    transition: fill 0.1s ease;
+    stroke: #fff;
+    stroke-width: 0.5;
+    pointer-events: all;
+  }
+  svg.heart { touch-action: none; user-select: none; -webkit-user-select: none; }
+  .controls-panel {
+    background: white;
+    border-radius: 25px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  }
+  .current-emotion {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 15px;
+    background: #f8f9fa;
+    border: 3px dashed #ddd;
+    transition: all 0.3s;
+  }
+  .current-emotion.active {
+    border-color: var(--current-color);
+    background: var(--current-bg);
+  }
+  .current-emotion .label {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 5px;
+  }
+  .current-emotion .name {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--current-color, #999);
+  }
+  .section-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 18px 0 10px;
+    color: #444;
+  }
+  .emotions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+    max-height: 360px;
+    overflow-y: auto;
+    padding: 4px;
+  }
+  .emotions-grid::-webkit-scrollbar { width: 8px; }
+  .emotions-grid::-webkit-scrollbar-thumb { background: #d63384; border-radius: 4px; }
+  .emotion-btn {
+    border: 3px solid transparent;
+    border-radius: 12px;
+    padding: 9px 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    transition: all 0.2s;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+  .emotion-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+  }
+  .emotion-btn.selected {
+    border-color: #333;
+    transform: scale(1.05);
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.6), 0 5px 15px rgba(0,0,0,0.3);
+  }
+  .intensity-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .intensity-btn {
+    padding: 14px 10px;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1em;
+    font-weight: bold;
+    transition: all 0.2s;
+  }
+  .intensity-btn:hover { background: #f0f0f0; border-color: #999; }
+  .intensity-btn.selected {
+    background: #333;
+    color: white;
+    border-color: #333;
+  }
+  .intensity-btn .emoji { font-size: 1.4em; display: block; margin-bottom: 3px; }
+  .action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .action-btn {
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1em;
+    font-weight: bold;
+    transition: all 0.2s;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+  .action-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 12px rgba(0,0,0,0.2); }
+  .btn-paint { background: linear-gradient(135deg, #d63384, #ff6b9d); color: white; }
+  .btn-clear { background: linear-gradient(135deg, #6c757d, #adb5bd); color: white; }
+  .btn-save  { background: linear-gradient(135deg, #198754, #20c997); color: white; }
+  .stats {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px dashed #eee;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    font-size: 0.95em;
+  }
+  .stat-swatch {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+  }
+  .stat-bar-wrap {
+    flex: 1;
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 18px;
+  }
+  .stat-bar {
+    height: 100%;
+    transition: width 0.4s ease;
+    border-radius: 10px;
+  }
+  .stat-name { min-width: 75px; font-weight: bold; }
+  .stat-pct { min-width: 45px; text-align: left; color: #666; font-size: 0.9em; }
+  .hint {
+    text-align: center;
+    color: #888;
+    font-size: 0.9em;
+    margin-top: 15px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>♥ מעגל הלב שלי ♥</h1>
+    <p class="subtitle">בחר/י רגש וצבע/י את הלב לפי כמה שאת/ה מרגיש/ה אותו</p>
+
+    <div class="main-grid">
+      <div class="heart-panel">
+        <div class="heart-container">
+          <svg class="heart" id="heartSvg" viewBox="0 0 500 500"></svg>
+        </div>
+        <p class="hint">💡 בחר/י רגש, ואז גרור/י את העכבר על הלב כדי לצבוע! 🎨</p>
+      </div>
+
+      <div class="controls-panel">
+        <div class="current-emotion" id="currentEmotion">
+          <div class="label">הרגש הנבחר:</div>
+          <div class="name" id="currentName">בחר/י רגש למטה</div>
+        </div>
+
+        <div class="section-title">🎨 בחר/י רגש</div>
+        <div class="emotions-grid" id="emotionsGrid"></div>
+
+        <div class="section-title">🖌️ גודל מברשת</div>
+        <div class="intensity-row" id="intensityRow">
+          <button class="intensity-btn" data-brush="1"><span class="emoji">✏️</span>דקה</button>
+          <button class="intensity-btn selected" data-brush="2"><span class="emoji">🖊️</span>בינונית</button>
+          <button class="intensity-btn" data-brush="3"><span class="emoji">🖌️</span>עבה</button>
+        </div>
+
+        <div class="action-row">
+          <button class="action-btn btn-clear" id="clearBtn">🧹 ניקוי</button>
+          <button class="action-btn btn-save" id="saveBtn">💾 שמירה</button>
+        </div>
+
+        <div class="stats" id="stats">
+          <div class="section-title" style="margin-top:0">📊 מה הרגשתי</div>
+          <div id="statsList" style="color:#999;text-align:center;padding:10px;">עדיין לא צבעת...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const EMOTIONS = [
+  { name: 'שמחה',         color: '#FFD93D' },
+  { name: 'כעס',          color: '#E63946' },
+  { name: 'עצב',          color: '#4A90E2' },
+  { name: 'עייפות',       color: '#52B788' },
+  { name: 'פחד',          color: '#6A4C93' },
+  { name: 'התלהבות',      color: '#FF8C42' },
+  { name: 'תסכול',        color: '#8B4513' },
+  { name: 'מבוכה',        color: '#FF99C8' },
+  { name: 'סיפוק',        color: '#06D6A0' },
+  { name: 'אכזבה',        color: '#5C5C5C' },
+  { name: 'בושה',         color: '#C9184A' },
+  { name: 'גאווה',        color: '#FFB627' },
+  { name: 'אהבה',         color: '#FF1744' },
+  { name: 'שלווה',        color: '#A8DADC' },
+  { name: 'בדידות',       color: '#1D3557' },
+  { name: 'קנאה',         color: '#7CB342' },
+  { name: 'אשמה',         color: '#4A148C' },
+  { name: 'חרטה',         color: '#37474F' },
+  { name: 'הקלה',         color: '#80CBC4' },
+  { name: 'תקווה',        color: '#FFF59D' },
+  { name: 'ייאוש',        color: '#212121' },
+  { name: 'סקרנות',       color: '#00BCD4' },
+  { name: 'שעמום',        color: '#BCAAA4' },
+  { name: 'בלבול',        color: '#B39DDB' },
+  { name: 'הפתעה',        color: '#FF6F00' },
+  { name: 'גועל',         color: '#558B2F' },
+  { name: 'אמון',         color: '#03A9F4' },
+  { name: 'דאגה',         color: '#FBC02D' },
+  { name: 'הכרת תודה',    color: '#FFAB91' },
+  { name: 'כמיהה',        color: '#CE93D8' },
+  { name: 'נוסטלגיה',     color: '#A1887F' },
+  { name: 'ביישנות',      color: '#F8BBD0' },
+  { name: 'עוצמה',        color: '#BF360C' },
+  { name: 'חמלה',         color: '#F48FB1' },
+  { name: 'השראה',        color: '#FFEB3B' },
+  { name: 'שובבות',       color: '#CDDC39' },
+  { name: 'רוגע',         color: '#4DD0E1' },
+  { name: 'עליצות',       color: '#FF7043' },
+  { name: 'אופוריה',      color: '#E91E63' },
+  { name: 'מתח',          color: '#9E9E9E' },
+  { name: 'אהדה',         color: '#FFCC80' },
+  { name: 'בטחון עצמי',   color: '#0277BD' },
+  { name: 'חוסר בטחון',   color: '#90A4AE' },
+];
+
+let selectedEmotion = null;
+let brushSize = 2; // 1=small, 2=medium, 3=large
+let heartCells = []; // { id, cx, cy, fill }
+let isPainting = false;
+
+// Heart shape parametric equation
+function isInHeart(x, y) {
+  // Normalize to [-1.5, 1.5]
+  const nx = (x - 250) / 180;
+  const ny = -(y - 230) / 180;
+  // Heart curve: (x^2 + y^2 - 1)^3 <= x^2 * y^3
+  const term = (nx*nx + ny*ny - 1);
+  return (term*term*term) <= (nx*nx * ny*ny*ny);
+}
+
+function buildHeart() {
+  const svg = document.getElementById('heartSvg');
+  svg.innerHTML = '';
+  heartCells = [];
+  const r = 11;     // cell radius
+  const step = r * 1.85;
+  const hStep = step * Math.sqrt(3)/2;
+  let id = 0;
+  for (let row = 0; row * hStep < 500; row++) {
+    const y = 50 + row * hStep;
+    const offset = (row % 2) * (step / 2);
+    for (let col = 0; col * step + offset < 500; col++) {
+      const x = 30 + col * step + offset;
+      if (isInHeart(x, y)) {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', x);
+        circle.setAttribute('cy', y);
+        circle.setAttribute('r', r);
+        circle.setAttribute('class', 'heart-cell');
+        circle.setAttribute('fill', '#FFE5EC');
+        circle.dataset.id = id;
+        svg.appendChild(circle);
+        heartCells.push({ id, cx: x, cy: y, fill: '#FFE5EC', emotion: null, el: circle });
+        id++;
+      }
+    }
+  }
+}
+
+function buildEmotions() {
+  const grid = document.getElementById('emotionsGrid');
+  EMOTIONS.forEach((e, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'emotion-btn';
+    btn.style.background = e.color;
+    btn.textContent = e.name;
+    btn.dataset.idx = i;
+    btn.addEventListener('click', () => selectEmotion(i));
+    grid.appendChild(btn);
+  });
+}
+
+function selectEmotion(idx) {
+  selectedEmotion = EMOTIONS[idx];
+  document.querySelectorAll('.emotion-btn').forEach((b, i) => {
+    b.classList.toggle('selected', i === idx);
+  });
+  const cur = document.getElementById('currentEmotion');
+  const name = document.getElementById('currentName');
+  cur.classList.add('active');
+  cur.style.setProperty('--current-color', selectedEmotion.color);
+  cur.style.setProperty('--current-bg', selectedEmotion.color + '22');
+  name.textContent = selectedEmotion.name;
+}
+
+function paintCell(cell) {
+  if (cell.emotion === selectedEmotion.name) return;
+  cell.fill = selectedEmotion.color;
+  cell.emotion = selectedEmotion.name;
+  cell.el.setAttribute('fill', selectedEmotion.color);
+}
+
+// Convert screen point → SVG coords, then paint all cells within brush radius
+function paintAtPoint(clientX, clientY) {
+  if (!selectedEmotion) return;
+  const svg = document.getElementById('heartSvg');
+  const rect = svg.getBoundingClientRect();
+  const x = ((clientX - rect.left) / rect.width) * 500;
+  const y = ((clientY - rect.top) / rect.height) * 500;
+  const radii = { 1: 14, 2: 28, 3: 48 };
+  const brushRadius = radii[brushSize];
+  let changed = false;
+  for (const cell of heartCells) {
+    const dx = cell.cx - x;
+    const dy = cell.cy - y;
+    if (dx*dx + dy*dy <= brushRadius * brushRadius) {
+      if (cell.emotion !== selectedEmotion.name) {
+        paintCell(cell);
+        changed = true;
+      }
+    }
+  }
+  if (changed) updateStats();
+}
+
+function setupPainting() {
+  const svg = document.getElementById('heartSvg');
+
+  const start = (e) => {
+    if (!selectedEmotion) {
+      alert('בחר/י קודם רגש 🎨');
+      return;
+    }
+    e.preventDefault();
+    isPainting = true;
+    const p = e.touches ? e.touches[0] : e;
+    paintAtPoint(p.clientX, p.clientY);
+  };
+  const move = (e) => {
+    if (!isPainting) return;
+    e.preventDefault();
+    const p = e.touches ? e.touches[0] : e;
+    paintAtPoint(p.clientX, p.clientY);
+  };
+  const end = () => { isPainting = false; };
+
+  svg.addEventListener('mousedown', start);
+  svg.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  svg.addEventListener('mouseleave', end);
+
+  svg.addEventListener('touchstart', start, { passive: false });
+  svg.addEventListener('touchmove', move, { passive: false });
+  window.addEventListener('touchend', end);
+}
+
+function clearHeart() {
+  heartCells.forEach(c => {
+    c.fill = '#FFE5EC';
+    c.emotion = null;
+    c.el.setAttribute('fill', '#FFE5EC');
+  });
+  updateStats();
+}
+
+function updateStats() {
+  const counts = {};
+  heartCells.forEach(c => {
+    if (c.emotion) counts[c.emotion] = (counts[c.emotion] || 0) + 1;
+  });
+  const total = heartCells.length;
+  const list = document.getElementById('statsList');
+  const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  if (entries.length === 0) {
+    list.innerHTML = '<div style="color:#999;text-align:center;padding:10px;">עדיין לא צבעת...</div>';
+    return;
+  }
+  list.innerHTML = entries.map(([name, cnt]) => {
+    const emo = EMOTIONS.find(e => e.name === name);
+    const pct = ((cnt / total) * 100).toFixed(0);
+    return `
+      <div class="stat-row">
+        <div class="stat-swatch" style="background:${emo.color}"></div>
+        <div class="stat-name">${name}</div>
+        <div class="stat-bar-wrap"><div class="stat-bar" style="width:${pct}%;background:${emo.color}"></div></div>
+        <div class="stat-pct">${pct}%</div>
+      </div>`;
+  }).join('');
+}
+
+function saveImage() {
+  const svg = document.getElementById('heartSvg');
+  const svgData = new XMLSerializer().serializeToString(svg);
+  const canvas = document.createElement('canvas');
+  canvas.width = 1000; canvas.height = 1000;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, 1000, 1000);
+  const img = new Image();
+  const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0, 1000, 1000);
+    URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.download = 'heart-circle-' + new Date().toISOString().slice(0,10) + '.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  };
+  img.src = url;
+}
+
+// Brush size buttons
+document.querySelectorAll('.intensity-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.intensity-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    brushSize = parseInt(btn.dataset.brush);
+  });
+});
+
+document.getElementById('clearBtn').addEventListener('click', clearHeart);
+document.getElementById('saveBtn').addEventListener('click', saveImage);
+
+buildHeart();
+buildEmotions();
+setupPainting();
+</script>
+</body>
+</html>
