@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>מטוסי הרגשות ✈️</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; overflow:hidden; font-family:'Segoe UI','Arial',sans-serif; }
+  body { background:#0a1a2f; display:flex; align-items:center; justify-content:center; user-select:none; }
+  #wrap { position:relative; width:100vw; height:100vh; }
+  canvas { display:block; width:100%; height:100%; touch-action:none; }
+
+  /* HUD */
+  #hud { position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-between;
+    align-items:flex-start; padding:14px 18px; pointer-events:none; z-index:5; direction:rtl; }
+  .badge { background:rgba(255,255,255,.14); backdrop-filter:blur(6px); border-radius:16px;
+    padding:8px 14px; color:#fff; font-weight:700; font-size:clamp(14px,4vw,20px);
+    box-shadow:0 4px 14px rgba(0,0,0,.25); text-align:center; line-height:1.2; }
+  .badge small { display:block; font-size:.62em; opacity:.8; font-weight:600; }
+  #timeBadge.low span { color:#ff6b6b; }
+
+  /* Current emotion chip */
+  #emotionNow { position:absolute; bottom:84px; left:50%; transform:translateX(-50%); z-index:5;
+    pointer-events:none; background:rgba(0,0,0,.35); border-radius:30px; padding:10px 22px;
+    display:flex; align-items:center; gap:10px; color:#fff; font-weight:800;
+    font-size:clamp(18px,5vw,26px); box-shadow:0 6px 20px rgba(0,0,0,.35); transition:background .25s; }
+  #emotionNow .dot { width:22px; height:22px; border-radius:50%; box-shadow:0 0 12px currentColor; }
+
+  #tapHint { position:absolute; bottom:24px; left:50%; transform:translateX(-50%); z-index:5;
+    pointer-events:none; color:#cfe3ff; font-size:15px; font-weight:600; opacity:.85;
+    text-align:center; animation:pulse 1.6s infinite; }
+  @keyframes pulse { 0%,100%{opacity:.4;} 50%{opacity:.95;} }
+
+  /* Overlays */
+  .overlay { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; color:#fff; padding:24px;
+    background:radial-gradient(circle at 50% 35%, rgba(20,40,80,.7), rgba(5,12,28,.95));
+    backdrop-filter:blur(4px); direction:rtl; }
+  .overlay.hidden { display:none; }
+  .overlay h1 { font-size:clamp(28px,9vw,54px); margin-bottom:8px; text-shadow:0 4px 20px rgba(0,0,0,.5); }
+  .overlay p { font-size:clamp(15px,4.4vw,20px); max-width:540px; line-height:1.6; opacity:.92; margin-bottom:8px; }
+  .legend { display:flex; flex-wrap:wrap; gap:10px 16px; justify-content:center; margin:18px 0 24px; max-width:540px; }
+  .legend .item { display:flex; align-items:center; gap:8px; font-size:clamp(14px,4vw,18px); font-weight:700; }
+  .legend .sw { width:20px; height:20px; border-radius:50%; box-shadow:0 0 10px currentColor; }
+  .btn { margin-top:6px; cursor:pointer; border:none; background:linear-gradient(135deg,#ffd34e,#ff9d2f);
+    color:#3a1f00; font-weight:900; font-size:clamp(18px,5vw,24px); padding:14px 42px; border-radius:40px;
+    box-shadow:0 8px 24px rgba(255,160,40,.45); transition:transform .12s; }
+  .btn:active { transform:scale(.94); }
+  .stat-big { font-size:clamp(34px,11vw,68px); font-weight:900; color:#ffd34e; text-shadow:0 4px 18px rgba(0,0,0,.5); margin:6px 0; }
+
+  /* Map of emotions on end screen */
+  #emoMap { display:flex; flex-wrap:wrap; gap:10px 14px; justify-content:center; margin:14px 0 22px; max-width:560px; }
+  #emoMap .cell { display:flex; flex-direction:column; align-items:center; gap:2px;
+    background:rgba(255,255,255,.08); border-radius:16px; padding:10px 14px; min-width:78px; }
+  #emoMap .cell .f { font-size:30px; }
+  #emoMap .cell .n { font-size:14px; font-weight:700; }
+  #emoMap .cell .c { font-size:13px; opacity:.8; }
+  #emoMap .cell.dim { opacity:.32; }
+
+  /* ===== Breathing (reflection) overlay ===== */
+  #breathe { position:absolute; inset:0; z-index:20; display:none; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; padding:26px; direction:rtl;
+    color:#fff; backdrop-filter:blur(7px); transition:background .6s; }
+  #breathe.show { display:flex; }
+  #breathe .circle { position:relative; width:200px; height:200px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; margin-bottom:10px;
+    background:radial-gradient(circle, rgba(255,255,255,.30), rgba(255,255,255,.05));
+    box-shadow:0 0 60px var(--gc, #fff); animation:breath 8s ease-in-out infinite; }
+  @keyframes breath { 0%,100%{ transform:scale(.62); } 50%{ transform:scale(1.05); } }
+  #breathe .face { font-size:74px; }
+  #breathe .bword { font-size:clamp(20px,6vw,28px); font-weight:800; min-height:1.3em; margin:4px 0 14px;
+    letter-spacing:1px; }
+  #breathe .normalize { font-size:clamp(19px,5.4vw,26px); font-weight:900; max-width:560px; line-height:1.5; }
+  #breathe .invite { font-size:clamp(16px,4.6vw,21px); max-width:540px; line-height:1.55; opacity:.92;
+    margin:10px 0 6px; }
+  #breathe .think { font-size:14px; opacity:.65; margin-bottom:18px; }
+  #breathe .btn { background:linear-gradient(135deg,#a8e6cf,#5fd0a0); color:#0d3324;
+    box-shadow:0 8px 24px rgba(80,200,150,.4); }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div class="badge"><span id="passed">0</span><small>רגשות שעברת</small></div>
+    <div class="badge" id="timeBadge"><span id="time">90</span><small>זמן</small></div>
+    <div class="badge"><span id="best">0</span><small>שיא</small></div>
+  </div>
+
+  <div id="emotionNow">
+    <span class="dot" id="emoDot"></span>
+    <span id="emoName">שמחה</span>
+  </div>
+  <div id="tapHint">לחיצה / רווח = להחליף רגש ✦ גרור להזיז את המטוס</div>
+
+  <!-- Breathing / reflection -->
+  <div id="breathe">
+    <div class="circle"><span class="face" id="bFace">😊</span></div>
+    <div class="bword" id="bWord">שאיפה...</div>
+    <div class="normalize" id="bNorm"></div>
+    <div class="invite" id="bInvite"></div>
+    <div class="think">אין תשובה נכונה — רק חשוב על זה בלב 💭</div>
+    <button class="btn" id="bContinue">חשבתי על זה ✓</button>
+  </div>
+
+  <!-- Start -->
+  <div class="overlay" id="startScreen">
+    <h1>✈️ מטוסי הרגשות</h1>
+    <p>כל מטוס הוא רגש בצבע אחר. כדי לעבור דרך שער של רגש — הופכים להיות הצבע הזה. <b>לא בורחים מרגשות — עוברים דרכם ומקבלים כל אחד.</b> 🌈</p>
+    <p style="opacity:.85;font-size:16px">מדי פעם נעצור ל<b>נשימה קטנה</b> 🫁 — רגע לחשוב על הרגש שלך, בלי לחץ.</p>
+    <div class="legend" id="legend"></div>
+    <button class="btn" id="startBtn">בואו נטוס!</button>
+    <p style="margin-top:14px;opacity:.7;font-size:14px">לחיצה / רווח = להחליף רגש · גרירה / חיצים = להזיז את המטוס</p>
+  </div>
+
+  <!-- End -->
+  <div class="overlay hidden" id="overScreen">
+    <h1>איזה מסע! 🌈</h1>
+    <p>ביקרת ברגשות שלך</p>
+    <div class="stat-big"><span id="finalPassed">0</span></div>
+    <p style="margin-top:-6px">פעמים עברת דרך רגש</p>
+    <div id="emoMap"></div>
+    <p id="praise" style="font-weight:800;color:#9be37f"></p>
+    <button class="btn" id="retryBtn">עוד מסע!</button>
+  </div>
+</div>
+
+<script>
+const cv = document.getElementById('game');
+const ctx = cv.getContext('2d');
+let W, H, DPR;
+function resize(){
+  DPR = Math.min(window.devicePixelRatio||1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  cv.width = W*DPR; cv.height = H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', resize); resize();
+
+// ---- Emotions (normalize first, then a gentle invitation) ----
+const EMOTIONS = [
+  { name:'שמחה', color:'#ffd23e', face:'😊',
+    norm:'שמחה ממלאת אותנו אור 😊', invite:'מה גרם לך לחייך לאחרונה?' },
+  { name:'עצב', color:'#3aa0ff', face:'😢',
+    norm:'עצב הוא רגש בסדר גמור 💙', invite:'מה עוזר לך כשקצת כבד בלב?' },
+  { name:'כעס', color:'#ff5046', face:'😠',
+    norm:'גם כעס מותר — לכולם קורה לכעוס 🌋', invite:'מה הגוף שלך מרגיש כשאתה כועס?' },
+  { name:'רוגע', color:'#52e08a', face:'😌',
+    norm:'רוגע זה מקום נעים לנוח בו 🍃', invite:'איפה אתה מרגיש הכי רגוע?' },
+  { name:'פחד', color:'#b06bff', face:'😨',
+    norm:'פחד שומר עלינו — הוא לא אויב 🛡️', invite:'מי נותן לך ביטחון כשמפחיד?' },
+  { name:'אהבה', color:'#ff7ab8', face:'🥰',
+    norm:'אהבה מחממת את הלב ❤️', invite:'את מי בא לך לחבק עכשיו?' },
+];
+
+// legend
+const legendEl = document.getElementById('legend');
+EMOTIONS.forEach(e=>{
+  const d = document.createElement('div'); d.className='item'; d.style.color=e.color;
+  d.innerHTML = `<span class="sw" style="background:${e.color}"></span><span style="color:#fff">${e.face} ${e.name}</span>`;
+  legendEl.appendChild(d);
+});
+
+// ---- State ----
+let plane, gates, particles, clouds, popups;
+let running, breathing, passed, best, speed, spawnTimer, frame;
+let timeLeft, lastTick, visits, nextBreathAt;
+const START_TIME = 90;
+best = +(localStorage.getItem('emoPlanesBest')||0);
+document.getElementById('best').textContent = best;
+
+function reset(){
+  plane = { x: W*0.26, y: H/2, r:26, emo:0, targetY:H/2 };
+  gates = []; particles = []; clouds = []; popups = [];
+  for(let i=0;i<6;i++) clouds.push({x:Math.random()*W, y:Math.random()*H, s:0.4+Math.random()*1.2, sp:0.3+Math.random()*0.7});
+  running = true; breathing = false; passed=0; speed=2.8; spawnTimer=0; frame=0;
+  timeLeft = START_TIME; lastTick = performance.now();
+  visits = EMOTIONS.map(()=>0);
+  nextBreathAt = 3; // first breathing pause after 3 emotions
+  updateHUD(); updateEmotionChip(); updateTime();
+}
+
+function updateHUD(){ document.getElementById('passed').textContent = passed; }
+function updateTime(){
+  const t = Math.ceil(timeLeft);
+  document.getElementById('time').textContent = t;
+  document.getElementById('timeBadge').classList.toggle('low', t<=10);
+}
+function updateEmotionChip(){
+  const e = EMOTIONS[plane.emo];
+  document.getElementById('emoName').textContent = e.name;
+  document.getElementById('emoDot').style.color = e.color;
+  document.getElementById('emoDot').style.background = e.color;
+  document.getElementById('emotionNow').style.background = hexA(e.color,0.30);
+}
+function hexA(hex,a){ const n=parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
+
+function cycleEmotion(){
+  if(!running || breathing) return;
+  plane.emo = (plane.emo+1) % EMOTIONS.length;
+  updateEmotionChip();
+  const e = EMOTIONS[plane.emo];
+  for(let i=0;i<14;i++){ const a=Math.random()*Math.PI*2, sp=1+Math.random()*4;
+    particles.push({x:plane.x,y:plane.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:30,col:e.color,r:2+Math.random()*3}); }
+}
+
+// ---- Gates ----
+function spawnGate(){
+  const emo = Math.floor(Math.random()*EMOTIONS.length);
+  const gapH = Math.max(160, H*0.34);
+  const gapY = 80 + Math.random()*(H-160-gapH);
+  gates.push({ x:W+40, gapY, gapH, emo, passed:false, w:54 });
+}
+
+// ---- Breathing pause ----
+let breathWordTimer=null;
+function startBreathing(emo){
+  breathing = true;
+  const e = EMOTIONS[emo];
+  const b = document.getElementById('breathe');
+  b.style.setProperty('--gc', e.color);
+  b.style.background = `radial-gradient(circle at 50% 42%, ${hexA(e.color,0.35)}, rgba(5,12,28,.92))`;
+  document.getElementById('bFace').textContent = e.face;
+  document.getElementById('bNorm').textContent = e.norm;
+  document.getElementById('bInvite').textContent = '💭 ' + e.invite;
+  b.classList.add('show');
+  // breathing word in sync with 8s css animation (4s in / 4s out)
+  const word = document.getElementById('bWord');
+  function tick(){ const phase = (performance.now()%8000)<4000; word.textContent = phase ? 'שאיפה...' : 'נשיפה...'; }
+  tick(); breathWordTimer = setInterval(tick, 250);
+}
+function endBreathing(){
+  breathing = false;
+  document.getElementById('breathe').classList.remove('show');
+  if(breathWordTimer){ clearInterval(breathWordTimer); breathWordTimer=null; }
+  lastTick = performance.now(); // don't count breathing time against the clock
+}
+document.getElementById('bContinue').onclick = endBreathing;
+
+// ---- Input ----
+function tap(){ cycleEmotion(); }
+cv.addEventListener('pointerdown', tap);
+document.addEventListener('keydown', e=>{
+  if(e.code==='Space'){ e.preventDefault(); if(breathing) endBreathing(); else tap(); }
+  if(plane && !breathing){
+    if(e.code==='ArrowUp')   plane.targetY -= 60;
+    if(e.code==='ArrowDown') plane.targetY += 60;
+  }
+});
+cv.addEventListener('pointermove', e=>{ if(e.buttons===1 && plane && !breathing) plane.targetY = e.clientY; });
+
+// ---- Loop ----
+function loop(){ if(running && !breathing) update(); draw(); requestAnimationFrame(loop); }
+
+function update(){
+  frame++;
+  const now = performance.now();
+  timeLeft -= (now-lastTick)/1000; lastTick = now;
+  if(timeLeft<=0){ timeLeft=0; updateTime(); gameOver(); return; }
+  updateTime();
+
+  speed += 0.0012;
+  plane.targetY = Math.max(40, Math.min(H-40, plane.targetY));
+  plane.y += (plane.targetY - plane.y)*0.12;
+
+  spawnTimer--;
+  if(spawnTimer<=0){ spawnGate(); spawnTimer = Math.max(80, 140 - frame*0.02); }
+
+  for(const g of gates){
+    g.x -= speed;
+    if(!g.passed && g.x + g.w < plane.x){
+      g.passed = true;
+      const inGap = plane.y > g.gapY && plane.y < g.gapY+g.gapH;
+      if(inGap && g.emo===plane.emo){
+        passed++; visits[g.emo]++; updateHUD();
+        popText('עברת דרך ' + EMOTIONS[g.emo].name + ' ✓', g.emo);
+        confetti(plane.x,plane.y,EMOTIONS[g.emo].color);
+        if(passed>=nextBreathAt){ nextBreathAt = passed + (3+Math.floor(Math.random()*2)); startBreathing(g.emo); return; }
+      }
+    }
+    if(g.x < plane.x+plane.r && g.x+g.w > plane.x-plane.r){
+      if(plane.y - plane.r < g.gapY || plane.y + plane.r > g.gapY+g.gapH) gameOver();
+    }
+  }
+  gates = gates.filter(g=> g.x > -80);
+
+  for(const p of particles){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.life--; }
+  particles = particles.filter(p=>p.life>0);
+  for(const c of clouds){ c.x -= c.sp*speed*0.3; if(c.x<-80){ c.x=W+80; c.y=Math.random()*H; } }
+}
+
+function popText(txt, emo){ popups.push({txt, x:plane.x, y:plane.y-40, life:60, col:EMOTIONS[emo].color}); }
+function confetti(x,y,col){ for(let i=0;i<20;i++){ const a=Math.random()*Math.PI*2, sp=2+Math.random()*5;
+  particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:40,col:Math.random()<0.5?col:'#fff',r:2+Math.random()*3}); } }
+
+function gameOver(){
+  if(!running) return;
+  running=false;
+  if(passed>best){ best=passed; localStorage.setItem('emoPlanesBest',best); }
+  document.getElementById('best').textContent = best;
+  setTimeout(()=>{
+    document.getElementById('finalPassed').textContent = passed;
+    // emotion map
+    const map = document.getElementById('emoMap'); map.innerHTML='';
+    EMOTIONS.forEach((e,i)=>{
+      const c=document.createElement('div');
+      c.className='cell'+(visits[i]?'':' dim');
+      c.innerHTML=`<span class="f">${e.face}</span><span class="n" style="color:${e.color}">${e.name}</span><span class="c">${visits[i]?('×'+visits[i]):'—'}</span>`;
+      map.appendChild(c);
+    });
+    document.getElementById('praise').textContent = praiseFor();
+    document.getElementById('overScreen').classList.remove('hidden');
+  }, 450);
+}
+function praiseFor(){
+  const variety = visits.filter(v=>v>0).length;
+  if(variety>=6) return 'ביקרת בכל הרגשות שלך — כל אחד מהם בסדר 🌟';
+  if(variety>=4) return 'יפה! פגשת הרבה רגשות שונים בלב שלך 💛';
+  if(variety>=2) return 'התחלה יפה של היכרות עם הרגשות שלך 🙂';
+  return 'כל רגש שפגשת הוא חלק ממך ✨';
+}
+
+// ---- Draw ----
+function draw(){
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0d2a5c'); g.addColorStop(0.5,'#1b4d8a'); g.addColorStop(1,'#3a86c9');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  for(const c of clouds) drawCloud(c.x,c.y,c.s);
+  for(const gt of gates) drawGate(gt);
+  for(const p of particles){ ctx.globalAlpha=Math.max(0,p.life/40); ctx.fillStyle=p.col;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill(); }
+  ctx.globalAlpha=1;
+  if(plane) drawPlane();
+  if(!breathing){ for(const p of popups){ p.y-=1; p.life--; } popups = popups.filter(p=>p.life>0); }
+  for(const p of popups){ ctx.globalAlpha=Math.min(1,p.life/40); ctx.fillStyle=p.col;
+    ctx.font='900 24px Segoe UI,Arial'; ctx.textAlign='center'; ctx.fillText(p.txt, p.x, p.y); }
+  ctx.globalAlpha=1;
+}
+function drawCloud(x,y,s){ ctx.fillStyle='rgba(255,255,255,0.16)'; ctx.beginPath();
+  ctx.arc(x,y,22*s,0,7); ctx.arc(x+24*s,y+6*s,18*s,0,7); ctx.arc(x-22*s,y+8*s,16*s,0,7); ctx.arc(x+6*s,y-12*s,16*s,0,7); ctx.fill(); }
+function drawGate(g){
+  const e = EMOTIONS[g.emo];
+  ctx.fillStyle = hexA(e.color,0.92);
+  roundRect(g.x,-10,g.w,g.gapY+10,14); ctx.fill();
+  roundRect(g.x,g.gapY+g.gapH,g.w,H-(g.gapY+g.gapH)+10,14); ctx.fill();
+  ctx.fillStyle = hexA(e.color,0.4);
+  ctx.fillRect(g.x-4,0,4,g.gapY); ctx.fillRect(g.x-4,g.gapY+g.gapH,4,H-(g.gapY+g.gapH));
+  ctx.font='30px Segoe UI'; ctx.textAlign='center';
+  ctx.fillText(e.face, g.x+g.w/2, g.gapY-12);
+  ctx.fillText(e.face, g.x+g.w/2, g.gapY+g.gapH+34);
+  ctx.save(); ctx.translate(g.x+g.w/2, g.gapY+g.gapH/2);
+  ctx.fillStyle=hexA(e.color,0.95); ctx.font='900 18px Segoe UI,Arial'; ctx.fillText(e.name,0,6); ctx.restore();
+}
+function drawPlane(){
+  const e = EMOTIONS[plane.emo];
+  ctx.save(); ctx.translate(plane.x, plane.y);
+  ctx.rotate((plane.targetY-plane.y)*0.004);
+  ctx.shadowColor=e.color; ctx.shadowBlur=22; ctx.fillStyle=e.color;
+  ctx.beginPath(); ctx.moveTo(28,0); ctx.quadraticCurveTo(10,-16,-22,-12);
+  ctx.quadraticCurveTo(-30,0,-22,12); ctx.quadraticCurveTo(10,16,28,0); ctx.fill();
+  ctx.shadowBlur=0; ctx.fillStyle=hexA('#ffffff',0.55);
+  ctx.beginPath(); ctx.moveTo(0,-4); ctx.lineTo(-14,-22); ctx.lineTo(2,-6); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(0,4); ctx.lineTo(-14,22); ctx.lineTo(2,6); ctx.fill();
+  ctx.fillStyle=hexA('#ffffff',0.5);
+  ctx.beginPath(); ctx.moveTo(-20,-2); ctx.lineTo(-30,-16); ctx.lineTo(-16,-6); ctx.fill();
+  ctx.font='18px Segoe UI'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(e.face, 6, 0); ctx.restore(); ctx.textBaseline='alphabetic';
+}
+function roundRect(x,y,w,h,r){ r=Math.min(r,w/2,Math.abs(h)/2); ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+// ---- Buttons ----
+document.getElementById('startBtn').onclick = ()=>{ document.getElementById('startScreen').classList.add('hidden'); reset(); };
+document.getElementById('retryBtn').onclick = ()=>{ document.getElementById('overScreen').classList.add('hidden'); reset(); };
+
+reset(); running=false;
+loop();
+</script>
+</body>
+</html>
